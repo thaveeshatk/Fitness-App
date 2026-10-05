@@ -1,0 +1,11 @@
+{
+    "name": "FitOn Fitness App",
+    "short_name": "FitOn",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#F8FAFB",
+    "theme_color": "#006257",
+    "description": "Modern Fitness Mobile Application",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false
+}

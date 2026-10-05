@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/routes/app_routes.dart';
 import '../../../../core/widgets/primary_pill_button.dart';
 import '../widgets/hero_preview_card.dart';
 import '../widgets/onboarding_feature_card.dart';
@@ -19,31 +20,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
   const WelcomeOnboardingScreen({super.key});
 
   void _onGetStartedPressed(BuildContext context) {
-    // Demonstrates interactive completion of the onboarding flow
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Welcome to FitOn! Ready for the next development phase.',
-                style: GoogleFonts.plusJakartaSans(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13.5,
-                ),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: AppColors.primaryTeal,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        margin: const EdgeInsets.all(16),
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    Navigator.of(context).pushNamed(AppRoutes.profileSetup);
   }
 
   @override

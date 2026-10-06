@@ -1,0 +1,151 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'profile_preferences_screen.dart';
+
+/// Main navigation shell hosting persistent bottom navigation bar.
+/// Contains: Home, Plan, Workouts, Progress, Profile tabs.
+class MainNavigationScreen extends StatefulWidget {
+  final int initialIndex;
+
+  const MainNavigationScreen({
+    super.key,
+    this.initialIndex = 4, // Default to Profile tab as requested
+  });
+
+  @override
+  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+}
+
+class _MainNavigationScreenState extends State<MainNavigationScreen> {
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          _buildPlaceholderPage('Home', Icons.home_outlined),
+          _buildPlaceholderPage('Plan', Icons.assignment_outlined),
+          _buildPlaceholderPage('Workouts', Icons.fitness_center_outlined),
+          _buildPlaceholderPage('Progress', Icons.bar_chart_outlined),
+          const ProfilePreferencesScreen(),
+        ],
+      ),
+      bottomNavigationBar: _buildBottomBar(),
+    );
+  }
+
+  Widget _buildPlaceholderPage(String title, IconData icon) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFAFBFD),
+      appBar: AppBar(
+        title: Text(
+          title,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF0F172A),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 56, color: const Color(0xFF94A3B8)),
+            const SizedBox(height: 16),
+            Text(
+              '$title Screen',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF475569),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomBar() {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: Color(0xFFEDF2F7), width: 1),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Container(
+          height: 64,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(0, 'Home', Icons.home_outlined, Icons.home_rounded),
+              _buildNavItem(1, 'Plan', Icons.assignment_outlined, Icons.assignment_rounded),
+              _buildNavItem(2, 'Workouts', Icons.fitness_center_outlined, Icons.fitness_center_rounded),
+              _buildNavItem(3, 'Progress', Icons.bar_chart_outlined, Icons.bar_chart_rounded),
+              _buildNavItem(4, 'Profile', Icons.person_outline_rounded, Icons.person_rounded),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, String label, IconData icon, IconData activeIcon) {
+    final isSelected = _currentIndex == index;
+    const activeColor = Color(0xFF005953);
+    const inactiveColor = Color(0xFF94A3B8);
+
+    return Expanded(
+      child: InkWell(
+        onTap: () => setState(() => _currentIndex = index),
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isSelected ? activeIcon : icon,
+              color: isSelected ? activeColor : inactiveColor,
+              size: 22,
+            ),
+            const SizedBox(height: 3),
+            Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? activeColor : inactiveColor,
+              ),
+            ),
+            const SizedBox(height: 4),
+            // Wireframe active indicator bar under active tab
+            Container(
+              width: 20,
+              height: 2.5,
+              decoration: BoxDecoration(
+                color: isSelected ? activeColor : Colors.transparent,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

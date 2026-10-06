@@ -62,3 +62,9 @@ migrate_working_dir/
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 # Widget Preview related
 .widget_preview/
+
+# Generated iOS files
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/ephemeral/
+**/ios/Runner/GeneratedPluginRegistrant.*

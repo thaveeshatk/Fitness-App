@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/routes/app_routes.dart';
 import '../../data/models/profile_model.dart';
 import '../../data/services/profile_service.dart';
 
@@ -81,7 +82,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       await ProfileService.saveProfile(profile);
       if (!mounted) return;
       _showSuccessSnackbar();
-      // TODO: Navigate to the next screen (home / plan screen) once built.
+      // Navigate to the main application shell landing on Profile & Preferences
+      await Future<void>.delayed(const Duration(milliseconds: 600));
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, AppRoutes.mainNav);
     } catch (e) {
       if (!mounted) return;
       _showErrorSnackbar(e.toString());

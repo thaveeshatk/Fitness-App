@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fitness_app/features/home/presentation/screens/home_screen.dart';
 import 'package:fitness_app/features/plan/presentation/screens/my_plan_screen.dart';
 import 'package:fitness_app/features/workouts/presentation/screens/workouts_screen.dart';
 import 'profile_preferences_screen.dart';
@@ -11,7 +12,7 @@ class MainNavigationScreen extends StatefulWidget {
 
   const MainNavigationScreen({
     super.key,
-    this.initialIndex = 4, // Profile or Plan
+    this.initialIndex = 0, // Default to Home as requested
   });
 
   @override
@@ -33,7 +34,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          _buildPlaceholderPage('Home', Icons.home_outlined),
+          HomeScreen(
+            onNavigateToTab: (index) => setState(() => _currentIndex = index),
+          ),
           MyPlanScreen(
             onNavigateToTab: (index) => setState(() => _currentIndex = index),
           ),

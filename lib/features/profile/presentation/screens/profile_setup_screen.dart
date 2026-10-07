@@ -82,10 +82,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       await ProfileService.saveProfile(profile);
       if (!mounted) return;
       _showSuccessSnackbar();
-      // Navigate to the main application shell landing on Profile & Preferences
+      // Navigate to the main application shell landing on Home
       await Future<void>.delayed(const Duration(milliseconds: 600));
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, AppRoutes.mainNav);
+      Navigator.pushReplacementNamed(context, AppRoutes.mainNav, arguments: 0);
     } catch (e) {
       if (!mounted) return;
       _showErrorSnackbar(e.toString());

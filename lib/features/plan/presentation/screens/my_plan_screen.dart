@@ -9,8 +9,7 @@ import 'package:fitness_app/features/plan/data/services/plan_service.dart';
 import 'package:fitness_app/features/plan/presentation/widgets/my_plan_header.dart';
 import 'package:fitness_app/features/plan/presentation/widgets/plan_hero_progress_card.dart';
 import 'package:fitness_app/features/plan/presentation/widgets/plan_schedule_card.dart';
-import 'package:fitness_app/features/plan/presentation/widgets/weekly_schedule_sheet.dart';
-
+import 'package:fitness_app/features/plan/presentation/screens/weekly_schedule_screen.dart';
 /// Screen 3: "My Plan"
 /// Faithfully converts the provided wireframe into a rich, connected Flutter screen:
 /// - Brand header with FitOn logo badge ("F."), "My Plan" title, notification bell, and user avatar
@@ -82,13 +81,9 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
   }
 
   void _onViewWeeklySchedule() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => WeeklyScheduleSheet(
-        items: _planItems,
-        onSelectWorkout: _onOpenWorkout,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const WeeklyScheduleScreen(),
       ),
     );
   }

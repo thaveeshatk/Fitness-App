@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../data/models/workout_model.dart';
 import 'exercise_guidance_screen.dart';
+import 'workout_complete_screen.dart';
 
 class ActivityScreen extends StatefulWidget {
   final WorkoutModel workout;
@@ -213,7 +214,18 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 ),
                 onPressed: () {
                   Navigator.of(ctx).pop(); // Close dialog
-                  Navigator.of(context).pop(); // Return to details
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (_) => WorkoutCompleteScreen(
+                        workoutTitle: widget.workout.title,
+                        durationMinutes: (_elapsedSeconds / 60).ceil() > 0 ? (_elapsedSeconds / 60).ceil() : 25,
+                        activeMinutes: (_elapsedSeconds / 60).floor() > 0 ? (_elapsedSeconds / 60).floor() : 22,
+                        caloriesBurned: widget.workout.calories,
+                        coachName: widget.workout.coach,
+                        coachAvatar: widget.workout.coachAvatar,
+                      ),
+                    ),
+                  );
                 },
                 child: Text(
                   'Finish & Return',
@@ -326,19 +338,62 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 showDialog(
                   context: context,
                   builder: (ctx) => AlertDialog(
-                    title: const Text('End Activity?'),
-                    content: const Text('Are you sure you want to quit the current workout session?'),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    title: Text(
+                      'End Activity?',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 18,
+                      ),
+                    ),
+                    content: Text(
+                      'Are you sure you want to quit the current workout session?',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(ctx).pop(),
-                        child: const Text('Continue'),
+                        child: Text(
+                          'Continue',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                       ),
-                      TextButton(
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFDC2626),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
                         onPressed: () {
                           Navigator.of(ctx).pop();
-                          Navigator.of(context).pop();
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (_) => WorkoutCompleteScreen(
+                                workoutTitle: widget.workout.title,
+                                durationMinutes: (_elapsedSeconds / 60).ceil() > 0 ? (_elapsedSeconds / 60).ceil() : 25,
+                                activeMinutes: (_elapsedSeconds / 60).floor() > 0 ? (_elapsedSeconds / 60).floor() : 22,
+                                caloriesBurned: widget.workout.calories,
+                                coachName: widget.workout.coach,
+                                coachAvatar: widget.workout.coachAvatar,
+                              ),
+                            ),
+                          );
                         },
-                        child: const Text('End Session', style: TextStyle(color: Colors.red)),
+                        child: Text(
+                          'End Session',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ],
                   ),

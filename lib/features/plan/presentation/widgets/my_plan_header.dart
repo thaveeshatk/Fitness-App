@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fitness_app/core/constants/app_colors.dart';
 import 'package:fitness_app/core/widgets/fiton_logo.dart';
+import 'package:fitness_app/core/widgets/user_avatar.dart';
 
 /// Top App Bar / Brand Header for the "My Plan" screen.
 /// Matches the wireframe header:
@@ -108,25 +109,9 @@ class MyPlanHeader extends StatelessWidget {
                 const SizedBox(width: 8),
 
                 // User Profile Avatar
-                GestureDetector(
+                UserAvatar(
+                  radius: 16,
                   onTap: onProfileTap,
-                  child: Container(
-                    padding: const EdgeInsets.all(1.5),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: const Color(0xFFCBD5E1),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: const CircleAvatar(
-                      radius: 16,
-                      backgroundColor: Color(0xFFE2E8F0),
-                      backgroundImage: NetworkImage(
-                        'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=150&auto=format&fit=crop',
-                      ),
-                    ),
-                  ),
                 ),
               ],
             ),

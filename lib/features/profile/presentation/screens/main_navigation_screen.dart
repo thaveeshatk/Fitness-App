@@ -42,7 +42,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           ),
           const WorkoutsScreen(),
           _buildPlaceholderPage('Progress', Icons.bar_chart_outlined),
-          const ProfilePreferencesScreen(),
+          ProfilePreferencesScreen(
+            onBack: () => setState(() => _currentIndex = 0),
+          ),
         ],
       ),
       bottomNavigationBar: _buildBottomBar(),

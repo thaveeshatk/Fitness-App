@@ -20,7 +20,11 @@ class WelcomeOnboardingScreen extends StatelessWidget {
   const WelcomeOnboardingScreen({super.key});
 
   void _onGetStartedPressed(BuildContext context) {
-    Navigator.of(context).pushNamed(AppRoutes.profileSetup);
+    Navigator.of(context).pushNamed(AppRoutes.auth, arguments: true);
+  }
+
+  void _onLogInPressed(BuildContext context) {
+    Navigator.of(context).pushNamed(AppRoutes.auth, arguments: false);
   }
 
   @override
@@ -109,7 +113,39 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                 onPressed: () => _onGetStartedPressed(context),
               ),
 
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
+
+              // Alternative: Already have an account? Log In
+              Center(
+                child: TextButton(
+                  onPressed: () => _onLogInPressed(context),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  ),
+                  child: RichText(
+                    text: TextSpan(
+                      text: 'Already have an account? ',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13.5,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: 'Log In',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13.5,
+                            color: AppColors.primaryTeal,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 8),
 
               // Footer Note: Setup in less than a minute
               Center(

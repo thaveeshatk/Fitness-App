@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import '../../features/onboarding/presentation/screens/welcome_onboarding_screen.dart';
+import '../../features/auth/presentation/screens/auth_screen.dart';
 import '../../features/profile/presentation/screens/profile_setup_screen.dart';
 import '../../features/profile/presentation/screens/main_navigation_screen.dart';
 import '../../features/profile/presentation/screens/profile_preferences_screen.dart';
@@ -12,6 +13,7 @@ class AppRoutes {
 
   static const String splash = '/';
   static const String welcome = '/welcome';
+  static const String auth = '/auth';
   static const String profileSetup = '/profile-setup';
   static const String mainNav = '/main-nav';
   static const String profilePreferences = '/profile-preferences';
@@ -29,6 +31,30 @@ class AppRoutes {
         return PageRouteBuilder(
           pageBuilder: (_, animation, secondaryAnimation) =>
               const WelcomeOnboardingScreen(),
+          transitionsBuilder: (_, animation, secondaryAnimation, child) {
+            final curved = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOutCubic,
+            );
+            return FadeTransition(
+              opacity: curved,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0.06, 0),
+                  end: Offset.zero,
+                ).animate(curved),
+                child: child,
+              ),
+            );
+          },
+          settings: settings,
+        );
+
+      case auth:
+        final isSignUp = (settings.arguments is bool) ? (settings.arguments as bool) : false;
+        return PageRouteBuilder(
+          pageBuilder: (_, animation, secondaryAnimation) =>
+              AuthScreen(initialIsSignUp: isSignUp),
           transitionsBuilder: (_, animation, secondaryAnimation, child) {
             final curved = CurvedAnimation(
               parent: animation,
@@ -72,7 +98,7 @@ class AppRoutes {
         );
 
       case mainNav:
-        final initialIndex = (settings.arguments is int) ? (settings.arguments as int) : 1;
+        final initialIndex = (settings.arguments is int) ? (settings.arguments as int) : 0;
         return PageRouteBuilder(
           pageBuilder: (_, animation, secondaryAnimation) =>
               MainNavigationScreen(initialIndex: initialIndex),

@@ -148,6 +148,62 @@ class ExerciseItem {
     }
     return 'Do not let knees cave inward. Avoid rounding the lower back under load.';
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'phase': phase,
+      'subtitle': subtitle,
+      'badge': badge,
+      'imageUrl': imageUrl,
+      if (target != null) 'target': target,
+      if (steps != null) 'steps': steps,
+      if (techniquePoints != null) 'techniquePoints': techniquePoints,
+      if (safetyTips != null) 'safetyTips': safetyTips,
+    };
+  }
+
+  factory ExerciseItem.fromMap(Map<String, dynamic> map) {
+    return ExerciseItem(
+      id: map['id']?.toString() ?? '',
+      name: map['name']?.toString() ?? '',
+      phase: map['phase']?.toString() ?? 'PHASE: MAIN',
+      subtitle: map['subtitle']?.toString() ?? 'Dynamic movement',
+      badge: map['badge']?.toString() ?? '3 sets',
+      imageUrl: map['imageUrl']?.toString() ?? 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1200&auto=format&fit=crop',
+      target: map['target']?.toString(),
+      steps: map['steps'] != null ? List<String>.from(map['steps'] as List) : null,
+      techniquePoints: map['techniquePoints']?.toString(),
+      safetyTips: map['safetyTips']?.toString(),
+    );
+  }
+
+  ExerciseItem copyWith({
+    String? id,
+    String? name,
+    String? phase,
+    String? subtitle,
+    String? badge,
+    String? imageUrl,
+    String? target,
+    List<String>? steps,
+    String? techniquePoints,
+    String? safetyTips,
+  }) {
+    return ExerciseItem(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      phase: phase ?? this.phase,
+      subtitle: subtitle ?? this.subtitle,
+      badge: badge ?? this.badge,
+      imageUrl: imageUrl ?? this.imageUrl,
+      target: target ?? this.target,
+      steps: steps ?? this.steps,
+      techniquePoints: techniquePoints ?? this.techniquePoints,
+      safetyTips: safetyTips ?? this.safetyTips,
+    );
+  }
 }
 
 class WorkoutModel {
@@ -169,6 +225,7 @@ class WorkoutModel {
   final String overview;
   final String safetyInfo;
   final List<ExerciseItem> exercises;
+  final bool isCustom;
 
   const WorkoutModel({
     required this.id,
@@ -189,5 +246,106 @@ class WorkoutModel {
     required this.overview,
     this.safetyInfo = 'Warm up thoroughly before starting. Maintain a neutral spine during squats and rows. Stop immediately if you feel sharp joint pain.',
     required this.exercises,
+    this.isCustom = false,
   });
+
+  WorkoutModel copyWith({
+    String? id,
+    String? title,
+    String? specificationSubtitle,
+    String? coach,
+    String? coachRole,
+    String? coachAvatar,
+    double? rating,
+    int? durationMinutes,
+    int? calories,
+    String? category,
+    String? subCategory,
+    String? difficulty,
+    List<String>? equipment,
+    List<String>? tags,
+    String? imageUrl,
+    String? overview,
+    String? safetyInfo,
+    List<ExerciseItem>? exercises,
+    bool? isCustom,
+  }) {
+    return WorkoutModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      specificationSubtitle: specificationSubtitle ?? this.specificationSubtitle,
+      coach: coach ?? this.coach,
+      coachRole: coachRole ?? this.coachRole,
+      coachAvatar: coachAvatar ?? this.coachAvatar,
+      rating: rating ?? this.rating,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
+      calories: calories ?? this.calories,
+      category: category ?? this.category,
+      subCategory: subCategory ?? this.subCategory,
+      difficulty: difficulty ?? this.difficulty,
+      equipment: equipment ?? this.equipment,
+      tags: tags ?? this.tags,
+      imageUrl: imageUrl ?? this.imageUrl,
+      overview: overview ?? this.overview,
+      safetyInfo: safetyInfo ?? this.safetyInfo,
+      exercises: exercises ?? this.exercises,
+      isCustom: isCustom ?? this.isCustom,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'specificationSubtitle': specificationSubtitle,
+      'coach': coach,
+      'coachRole': coachRole,
+      'coachAvatar': coachAvatar,
+      'rating': rating,
+      'durationMinutes': durationMinutes,
+      'calories': calories,
+      'category': category,
+      'subCategory': subCategory,
+      'difficulty': difficulty,
+      'equipment': equipment,
+      'tags': tags,
+      'imageUrl': imageUrl,
+      'overview': overview,
+      'safetyInfo': safetyInfo,
+      'exercises': exercises.map((e) => e.toMap()).toList(),
+      'isCustom': isCustom,
+    };
+  }
+
+  factory WorkoutModel.fromMap(Map<String, dynamic> map, [String? docId]) {
+    return WorkoutModel(
+      id: docId ?? map['id']?.toString() ?? '',
+      title: map['title']?.toString() ?? 'Custom Workout',
+      specificationSubtitle: map['specificationSubtitle']?.toString() ?? 'Custom Routine • Personalized Training',
+      coach: map['coach']?.toString() ?? 'You (Custom)',
+      coachRole: map['coachRole']?.toString() ?? 'Personal Workout',
+      coachAvatar: map['coachAvatar']?.toString() ?? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop',
+      rating: (map['rating'] as num?)?.toDouble() ?? 5.0,
+      durationMinutes: (map['durationMinutes'] as num?)?.toInt() ?? 25,
+      calories: (map['calories'] as num?)?.toInt() ?? 200,
+      category: map['category']?.toString() ?? 'Cardio',
+      subCategory: map['subCategory']?.toString() ?? 'CUSTOM ROUTINE',
+      difficulty: map['difficulty']?.toString() ?? 'Intermediate',
+      equipment: map['equipment'] != null
+          ? List<String>.from(map['equipment'] as List)
+          : ['None / Bodyweight'],
+      tags: map['tags'] != null
+          ? List<String>.from(map['tags'] as List)
+          : ['CUSTOM', 'MY ROUTINE'],
+      imageUrl: map['imageUrl']?.toString() ?? 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=600&auto=format&fit=crop',
+      overview: map['overview']?.toString() ?? 'Personalized circuit routine crafted for optimal progression.',
+      safetyInfo: map['safetyInfo']?.toString() ?? 'Warm up thoroughly before starting. Maintain proper form.',
+      exercises: map['exercises'] != null
+          ? (map['exercises'] as List)
+              .map((e) => ExerciseItem.fromMap(Map<String, dynamic>.from(e as Map)))
+              .toList()
+          : [],
+      isCustom: map['isCustom'] as bool? ?? true,
+    );
+  }
 }

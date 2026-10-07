@@ -4,6 +4,7 @@ import '../../features/onboarding/presentation/screens/welcome_onboarding_screen
 import '../../features/profile/presentation/screens/profile_setup_screen.dart';
 import '../../features/profile/presentation/screens/main_navigation_screen.dart';
 import '../../features/profile/presentation/screens/profile_preferences_screen.dart';
+import '../../features/plan/presentation/screens/my_plan_screen.dart';
 
 /// App navigation routes definition and route generator
 class AppRoutes {
@@ -14,6 +15,7 @@ class AppRoutes {
   static const String profileSetup = '/profile-setup';
   static const String mainNav = '/main-nav';
   static const String profilePreferences = '/profile-preferences';
+  static const String myPlan = '/my-plan';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -70,9 +72,10 @@ class AppRoutes {
         );
 
       case mainNav:
+        final initialIndex = (settings.arguments is int) ? (settings.arguments as int) : 1;
         return PageRouteBuilder(
           pageBuilder: (_, animation, secondaryAnimation) =>
-              const MainNavigationScreen(initialIndex: 4),
+              MainNavigationScreen(initialIndex: initialIndex),
           transitionsBuilder: (_, animation, secondaryAnimation, child) {
             final curved = CurvedAnimation(
               parent: animation,
@@ -89,6 +92,12 @@ class AppRoutes {
               ),
             );
           },
+          settings: settings,
+        );
+
+      case myPlan:
+        return MaterialPageRoute(
+          builder: (_) => const MyPlanScreen(),
           settings: settings,
         );
 

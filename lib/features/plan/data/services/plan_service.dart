@@ -11,6 +11,29 @@ class PlanService {
   PlanService._();
 
   static List<PlanScheduleItem>? _cachedPlan;
+  
+  // Simulated database for schedule settings
+  static Set<String> _savedDays = {'Mon', 'Wed', 'Fri', 'Sat'};
+  static String _savedTime = '07:00';
+  static bool _savedIsAm = false;
+  
+  static Future<void> saveSchedule(Set<String> days, String time, bool isAm) async {
+    // Simulate backend network delay
+    await Future.delayed(const Duration(seconds: 1));
+    _savedDays = days;
+    _savedTime = time;
+    _savedIsAm = isAm;
+    
+    developer.log('Schedule saved to backend DB: days=$days, time=$time, isAm=$isAm', name: 'PlanService');
+  }
+  
+  static Map<String, dynamic> getSavedSchedule() {
+    return {
+      'days': _savedDays,
+      'time': _savedTime,
+      'isAm': _savedIsAm,
+    };
+  }
 
   /// Loads the weekly plan tailored to the user's profile.
   static Future<List<PlanScheduleItem>> getWeeklyPlan({bool forceRefresh = false}) async {

@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/services/firebase_service.dart';
 import '../models/auth_user.dart';
 
+import 'package:flutter/foundation.dart';
+
 /// Central authentication service providing user sign in, account creation,
 /// and session persistence. Operates with Firebase Auth when configured,
 /// and provides an in-memory session fallback for local operation.
@@ -10,8 +12,39 @@ class AuthService {
   AuthService._();
 
   static AuthUser? _currentUser = AuthUser.mockDefault();
+  static final ValueNotifier<AuthUser?> userNotifier = ValueNotifier<AuthUser?>(_currentUser);
+
   static bool get isLoggedIn => _currentUser != null;
   static AuthUser get currentUser => _currentUser ?? AuthUser.mockDefault();
+
+  /// Preset profile avatars for quick selection
+  static const List<String> presetAvatars = [
+    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=250&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=250&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=250&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=250&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=250&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=250&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=250&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=250&auto=format&fit=crop',
+  ];
+
+  /// Updates profile picture URL across the app and notifies all listeners
+  static Future<void> updateProfilePhoto(String newPhotoUrl) async {
+    final current = _currentUser ?? AuthUser.mockDefault();
+    _currentUser = current.copyWith(photoUrl: newPhotoUrl);
+    userNotifier.value = _currentUser;
+
+    developer.log('Updated profile photo to: $newPhotoUrl', name: 'AuthService');
+
+    if (FirebaseService.isInitialized) {
+      try {
+        await FirebaseAuth.instance.currentUser?.updatePhotoURL(newPhotoUrl);
+      } catch (e) {
+        developer.log('Failed updating Firebase user photo: $e', name: 'AuthService');
+      }
+    }
+  }
 
   /// Sign in with Email and Password
   static Future<AuthUser> signInWithEmail({
@@ -36,6 +69,7 @@ class AuthService {
           photoUrl: fbUser?.photoURL ??
               'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop',
         );
+        userNotifier.value = _currentUser;
         return _currentUser!;
       } catch (e) {
         developer.log('Firebase signIn failed: $e', name: 'AuthService');
@@ -56,6 +90,7 @@ class AuthService {
       email: email.trim(),
       photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop',
     );
+    userNotifier.value = _currentUser;
     return _currentUser!;
   }
 
@@ -83,6 +118,7 @@ class AuthService {
           email: fbUser?.email ?? email,
           photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop',
         );
+        userNotifier.value = _currentUser;
         return _currentUser!;
       } catch (e) {
         developer.log('Firebase signUp failed: $e', name: 'AuthService');
@@ -98,6 +134,7 @@ class AuthService {
       email: email.trim(),
       photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop',
     );
+    userNotifier.value = _currentUser;
     return _currentUser!;
   }
 
@@ -110,6 +147,7 @@ class AuthService {
       email: 'alex.fitness@gmail.com',
       photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop',
     );
+    userNotifier.value = _currentUser;
     return _currentUser!;
   }
 
@@ -122,6 +160,7 @@ class AuthService {
       email: 'alex@icloud.com',
       photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop',
     );
+    userNotifier.value = _currentUser;
     return _currentUser!;
   }
 
@@ -131,5 +170,6 @@ class AuthService {
       await FirebaseAuth.instance.signOut();
     }
     _currentUser = null;
+    userNotifier.value = null;
   }
 }

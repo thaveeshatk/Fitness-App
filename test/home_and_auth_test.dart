@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fitness_app/core/widgets/user_avatar.dart';
+import 'package:fitness_app/features/auth/data/services/auth_service.dart';
 import 'package:fitness_app/features/auth/presentation/screens/auth_screen.dart';
 import 'package:fitness_app/features/home/presentation/screens/home_screen.dart';
+import 'package:fitness_app/features/profile/presentation/screens/profile_preferences_screen.dart';
 
 void main() {
   testWidgets('AuthScreen renders login and create account options properly',
@@ -31,7 +34,6 @@ void main() {
 
   testWidgets('HomeScreen renders all wireframe elements accurately',
       (WidgetTester tester) async {
-    // Provide a large enough surface size so all sections are visible or easily scrollable
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -77,5 +79,65 @@ void main() {
     expect(find.text('Based on activity'), findsOneWidget);
     expect(find.text('Core Starter Routine'), findsOneWidget);
     expect(find.text('Gentle Core • No Equipment'), findsOneWidget);
+  });
+
+  testWidgets('ProfilePreferencesScreen renders profile photo card, back button, and logout option',
+      (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    bool backPressed = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProfilePreferencesScreen(
+          onBack: () => backPressed = true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Check Profile Photo Card & Change Picture button
+    expect(find.text('Change Profile Picture'), findsOneWidget);
+    expect(find.text('Alex'), findsOneWidget);
+
+    // Check Back button triggers onBack (which routes to Home)
+    final backButton = find.byIcon(Icons.chevron_left_rounded).first;
+    await tester.tap(backButton);
+    expect(backPressed, isTrue);
+
+    // Scroll down to check Log Out button
+    await tester.scrollUntilVisible(
+      find.text('Log Out'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Log Out'), findsOneWidget);
+
+    // Tap Log Out and verify confirmation dialog opens
+    await tester.tap(find.text('Log Out'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Are you sure you want to log out from FitOn?'), findsOneWidget);
+    expect(find.text('Cancel'), findsOneWidget);
+  });
+
+  testWidgets('UserAvatar reactively updates when AuthService photo is changed',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: UserAvatar(radius: 20),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    const newPhoto = 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=250&auto=format&fit=crop';
+    await AuthService.updateProfilePhoto(newPhoto);
+    await tester.pumpAndSettle();
+
+    expect(AuthService.currentUser.photoUrl, equals(newPhoto));
   });
 }

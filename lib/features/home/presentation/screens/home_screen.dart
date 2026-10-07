@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/fiton_logo.dart';
+import '../../../../core/widgets/user_avatar.dart';
+import '../../../auth/data/models/auth_user.dart';
 import '../../../auth/data/services/auth_service.dart';
 import '../../../workouts/data/models/workout_model.dart';
 import '../../../workouts/data/repositories/workout_repository.dart';
@@ -9,6 +11,7 @@ import '../../../workouts/presentation/screens/workout_detail_screen.dart';
 import '../../../workouts/presentation/screens/activity_screen.dart';
 import '../../../plan/data/services/plan_service.dart';
 import '../../../plan/data/models/plan_schedule_item.dart';
+import 'package:fitness_app/features/profile/presentation/widgets/profile_photo_picker_dialog.dart';
 
 /// Screen: Home Dashboard
 /// Faithfully reproduces the provided wireframe pixel-for-pixel:
@@ -82,10 +85,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userName = AuthService.currentUser.name;
-    final userAvatar = AuthService.currentUser.photoUrl ??
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop';
-
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Color(0xFFFBFDFF),
@@ -106,12 +105,12 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. Top App Bar Header
-              _buildTopHeader(userAvatar),
+              _buildTopHeader(),
 
               const SizedBox(height: 20),
 
               // 2. Greeting Row
-              _buildGreetingRow(userName, userAvatar),
+              _buildGreetingRow(),
 
               const SizedBox(height: 24),
 
@@ -143,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── 1. Top Header Bar ──────────────────────────────────────────────────────
 
-  Widget _buildTopHeader(String userAvatar) {
+  Widget _buildTopHeader() {
     return Row(
       children: [
         // App Icon "F."
@@ -208,38 +207,15 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(width: 12),
         // User profile avatar
-        GestureDetector(
+        UserAvatar(
+          radius: 19,
           onTap: () {
             if (widget.onNavigateToTab != null) {
               widget.onNavigateToTab!(4); // Profile tab
+            } else {
+              ProfilePhotoPickerDialog.show(context);
             }
           },
-          child: Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: ClipOval(
-              child: Image.network(
-                userAvatar,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const Icon(
-                  Icons.person_rounded,
-                  color: AppColors.primaryTeal,
-                  size: 24,
-                ),
-              ),
-            ),
-          ),
         ),
       ],
     );
@@ -247,107 +223,93 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── 2. Greeting Row ────────────────────────────────────────────────────────
 
-  Widget _buildGreetingRow(String userName, String userAvatar) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Greeting texts
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Good morning, $userName!',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF0F172A),
-                  letterSpacing: -0.6,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Ready to build your daily momentum?',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xFF64748B),
-                ),
-              ),
-            ],
-          ),
-        ),
-        // Alert bell circle button & coach/avatar circle
-        Row(
-          mainAxisSize: MainAxisSize.min,
+  Widget _buildGreetingRow() {
+    return ValueListenableBuilder<AuthUser?>(
+      valueListenable: AuthService.userNotifier,
+      builder: (context, user, _) {
+        final displayName = (user?.name != null && user!.name.isNotEmpty) ? user.name : 'Alex';
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFF1F5F9)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Stack(
-                alignment: Alignment.center,
+            // Greeting texts
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
-                    Icons.notifications_active_outlined,
-                    size: 20,
-                    color: Color(0xFF334155),
+                  Text(
+                    'Good morning, $displayName!',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF0F172A),
+                      letterSpacing: -0.6,
+                    ),
                   ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFFF3B30),
-                        shape: BoxShape.circle,
-                      ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Ready to build your daily momentum?',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF64748B),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
+            // Alert bell circle button & coach/avatar circle
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFFF1F5F9)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: ClipOval(
-                child: Image.network(
-                  userAvatar,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(
-                    Icons.person_rounded,
-                    color: AppColors.primaryTeal,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      const Icon(
+                        Icons.notifications_active_outlined,
+                        size: 20,
+                        color: Color(0xFF334155),
+                      ),
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFFF3B30),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                UserAvatar(
+                  radius: 19,
+                  onTap: () => ProfilePhotoPickerDialog.show(context),
+                ),
+              ],
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 

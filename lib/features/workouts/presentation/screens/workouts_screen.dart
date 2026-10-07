@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../data/models/workout_model.dart';
 import '../../data/repositories/workout_repository.dart';
 
@@ -126,11 +127,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundColor: AppColors.primaryTeal,
-              child: Icon(Icons.person, color: Colors.white, size: 20),
-            ),
+            child: UserAvatar(radius: 17),
           ),
         ],
       ),

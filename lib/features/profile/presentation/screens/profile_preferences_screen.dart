@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/routes/app_routes.dart';
+import '../../../../core/widgets/user_avatar.dart';
+import '../../../auth/data/models/auth_user.dart';
+import '../../../auth/data/services/auth_service.dart';
 import '../../data/models/profile_model.dart';
 import '../../data/services/profile_service.dart';
+import '../widgets/profile_photo_picker_dialog.dart';
 
 /// Screen for viewing and updating user fitness profile & preferences.
 /// Matches the provided wireframe pixel-for-pixel.
@@ -201,6 +206,8 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
               const SizedBox(height: 16),
               _buildSubHeader(),
               const SizedBox(height: 16),
+              _buildUserProfilePhotoCard(),
+              const SizedBox(height: 16),
               _buildRhythmBanner(),
               const SizedBox(height: 24),
               _buildPrimaryFitnessGoalSection(),
@@ -216,6 +223,8 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
               _buildAvailableEquipmentSection(),
               const SizedBox(height: 30),
               _buildSaveButton(),
+              const SizedBox(height: 14),
+              _buildLogoutButton(),
               const SizedBox(height: 14),
               _buildFooterNotice(),
               const SizedBox(height: 28),
@@ -266,16 +275,9 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
         ),
         const SizedBox(width: 8),
         // User Avatar
-        Container(
-          width: 34,
-          height: 34,
-          decoration: const BoxDecoration(
-            color: Color(0xFF005953),
-            shape: BoxShape.circle,
-          ),
-          child: const Center(
-            child: Icon(Icons.person_rounded, color: Colors.white, size: 20),
-          ),
+        UserAvatar(
+          radius: 17,
+          onTap: () => ProfilePhotoPickerDialog.show(context),
         ),
       ],
     );
@@ -286,7 +288,13 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
     return Row(
       children: [
         GestureDetector(
-          onTap: widget.onBack ?? () => Navigator.maybePop(context),
+          onTap: () {
+            if (widget.onBack != null) {
+              widget.onBack!();
+            } else {
+              Navigator.pushReplacementNamed(context, AppRoutes.mainNav, arguments: 0);
+            }
+          },
           child: Container(
             width: 38,
             height: 38,
@@ -336,6 +344,95 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  // ── User Profile Photo & Account Card ──────────────────────────────────────
+  Widget _buildUserProfilePhotoCard() {
+    return ValueListenableBuilder<AuthUser?>(
+      valueListenable: AuthService.userNotifier,
+      builder: (context, user, _) {
+        final name = user?.name ?? 'Alex';
+        final email = user?.email ?? 'alex@fiton.com';
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFF1F5F9)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x08000000),
+                blurRadius: 10,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              UserAvatar(
+                radius: 34,
+                showEditBadge: true,
+                onTap: () => ProfilePhotoPickerDialog.show(context),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF0F172A),
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      email,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF64748B),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    InkWell(
+                      onTap: () => ProfilePhotoPickerDialog.show(context),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE6F5F2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.add_a_photo_outlined, size: 14, color: Color(0xFF00635A)),
+                            const SizedBox(width: 5),
+                            Text(
+                              'Change Profile Picture',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF00635A),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -1090,6 +1187,116 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                   const Icon(Icons.arrow_forward_rounded, size: 18),
                 ],
               ),
+      ),
+    );
+  }
+
+  // ── Logout Button & Confirmation ───────────────────────────────────────────
+  Widget _buildLogoutButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: OutlinedButton(
+        onPressed: _showLogoutConfirmationDialog,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFFDC2626),
+          side: const BorderSide(color: Color(0xFFFCA5A5), width: 1.2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+          backgroundColor: const Color(0xFFFEF2F2),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.logout_rounded, color: Color(0xFFDC2626), size: 18),
+            const SizedBox(width: 8),
+            Text(
+              'Log Out',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFFDC2626),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showLogoutConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFEE2E2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.logout_rounded, color: Color(0xFFDC2626), size: 20),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Log Out',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF0F172A),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Are you sure you want to log out from FitOn?',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF475569),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF64748B),
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await AuthService.signOut();
+              if (!mounted) return;
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                AppRoutes.auth,
+                (route) => false,
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFDC2626),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text(
+              'Log Out',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

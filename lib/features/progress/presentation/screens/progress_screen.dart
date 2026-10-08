@@ -6,7 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/asset_paths.dart';
 import '../../data/models/progress_data.dart';
 import '../../data/services/progress_service.dart';
-import '../../../workouts/presentation/screens/workout_complete_screen.dart';
+import 'history_screen.dart';
 
 /// Progress Tracker Screen
 /// Pixel-perfect, consistent with the rest of the application screens,
@@ -358,6 +358,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
             targetText: 'Target: ${_data.targetWorkouts}',
             bigValue: '${_data.completedWorkouts} Workouts',
             subtitle: 'Completed so far',
+            progressFraction: _data.targetWorkouts > 0 ? _data.completedWorkouts / _data.targetWorkouts : 0.0,
+            progressColor: _primaryTeal,
           ),
         ),
         const SizedBox(width: 12),
@@ -370,6 +372,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
             targetText: 'Target: ${_data.targetMinutes}m',
             bigValue: '${_data.activeMinutes} mins',
             subtitle: 'Active Movement',
+            progressFraction: _data.targetMinutes > 0 ? _data.activeMinutes / _data.targetMinutes : 0.0,
+            progressColor: const Color(0xFFD97706),
           ),
         ),
       ],
@@ -383,6 +387,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
     required String targetText,
     required String bigValue,
     required String subtitle,
+    required double progressFraction,
+    required Color progressColor,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -440,6 +446,16 @@ class _ProgressScreenState extends State<ProgressScreen> {
               fontSize: 11.5,
               fontWeight: FontWeight.w500,
               color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progressFraction.clamp(0.0, 1.0),
+              minHeight: 5,
+              backgroundColor: const Color(0xFFF1F5F9),
+              valueColor: AlwaysStoppedAnimation<Color>(progressColor),
             ),
           ),
         ],
@@ -555,9 +571,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
   Widget _buildHabitHealthCard() {
     return GestureDetector(
       onTap: () {
+        HapticFeedback.lightImpact();
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => const WorkoutCompleteScreen(),
+            builder: (_) => const HistoryScreen(),
           ),
         );
       },
@@ -766,7 +783,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           const SizedBox(height: 22),
           // 7-day bar chart
           SizedBox(
-            height: 120,
+            height: 130,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -830,10 +847,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _buildDayBar(DailyActivityItem day) {
-    const double maxBarHeight = 65.0;
+    const double maxBarHeight = 72.0;
+    final maxMinutes = _data.dailyActivities
+        .map((d) => d.minutes)
+        .fold(1, (a, b) => a > b ? a : b);
     final double barHeight = day.isRest
-        ? 6.0
-        : (day.minutes / 30.0 * maxBarHeight).clamp(16.0, maxBarHeight);
+        ? 5.0
+        : ((day.minutes / maxMinutes) * maxBarHeight).clamp(12.0, maxBarHeight);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -841,8 +861,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
         // Tag badge (Today or Plan)
         if (day.isToday)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-            margin: const EdgeInsets.only(bottom: 3),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            margin: const EdgeInsets.only(bottom: 4),
             decoration: BoxDecoration(
               color: _darkTeal,
               borderRadius: BorderRadius.circular(6),
@@ -859,7 +879,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
         else if (day.isPlanned)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-            margin: const EdgeInsets.only(bottom: 3),
+            margin: const EdgeInsets.only(bottom: 4),
             decoration: BoxDecoration(
               color: _mintGreenTint,
               borderRadius: BorderRadius.circular(6),
@@ -874,7 +894,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             ),
           )
         else
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
 
         // Value text (e.g. 20m or Rest)
         Text(
@@ -882,37 +902,46 @@ class _ProgressScreenState extends State<ProgressScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 10,
             fontWeight: day.isToday ? FontWeight.w800 : FontWeight.w600,
-            color: day.isRest ? AppColors.textMuted : AppColors.textPrimary,
+            color: day.isRest
+                ? AppColors.textMuted
+                : (day.isToday ? _primaryTeal : AppColors.textPrimary),
           ),
         ),
         const SizedBox(height: 5),
 
         // Vertical Bar
         Container(
-          width: 22,
+          width: 28,
           height: barHeight,
           decoration: BoxDecoration(
+            gradient: day.isRest || day.isPlanned
+                ? null
+                : LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: day.isToday
+                        ? [_mintGreen, _primaryTeal]
+                        : [const Color(0xFF00796B), const Color(0xFF004D40)],
+                  ),
             color: day.isRest
                 ? const Color(0xFFE2E8F0)
-                : (day.isPlanned
-                    ? _mintGreen.withValues(alpha: 0.45)
-                    : (day.isToday ? _primaryTeal : const Color(0xFF00796B))),
-            borderRadius: BorderRadius.circular(day.isRest ? 3 : 6),
+                : (day.isPlanned ? _mintGreen.withValues(alpha: 0.3) : null),
+            borderRadius: BorderRadius.circular(day.isRest ? 3 : 7),
             border: day.isToday
-                ? Border.all(color: _mintGreen, width: 1.5)
+                ? Border.all(color: _mintGreen.withValues(alpha: 0.6), width: 1.5)
                 : null,
             boxShadow: day.isToday
                 ? [
                     BoxShadow(
-                      color: _primaryTeal.withValues(alpha: 0.35),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
+                      color: _primaryTeal.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
                     ),
                   ]
                 : [],
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 7),
 
         // Day label
         Text(

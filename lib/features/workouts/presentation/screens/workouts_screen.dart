@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/user_avatar.dart';
+import '../../../profile/data/services/profile_service.dart';
 import '../../data/models/workout_model.dart';
 import '../../data/repositories/workout_repository.dart';
 import '../../data/services/workout_service.dart';
@@ -21,17 +22,18 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   // Tab State: 0 = Explore Workouts, 1 = My Custom Routines
   int _selectedTabIndex = 0;
 
-  // Filters State
-  String _selectedCategory = 'Cardio';
-  String _selectedDuration = '15-30m';
-  String _selectedDifficulty = 'Intermediate';
-  final Set<String> _selectedEquipment = {'None / Bodyweight'};
+  // Filters State - initialized dynamically from registered user profile
+  String _selectedCategory = 'All';
+  String _selectedDuration = '';
+  late String _selectedDifficulty;
+  final Set<String> _selectedEquipment = {};
 
   late List<WorkoutModel> _allWorkouts;
 
   @override
   void initState() {
     super.initState();
+    _selectedDifficulty = ProfileService.currentProfile.fitnessLevel;
     _allWorkouts = WorkoutRepository.getMockWorkouts();
     _loadWorkouts();
     WorkoutService.workoutsRevisionNotifier.addListener(_loadWorkouts);
@@ -46,6 +48,17 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
 
   Future<void> _loadWorkouts() async {
     final workouts = await WorkoutService.getAllWorkouts();
+    try {
+      final profile = await ProfileService.getProfile();
+      if (mounted && profile.fitnessLevel.isNotEmpty) {
+        setState(() {
+          _allWorkouts = workouts;
+          _selectedDifficulty = profile.fitnessLevel;
+        });
+        return;
+      }
+    } catch (_) {}
+
     if (mounted) {
       setState(() {
         _allWorkouts = workouts;
@@ -204,7 +217,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     setState(() {
       _selectedCategory = 'All';
       _selectedDuration = '';
-      _selectedDifficulty = 'All';
+      _selectedDifficulty = ProfileService.currentProfile.fitnessLevel;
       _selectedEquipment.clear();
       _searchController.clear();
     });
@@ -215,12 +228,6 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
       MaterialPageRoute(
         builder: (_) => WorkoutDetailScreen(
           workout: workout,
-          onEditRequested: workout.isCustom
-              ? (w) => _openWorkoutFormModal(existing: w)
-              : null,
-          onDeleteRequested: workout.isCustom
-              ? (w) => _confirmDeleteWorkout(w)
-              : null,
         ),
       ),
     );
@@ -234,21 +241,23 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openWorkoutFormModal(),
-        backgroundColor: AppColors.primaryTeal,
-        elevation: 4,
-        icon: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
-        label: Text(
-          _selectedTabIndex == 1 ? 'Create Routine' : 'Create Workout',
-          style: GoogleFonts.plusJakartaSans(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            fontSize: 13,
-            letterSpacing: 0.3,
-          ),
-        ),
-      ),
+      floatingActionButton: _selectedTabIndex == 0
+          ? FloatingActionButton.extended(
+              onPressed: () => _openWorkoutFormModal(),
+              backgroundColor: AppColors.primaryTeal,
+              elevation: 4,
+              icon: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
+              label: Text(
+                'Create Workout',
+                style: GoogleFonts.plusJakartaSans(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            )
+          : null,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -484,20 +493,18 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                           ],
                         ),
                       ),
-                      ElevatedButton(
-                        onPressed: () => _openWorkoutFormModal(),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.featureTealBg,
-                          foregroundColor: AppColors.primaryTeal,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          '+ Create',
+                          '${_myCustomWorkouts.length} Saved',
                           style: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 12,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11.5,
                           ),
                         ),
                       ),
@@ -574,26 +581,11 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Build your personalized workout routine with custom exercises and timing.',
+                          'Create your custom routines from the Explore Workouts page.',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12.5,
                             color: AppColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-                        ElevatedButton.icon(
-                          onPressed: () => _openWorkoutFormModal(),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryTeal,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          ),
-                          icon: const Icon(Icons.add_rounded, size: 18),
-                          label: Text(
-                            'Create Routine',
-                            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
                           ),
                         ),
                       ],
@@ -638,7 +630,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 physics: const BouncingScrollPhysics(),
                 child: Row(
                   children: [
-                    _buildCategoryChip('⭐ My Workouts', 'My Workouts'),
+                    _buildCategoryChip('All Workouts', 'All'),
                     _buildCategoryChip('Cardio (14)', 'Cardio'),
                     _buildCategoryChip('Strength', 'Strength'),
                     _buildCategoryChip('HIIT', 'HIIT'),
@@ -919,7 +911,11 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _selectedCategory = isSelected ? 'All' : categoryKey;
+          if (categoryKey.toLowerCase() == 'all') {
+            _selectedCategory = 'All';
+          } else {
+            _selectedCategory = isSelected ? 'All' : categoryKey;
+          }
         });
       },
       child: AnimatedContainer(
@@ -972,7 +968,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   }
 
   Widget _buildDifficultyOption(String label) {
-    final isSelected = _selectedDifficulty == label;
+    final isSelected = _selectedDifficulty.toLowerCase() == label.toLowerCase();
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -1067,23 +1063,45 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     );
   }
 
+  Color _getDifficultyBgColor(String difficulty) {
+    switch (difficulty.toLowerCase()) {
+      case 'beginner':
+        return const Color(0xFFE8F5E9);
+      case 'advanced':
+        return const Color(0xFFFBE9E7);
+      case 'intermediate':
+      default:
+        return const Color(0xFFE0F2F1);
+    }
+  }
+
+  Color _getDifficultyTextColor(String difficulty) {
+    switch (difficulty.toLowerCase()) {
+      case 'beginner':
+        return const Color(0xFF2E7D32);
+      case 'advanced':
+        return const Color(0xFFD84315);
+      case 'intermediate':
+      default:
+        return AppColors.primaryTeal;
+    }
+  }
+
   Widget _buildWorkoutCard(WorkoutModel workout) {
-    return GestureDetector(
-      onTap: () => _onPreviewTapped(workout),
-      child: Container(
+    return Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           border: workout.isCustom
               ? Border.all(color: AppColors.primaryTeal.withValues(alpha: 0.35), width: 1.5)
-              : null,
+              : Border.all(color: const Color(0xFFF1F5F9)),
           boxShadow: [
             BoxShadow(
               color: workout.isCustom
                   ? AppColors.primaryTeal.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.03),
-              blurRadius: 10,
+                  : const Color(0xFF0F172A).withValues(alpha: 0.04),
+              blurRadius: 14,
               offset: const Offset(0, 4),
             ),
           ],
@@ -1120,15 +1138,15 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
                   child: Image.network(
                     workout.imageUrl,
-                    width: 80,
-                    height: 80,
+                    width: 82,
+                    height: 82,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
-                      width: 80,
-                      height: 80,
+                      width: 82,
+                      height: 82,
                       color: Colors.grey.shade200,
                       child: const Icon(Icons.fitness_center_rounded, color: Colors.grey),
                     ),
@@ -1152,17 +1170,18 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                           ),
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFE0F2F1),
-                              borderRadius: BorderRadius.circular(4),
+                              color: _getDifficultyBgColor(workout.difficulty),
+                              borderRadius: BorderRadius.circular(5),
                             ),
                             child: Text(
                               workout.difficulty.toUpperCase(),
                               style: GoogleFonts.plusJakartaSans(
-                                color: AppColors.primaryTeal,
-                                fontWeight: FontWeight.w700,
+                                color: _getDifficultyTextColor(workout.difficulty),
+                                fontWeight: FontWeight.w800,
                                 fontSize: 9,
+                                letterSpacing: 0.3,
                               ),
                             ),
                           ),
@@ -1281,23 +1300,31 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 GestureDetector(
                   onTap: () => _onPreviewTapped(workout),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
                       color: AppColors.primaryTeal,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primaryTeal.withValues(alpha: 0.22),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           'Preview',
                           style: GoogleFonts.plusJakartaSans(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
-                            fontSize: 11,
+                            fontSize: 11.5,
                           ),
                         ),
                         const SizedBox(width: 4),
-                        const Icon(Icons.chevron_right, color: Colors.white, size: 14),
+                        const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 13),
                       ],
                     ),
                   ),
@@ -1306,8 +1333,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 }
 
@@ -1356,7 +1382,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
     if (ex != null && ex.exercises.isNotEmpty) {
       _selectedExercises = List.from(ex.exercises);
     } else {
-      _selectedExercises = _availableExercises.take(3).toList();
+      _selectedExercises = [];
     }
   }
 
@@ -1370,16 +1396,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
     setState(() {
       final index = _selectedExercises.indexWhere((e) => e.name == item.name);
       if (index >= 0) {
-        if (_selectedExercises.length > 1) {
-          _selectedExercises.removeAt(index);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('At least 1 exercise is required in a routine.'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
+        _selectedExercises.removeAt(index);
       } else {
         _selectedExercises.add(item);
       }

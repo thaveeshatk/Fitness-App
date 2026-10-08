@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../data/models/workout_model.dart';
 
 class ExerciseGuidanceScreen extends StatefulWidget {
@@ -59,11 +60,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              radius: 17,
-              backgroundColor: Color(0xFF003D37),
-              child: Icon(Icons.person_rounded, color: Colors.white, size: 20),
-            ),
+            child: UserAvatar(radius: 17),
           ),
         ],
       ),
@@ -72,7 +69,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── 1080P HD IMAGE GUIDANCE SECTION ─────────────────────────
+            // ── EXERCISE IMAGE GUIDANCE SECTION ──────────────────────────
             _buildImageGuidanceSection(),
             const SizedBox(height: 18),
 
@@ -591,7 +588,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        '${widget.exercise.name} • 1080p HD Demonstration Guide',
+                        '${widget.exercise.name} • Posture & Form Guide',
                         style: GoogleFonts.plusJakartaSans(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
@@ -612,282 +609,68 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
   }
 
   Widget _buildImageGuidanceSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Top Spec Row
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '[MEDIA_SPEC: 1080P_HD_GUIDE]',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF005953),
-                  letterSpacing: 0.5,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFC8F3EA),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.videocam_rounded, color: Color(0xFF005953), size: 13),
-                    const SizedBox(width: 4),
-                    Text(
-                      'HD VIDEO PREVIEW',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        color: const Color(0xFF005953),
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
           ),
-        ),
-
-        // Image Container
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20.0),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Crystal Clear High Quality Image
-                  Image.network(
-                    widget.exercise.imageUrl,
-                    fit: BoxFit.cover,
-                    filterQuality: FilterQuality.high,
-                    loadingBuilder: (ctx, child, progress) {
-                      if (progress == null) return child;
-                      return Container(
-                        color: const Color(0xFF062320),
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            color: Color(0xFF6EE7B7),
-                            strokeWidth: 2.5,
-                          ),
-                        ),
-                      );
-                    },
-                    errorBuilder: (_, __, ___) => Container(
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: GestureDetector(
+          onTap: _showImageFullscreenPreview,
+          child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // High Quality Exercise Posture Image
+                Image.network(
+                  widget.exercise.imageUrl,
+                  fit: BoxFit.cover,
+                  filterQuality: FilterQuality.high,
+                  loadingBuilder: (ctx, child, progress) {
+                    if (progress == null) return child;
+                    return Container(
                       color: const Color(0xFF062320),
-                      child: const Icon(Icons.fitness_center_rounded, color: Colors.white54, size: 48),
-                    ),
-                  ),
-
-                  // Subtle crystal-clear cinematic gradient (transparent middle)
-                  IgnorePointer(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withValues(alpha: 0.35),
-                            Colors.transparent,
-                            Colors.transparent,
-                            Colors.black.withValues(alpha: 0.65),
-                          ],
-                          stops: const [0.0, 0.25, 0.70, 1.0],
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF6EE7B7),
+                          strokeWidth: 2.5,
                         ),
                       ),
-                    ),
+                    );
+                  },
+                  errorBuilder: (_, __, ___) => Container(
+                    color: const Color(0xFF062320),
+                    child: const Icon(Icons.fitness_center_rounded, color: Colors.white54, size: 48),
                   ),
+                ),
 
-                  // Top-left Watermark
-                  Positioned(
-                    top: 12,
-                    left: 14,
-                    child: Text(
-                      '1080p HD Video & Form Guide',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white.withValues(alpha: 0.92),
-                        letterSpacing: 0.4,
-                      ),
+                // Subtle fullscreen hint icon at bottom right
+                Positioned(
+                  right: 12,
+                  bottom: 12,
+                  child: Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.55),
+                      shape: BoxShape.circle,
                     ),
+                    child: const Icon(Icons.fullscreen_rounded, color: Colors.white, size: 18),
                   ),
-
-                  // Center Glowing Play/Video Button + Demonstration Badge
-                  Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        GestureDetector(
-                          onTap: _showImageFullscreenPreview,
-                          child: Container(
-                            width: 58,
-                            height: 58,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF007A70), Color(0xFF003D37)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: const Color(0xFFC8F3EA).withValues(alpha: 0.85),
-                                width: 2,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF005953).withValues(alpha: 0.5),
-                                  blurRadius: 18,
-                                  spreadRadius: 2,
-                                  offset: const Offset(0, 4),
-                                ),
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.5),
-                                  blurRadius: 10,
-                                ),
-                              ],
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.play_arrow_rounded,
-                                color: Colors.white,
-                                size: 38,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        GestureDetector(
-                          onTap: _showImageFullscreenPreview,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(6),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.3),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.videocam_rounded, color: Color(0xFF005953), size: 14),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'DEMONSTRATION GUIDE',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.w800,
-                                    color: const Color(0xFF0F172A),
-                                    letterSpacing: 0.6,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Bottom video preview bar
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                          colors: [
-                            Colors.black.withValues(alpha: 0.85),
-                            Colors.transparent,
-                          ],
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.play_circle_fill_rounded, color: Color(0xFF6EE7B7), size: 18),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'HD Visual posture guide • Follow technique below',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white.withValues(alpha: 0.95),
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: _showImageFullscreenPreview,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF005953).withValues(alpha: 0.85),
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: const Color(0xFF6EE7B7).withValues(alpha: 0.5),
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.fullscreen_rounded, color: Colors.white, size: 14),
-                                  const SizedBox(width: 3),
-                                  Text(
-                                    '1080P HD',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 9.5,
-                                      fontWeight: FontWeight.w800,
-                                      color: Colors.white,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }

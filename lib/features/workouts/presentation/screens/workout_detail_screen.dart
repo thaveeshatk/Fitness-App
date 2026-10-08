@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../data/models/workout_model.dart';
 import 'activity_screen.dart';
 import 'exercise_guidance_screen.dart';
 
 class WorkoutDetailScreen extends StatelessWidget {
   final WorkoutModel workout;
-  final ValueChanged<WorkoutModel>? onEditRequested;
-  final ValueChanged<WorkoutModel>? onDeleteRequested;
 
   const WorkoutDetailScreen({
     super.key,
     required this.workout,
-    this.onEditRequested,
-    this.onDeleteRequested,
   });
 
   @override
@@ -38,32 +35,10 @@ class WorkoutDetailScreen extends StatelessWidget {
             letterSpacing: 1.5,
           ),
         ),
-        actions: [
-          if (workout.isCustom && onEditRequested != null)
-            IconButton(
-              icon: const Icon(Icons.edit_outlined, color: AppColors.primaryTeal, size: 20),
-              tooltip: 'Edit Routine',
-              onPressed: () {
-                Navigator.of(context).pop();
-                onEditRequested?.call(workout);
-              },
-            ),
-          if (workout.isCustom && onDeleteRequested != null)
-            IconButton(
-              icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFDC2626), size: 20),
-              tooltip: 'Delete Routine',
-              onPressed: () {
-                Navigator.of(context).pop();
-                onDeleteRequested?.call(workout);
-              },
-            ),
+        actions: const [
           Padding(
-            padding: const EdgeInsets.only(right: 16.0, left: 4.0),
-            child: CircleAvatar(
-              radius: 17,
-              backgroundImage: NetworkImage(workout.coachAvatar),
-              backgroundColor: AppColors.surfaceMuted,
-            ),
+            padding: EdgeInsets.only(right: 16.0),
+            child: UserAvatar(radius: 17),
           ),
         ],
       ),

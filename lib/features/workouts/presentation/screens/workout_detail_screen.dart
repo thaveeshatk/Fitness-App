@@ -7,8 +7,15 @@ import 'exercise_guidance_screen.dart';
 
 class WorkoutDetailScreen extends StatelessWidget {
   final WorkoutModel workout;
+  final ValueChanged<WorkoutModel>? onEditRequested;
+  final ValueChanged<WorkoutModel>? onDeleteRequested;
 
-  const WorkoutDetailScreen({super.key, required this.workout});
+  const WorkoutDetailScreen({
+    super.key,
+    required this.workout,
+    this.onEditRequested,
+    this.onDeleteRequested,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +39,26 @@ class WorkoutDetailScreen extends StatelessWidget {
           ),
         ),
         actions: [
+          if (workout.isCustom && onEditRequested != null)
+            IconButton(
+              icon: const Icon(Icons.edit_outlined, color: AppColors.primaryTeal, size: 20),
+              tooltip: 'Edit Routine',
+              onPressed: () {
+                Navigator.of(context).pop();
+                onEditRequested?.call(workout);
+              },
+            ),
+          if (workout.isCustom && onDeleteRequested != null)
+            IconButton(
+              icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFDC2626), size: 20),
+              tooltip: 'Delete Routine',
+              onPressed: () {
+                Navigator.of(context).pop();
+                onDeleteRequested?.call(workout);
+              },
+            ),
           Padding(
-            padding: const EdgeInsets.only(right: 16.0),
+            padding: const EdgeInsets.only(right: 16.0, left: 4.0),
             child: CircleAvatar(
               radius: 17,
               backgroundImage: NetworkImage(workout.coachAvatar),
@@ -50,6 +75,31 @@ class WorkoutDetailScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 12),
+              if (workout.isCustom)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.featureTealBg,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.star_rounded, size: 14, color: AppColors.primaryTeal),
+                      const SizedBox(width: 4),
+                      Text(
+                        'CUSTOM ROUTINE',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: AppColors.primaryTeal,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 10,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
               // Workout Title
               Text(

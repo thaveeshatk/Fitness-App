@@ -1009,4 +1009,18 @@ class WorkoutRepository {
       ),
     ];
   }
+
+  /// Returns a pool of distinct exercise movements available for custom routines.
+  static List<ExerciseItem> getAvailableExercises() {
+    final Map<String, ExerciseItem> unique = {};
+    for (final w in getMockWorkouts()) {
+      for (final e in w.exercises) {
+        if (!unique.containsKey(e.name)) {
+          unique[e.name] = e;
+        }
+      }
+    }
+    return unique.values.toList();
+  }
 }
+

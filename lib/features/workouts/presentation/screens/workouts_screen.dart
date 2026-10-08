@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/user_avatar.dart';
+import '../../../auth/data/services/auth_service.dart';
 import '../../../profile/data/services/profile_service.dart';
 import '../../data/models/workout_model.dart';
 import '../../data/repositories/workout_repository.dart';
@@ -37,10 +38,12 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     _allWorkouts = WorkoutRepository.getMockWorkouts();
     _loadWorkouts();
     WorkoutService.workoutsRevisionNotifier.addListener(_loadWorkouts);
+    AuthService.userNotifier.addListener(_loadWorkouts);
   }
 
   @override
   void dispose() {
+    AuthService.userNotifier.removeListener(_loadWorkouts);
     WorkoutService.workoutsRevisionNotifier.removeListener(_loadWorkouts);
     _searchController.dispose();
     super.dispose();

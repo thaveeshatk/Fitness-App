@@ -18,6 +18,7 @@ class WorkoutsScreen extends StatefulWidget {
 }
 
 class _WorkoutsScreenState extends State<WorkoutsScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _searchController = TextEditingController();
 
   // Tab State: 0 = Explore Workouts, 1 = My Custom Routines
@@ -243,7 +244,9 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     final customMatches = _myCustomWorkouts;
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: const Color(0xFFF8FAFC),
+      drawer: _buildWorkoutsDrawer(context),
       floatingActionButton: _selectedTabIndex == 0
           ? FloatingActionButton.extended(
               onPressed: () => _openWorkoutFormModal(),
@@ -267,7 +270,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary, size: 24),
-          onPressed: () {},
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
         title: Text(
           'SEARCH',
@@ -1337,6 +1340,258 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           ],
         ),
       );
+  }
+
+  Widget _buildWorkoutsDrawer(BuildContext context) {
+    final user = AuthService.currentUser;
+    final level = ProfileService.currentProfile.fitnessLevel;
+
+    return Drawer(
+      backgroundColor: Colors.white,
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Drawer Header
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1.5),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const UserAvatar(radius: 26),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user.name,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 3),
+                        Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF10B981),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              '$level Level',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // Navigation Section Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Text(
+                'WORKOUT QUICK MENU',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textMuted,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ),
+
+            // 1. Explore Workouts
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: _selectedTabIndex == 0 ? AppColors.featureTealBg : AppColors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.explore_rounded,
+                  color: _selectedTabIndex == 0 ? AppColors.primaryTeal : AppColors.textSecondary,
+                  size: 20,
+                ),
+              ),
+              title: Text(
+                'Explore Workouts',
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: _selectedTabIndex == 0 ? FontWeight.w800 : FontWeight.w600,
+                  fontSize: 14,
+                  color: _selectedTabIndex == 0 ? AppColors.primaryTeal : AppColors.textPrimary,
+                ),
+              ),
+              trailing: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: _selectedTabIndex == 0 ? AppColors.primaryTeal : AppColors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${_filteredExploreWorkouts.length}',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: _selectedTabIndex == 0 ? Colors.white : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              onTap: () {
+                Navigator.of(context).pop();
+                setState(() => _selectedTabIndex = 0);
+              },
+            ),
+
+            // 2. My Routines
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: _selectedTabIndex == 1 ? AppColors.featureTealBg : AppColors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.star_rounded,
+                  color: _selectedTabIndex == 1 ? AppColors.primaryTeal : AppColors.textSecondary,
+                  size: 20,
+                ),
+              ),
+              title: Text(
+                'My Custom Routines',
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: _selectedTabIndex == 1 ? FontWeight.w800 : FontWeight.w600,
+                  fontSize: 14,
+                  color: _selectedTabIndex == 1 ? AppColors.primaryTeal : AppColors.textPrimary,
+                ),
+              ),
+              trailing: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: _selectedTabIndex == 1 ? AppColors.primaryTeal : AppColors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${_myCustomWorkouts.length}',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: _selectedTabIndex == 1 ? Colors.white : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              onTap: () {
+                Navigator.of(context).pop();
+                setState(() => _selectedTabIndex = 1);
+              },
+            ),
+
+            // 3. Create Custom Workout
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.add_circle_outline_rounded,
+                  color: AppColors.primaryTeal,
+                  size: 20,
+                ),
+              ),
+              title: Text(
+                'Create New Routine',
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              onTap: () {
+                Navigator.of(context).pop();
+                _openWorkoutFormModal();
+              },
+            ),
+
+            // 4. Reset Filters
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.refresh_rounded,
+                  color: AppColors.textSecondary,
+                  size: 20,
+                ),
+              ),
+              title: Text(
+                'Reset All Filters',
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              onTap: () {
+                Navigator.of(context).pop();
+                _resetFilters();
+              },
+            ),
+
+            const Spacer(),
+
+            // Footer
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                border: Border(top: BorderSide(color: Color(0xFFF1F5F9))),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.fitness_center_rounded, size: 18, color: AppColors.primaryTeal),
+                  const SizedBox(width: 8),
+                  Text(
+                    'FitOn App • v2.0',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

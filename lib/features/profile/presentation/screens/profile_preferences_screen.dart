@@ -8,6 +8,7 @@ import '../../../auth/data/services/auth_service.dart';
 import '../../data/models/profile_model.dart';
 import '../../data/services/profile_service.dart';
 import '../widgets/profile_photo_picker_dialog.dart';
+import 'settings_screen.dart';
 
 /// Screen for viewing and updating user fitness profile & preferences.
 /// Matches the provided wireframe pixel-for-pixel.
@@ -263,14 +264,22 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
         ),
         const Spacer(),
         // Settings icon
-        Container(
-          width: 36,
-          height: 36,
-          alignment: Alignment.center,
-          child: const Icon(
-            Icons.settings_outlined,
-            color: Color(0xFF334155),
-            size: 24,
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsScreen()),
+            );
+          },
+          child: Container(
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
+            child: const Icon(
+              Icons.settings_outlined,
+              color: Color(0xFF334155),
+              size: 24,
+            ),
           ),
         ),
         const SizedBox(width: 4),

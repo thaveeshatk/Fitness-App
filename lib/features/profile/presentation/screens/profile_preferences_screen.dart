@@ -262,6 +262,18 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
           ),
         ),
         const Spacer(),
+        // Settings icon
+        Container(
+          width: 36,
+          height: 36,
+          alignment: Alignment.center,
+          child: const Icon(
+            Icons.settings_outlined,
+            color: Color(0xFF334155),
+            size: 24,
+          ),
+        ),
+        const SizedBox(width: 4),
         // Notification bell
         Container(
           width: 36,

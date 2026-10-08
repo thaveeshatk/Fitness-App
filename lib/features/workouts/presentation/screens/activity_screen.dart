@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../data/models/workout_model.dart';
 import 'exercise_guidance_screen.dart';
 import 'workout_complete_screen.dart';
@@ -25,6 +26,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
   int _elapsedSeconds = 0; // Starts fresh at 00:00
   bool _isRunning = true;
   bool _isResting = false;
+  bool _isTransitionToNextExercise = false;
   final int _restDurationSeconds = 30; // Standard 30-sec rest between sets
   Timer? _timer;
 
@@ -47,38 +49,104 @@ class _ActivityScreenState extends State<ActivityScreen> {
   }
 
   int _calculateExerciseInterval(ExerciseItem exercise) {
-    final badge = exercise.badge.toLowerCase();
+    final badge = exercise.badge.toLowerCase().trim();
 
-    // Check for exact seconds (e.g., '45 sec', '30 sec', '20 sec')
-    final secRegex = RegExp(r'(\d+)\s*(sec|s\b)');
+    // 1. Explicit seconds (e.g., '45 sec', '30 sec', '20 sec', '40 sec', '60 sec', '30 sec/side')
+    final secRegex = RegExp(r'(\d+)\s*(sec|seconds|s\b)');
     final secMatch = secRegex.firstMatch(badge);
     if (secMatch != null) {
       final val = int.tryParse(secMatch.group(1) ?? '');
       if (val != null && val > 0) return val;
     }
 
-    // Check for exact minutes (e.g., '3 min', '5 min', '2 min')
-    final minRegex = RegExp(r'(\d+)\s*(min|m\b)');
+    // 2. EMOM drills (e.g., '15 reps every min', '10 reps every min')
+    if (badge.contains('every min')) {
+      return 60;
+    }
+
+    // 3. Multi-minute or single-minute continuous duration (e.g., '1 min', '2 min', '3 min', '4 min', '5 min', '4 sets × 1 min')
+    final minRegex = RegExp(r'(\d+)\s*(min|minute|minutes|m\b)');
     final minMatch = minRegex.firstMatch(badge);
     if (minMatch != null) {
       final val = int.tryParse(minMatch.group(1) ?? '');
-      if (val != null && val > 0) return val * 60;
+      if (val != null && val > 0) {
+        return val * 60; // 1 min -> 60s, 2 min -> 120s, 3 min -> 180s, 4 min -> 240s, 5 min -> 300s
+      }
     }
 
-    // Default for rep-based movements (e.g., '3 sets × 12 reps') -> standard 60-second set
-    return 60;
+    // 4. Reps per side (e.g., '3 sets × 12 reps/side', '2 sets × 3 reps/side', '3 sets × 6 reps/side')
+    final repsPerSideRegex = RegExp(r'(\d+)\s*(?:reps|rep)\s*/\s*side');
+    final repsPerSideMatch = repsPerSideRegex.firstMatch(badge);
+    if (repsPerSideMatch != null) {
+      final reps = int.tryParse(repsPerSideMatch.group(1) ?? '');
+      if (reps != null && reps > 0) {
+        // Turkish get-up (3 reps) takes ~12s per rep (36s total); higher reps: ~4s/rep
+        return (reps <= 4) ? (reps * 12) : ((reps * 4).clamp(30, 75));
+      }
+    }
+
+    // 5. Standard repetitions (e.g., '3 sets × 6 reps', '3 sets × 8 reps', '3 sets × 10 reps', '3 sets × 12 reps', '3 sets × 16 reps', '3 sets × 20 reps')
+    final repsRegex = RegExp(r'(\d+)\s*(reps|rep\b)');
+    final repsMatch = repsRegex.firstMatch(badge);
+    if (repsMatch != null) {
+      final reps = int.tryParse(repsMatch.group(1) ?? '');
+      if (reps != null && reps > 0) {
+        // Natural pacing: ~3.5 seconds per repetition
+        // 6 reps -> 21s, 8 reps -> 28s, 10 reps -> 35s, 12 reps -> 42s, 15 reps -> 52s, 16 reps -> 56s, 20 reps -> 70s
+        return (reps * 3.5).round().clamp(20, 75);
+      }
+    }
+
+    // 6. Rep ladder (e.g., '10 - 20 - 30 reps')
+    if (badge.contains('10 - 20 - 30') || badge.contains('ladder')) {
+      return 60;
+    }
+
+    // 7. Steps (e.g., '3 sets × 20 steps')
+    final stepsRegex = RegExp(r'(\d+)\s*steps');
+    final stepsMatch = stepsRegex.firstMatch(badge);
+    if (stepsMatch != null) {
+      final steps = int.tryParse(stepsMatch.group(1) ?? '');
+      if (steps != null && steps > 0) {
+        return (steps * 2).clamp(20, 60); // 20 steps -> 40s
+      }
+    }
+
+    // 8. Cycles (e.g., '5 cycles')
+    final cyclesRegex = RegExp(r'(\d+)\s*cycles');
+    final cyclesMatch = cyclesRegex.firstMatch(badge);
+    if (cyclesMatch != null) {
+      final cycles = int.tryParse(cyclesMatch.group(1) ?? '');
+      if (cycles != null && cycles > 0) {
+        return (cycles * 8).clamp(20, 60); // 5 cycles -> 40s
+      }
+    }
+
+    // Fallback default
+    return 30;
   }
 
   int _calculateTotalSets(ExerciseItem exercise) {
-    final badge = exercise.badge.toLowerCase();
+    final badge = exercise.badge.toLowerCase().trim();
+
+    // Check for explicit sets / rounds / cycles
     final setsRegex = RegExp(r'(\d+)\s*(sets|rounds|cycles)');
     final setsMatch = setsRegex.firstMatch(badge);
     if (setsMatch != null) {
       final val = int.tryParse(setsMatch.group(1) ?? '');
       if (val != null && val > 0) return val;
     }
-    // Single continuous duration (e.g., '3 min' or '5 min')
-    if (badge.contains('min')) return 1;
+
+    // Rep ladder (e.g., '10 - 20 - 30 reps') has 3 stages/sets
+    if (badge.contains('10 - 20 - 30')) return 3;
+
+    // Single continuous duration (e.g., '2 min', '3 min', '4 min', '5 min' continuous warm-up / cool-down)
+    if (badge.contains('min') && !badge.contains('every min')) return 1;
+
+    // If unilateral per side without explicit sets, 2 sets (one per side)
+    if (badge.contains('/side') || badge.contains('per side')) return 2;
+
+    // Standard default sets
     return 3;
   }
 
@@ -92,24 +160,50 @@ class _ActivityScreenState extends State<ActivityScreen> {
         if (_intervalSecondsRemaining > 0) {
           _intervalSecondsRemaining--;
         } else {
-          // If in Active Interval and sets remain:
+          final exercises = widget.workout.exercises;
+          final hasMoreExercises = _currentExerciseIndex < exercises.length - 1;
+
           if (!_isResting) {
+            // Active Interval ended:
             if (_currentSet < _totalSets) {
-              // Transition into REST INTERVAL
+              // Transition into REST INTERVAL before the next set of this exercise
               _isResting = true;
+              _isTransitionToNextExercise = false;
+              _totalIntervalSeconds = _restDurationSeconds;
+              _intervalSecondsRemaining = _totalIntervalSeconds;
+            } else if (hasMoreExercises) {
+              // All sets finished for current exercise -> Transition rest before next exercise!
+              _isResting = true;
+              _isTransitionToNextExercise = true;
               _totalIntervalSeconds = _restDurationSeconds;
               _intervalSecondsRemaining = _totalIntervalSeconds;
             } else {
-              // All sets finished for this exercise
+              // All sets of final exercise finished!
+              _isRunning = false;
               _intervalSecondsRemaining = 0;
+              _showCompletionDialog();
             }
           } else {
-            // Rest interval finished -> transition back to ACTIVE INTERVAL for next set
+            // Rest Interval ended:
             _isResting = false;
-            _currentSet++;
-            final currentEx = widget.workout.exercises[_currentExerciseIndex];
-            _totalIntervalSeconds = _calculateExerciseInterval(currentEx);
-            _intervalSecondsRemaining = _totalIntervalSeconds;
+            if (_isTransitionToNextExercise) {
+              // Advance to next exercise automatically!
+              _isTransitionToNextExercise = false;
+              if (_currentExerciseIndex < exercises.length - 1) {
+                _currentExerciseIndex++;
+                _currentSet = 1;
+                final nextEx = exercises[_currentExerciseIndex];
+                _totalIntervalSeconds = _calculateExerciseInterval(nextEx);
+                _intervalSecondsRemaining = _totalIntervalSeconds;
+                _totalSets = _calculateTotalSets(nextEx);
+              }
+            } else {
+              // Advance to next set of current exercise!
+              _currentSet++;
+              final currentEx = exercises[_currentExerciseIndex];
+              _totalIntervalSeconds = _calculateExerciseInterval(currentEx);
+              _intervalSecondsRemaining = _totalIntervalSeconds;
+            }
           }
         }
       });
@@ -119,10 +213,25 @@ class _ActivityScreenState extends State<ActivityScreen> {
   void _skipRest() {
     setState(() {
       _isResting = false;
-      _currentSet++;
-      final currentEx = widget.workout.exercises[_currentExerciseIndex];
-      _totalIntervalSeconds = _calculateExerciseInterval(currentEx);
-      _intervalSecondsRemaining = _totalIntervalSeconds;
+      final exercises = widget.workout.exercises;
+      if (_isTransitionToNextExercise) {
+        _isTransitionToNextExercise = false;
+        if (_currentExerciseIndex < exercises.length - 1) {
+          _currentExerciseIndex++;
+          _currentSet = 1;
+          final nextEx = exercises[_currentExerciseIndex];
+          _totalIntervalSeconds = _calculateExerciseInterval(nextEx);
+          _intervalSecondsRemaining = _totalIntervalSeconds;
+          _totalSets = _calculateTotalSets(nextEx);
+        } else {
+          _showCompletionDialog();
+        }
+      } else {
+        _currentSet++;
+        final currentEx = exercises[_currentExerciseIndex];
+        _totalIntervalSeconds = _calculateExerciseInterval(currentEx);
+        _intervalSecondsRemaining = _totalIntervalSeconds;
+      }
       _isRunning = true;
     });
   }
@@ -145,6 +254,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
       setState(() {
         _currentExerciseIndex++;
         _isResting = false;
+        _isTransitionToNextExercise = false;
         final nextEx = exercises[_currentExerciseIndex];
         _totalIntervalSeconds = _calculateExerciseInterval(nextEx);
         _intervalSecondsRemaining = _totalIntervalSeconds;
@@ -187,7 +297,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'You successfully completed all 6 exercises in "${widget.workout.title}".',
+              'You successfully completed all ${widget.workout.exercises.length} exercises in "${widget.workout.title}".',
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
@@ -214,12 +324,18 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 ),
                 onPressed: () {
                   Navigator.of(ctx).pop(); // Close dialog
+                  final elapsedMins = (_elapsedSeconds / 60).ceil();
+                  final duration = elapsedMins > 0 ? elapsedMins : widget.workout.durationMinutes;
+                  final active = (_elapsedSeconds / 60).floor() > 0 
+                      ? (_elapsedSeconds / 60).floor() 
+                      : (duration > 2 ? duration - 2 : duration);
+
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
                       builder: (_) => WorkoutCompleteScreen(
                         workoutTitle: widget.workout.title,
-                        durationMinutes: (_elapsedSeconds / 60).ceil() > 0 ? (_elapsedSeconds / 60).ceil() : 25,
-                        activeMinutes: (_elapsedSeconds / 60).floor() > 0 ? (_elapsedSeconds / 60).floor() : 22,
+                        durationMinutes: duration,
+                        activeMinutes: active,
                         caloriesBurned: widget.workout.calories,
                         coachName: widget.workout.coach,
                         coachAvatar: widget.workout.coachAvatar,
@@ -227,12 +343,20 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     ),
                   );
                 },
-                child: Text(
-                  'Finish & Return',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Finish & View Summary',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Icon(Icons.arrow_forward_rounded, size: 16, color: Colors.white),
+                  ],
                 ),
               ),
             ),
@@ -420,13 +544,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
             ),
           ),
           const SizedBox(width: 10),
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              radius: 17,
-              backgroundImage: NetworkImage(widget.workout.coachAvatar),
-              backgroundColor: AppColors.surfaceMuted,
-            ),
+          const Padding(
+            padding: EdgeInsets.only(right: 16.0),
+            child: UserAvatar(radius: 17),
           ),
         ],
       ),
@@ -572,11 +692,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF005953),
+                              color: _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              'SET $_currentSet OF $_totalSets',
+                              _isResting
+                                  ? (_isTransitionToNextExercise ? 'REST BEFORE NEXT EXERCISE' : 'SET REST')
+                                  : 'SET $_currentSet OF $_totalSets',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,
@@ -620,7 +742,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            'Target rest: 60s',
+                            'Target rest: ${_restDurationSeconds}s',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w500,
@@ -635,23 +757,23 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       GestureDetector(
                         onTap: () => _openExerciseGuidance(currentExercise),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                            color: const Color(0xFFF0FDF4),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFFBBF7D0)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.info_outline, size: 15, color: Color(0xFF005953)),
+                              const Icon(Icons.menu_book_rounded, size: 15, color: Color(0xFF005953)),
                               const SizedBox(width: 6),
                               Text(
-                                '[ HOW TO PERFORM → ]',
+                                'HOW TO PERFORM GUIDE →',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w800,
-                                  color: AppColors.textPrimary,
+                                  color: const Color(0xFF005953),
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -685,6 +807,22 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     Stack(
                       alignment: Alignment.center,
                       children: [
+                        // Soft Ambient Glow Aura behind timer dial
+                        Container(
+                          width: 175,
+                          height: 175,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: (_isResting ? const Color(0xFFE65100) : const Color(0xFF005953))
+                                    .withValues(alpha: 0.08),
+                                blurRadius: 36,
+                                spreadRadius: 4,
+                              ),
+                            ],
+                          ),
+                        ),
                         SizedBox(
                           width: 190,
                           height: 190,
@@ -704,7 +842,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              _isResting ? 'REST INTERVAL' : 'INTERVAL',
+                              _isResting
+                                  ? (_isTransitionToNextExercise ? 'TRANSITION REST' : 'REST INTERVAL')
+                                  : 'ACTIVE INTERVAL',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 10.5,
                                 fontWeight: FontWeight.w700,
@@ -777,7 +917,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              _isResting ? 'REST INTERVAL' : 'ACTIVE INTERVAL',
+                              _isResting
+                                  ? (_isTransitionToNextExercise ? 'TRANSITION REST' : 'REST INTERVAL')
+                                  : 'ACTIVE INTERVAL',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
@@ -822,10 +964,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     children: [
                       Text(
                         _isResting
-                            ? '[ SKIP REST & START SET $_currentSet → ]'
+                            ? (_isTransitionToNextExercise && nextExercise != null
+                                ? '[ SKIP REST & START ${nextExercise.name.toUpperCase()} → ]'
+                                : '[ SKIP REST & START SET ${_currentSet + 1} → ]')
                             : '[ NEXT EXERCISE → ]',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 15,
+                          fontSize: 14.5,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
                           letterSpacing: 0.8,

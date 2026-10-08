@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fitness_app/features/workouts/presentation/screens/workouts_screen.dart';
+import 'package:fitness_app/features/progress/presentation/screens/progress_screen.dart';
 import 'profile_preferences_screen.dart';
 
 /// Main navigation shell hosting persistent bottom navigation bar.
@@ -35,7 +36,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           _buildPlaceholderPage('Home', Icons.home_outlined),
           _buildPlaceholderPage('Plan', Icons.assignment_outlined),
           const WorkoutsScreen(),
-          _buildPlaceholderPage('Progress', Icons.bar_chart_outlined),
+          const ProgressScreen(),
           const ProfilePreferencesScreen(),
         ],
       ),

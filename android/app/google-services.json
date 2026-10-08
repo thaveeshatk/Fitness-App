@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "840583329037",
+    "project_id": "fitness-app-b3e15",
+    "storage_bucket": "fitness-app-b3e15.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:840583329037:android:29a5f24f08633ef206ec44",
+        "android_client_info": {
+          "package_name": "com.fiton.fitness_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0XvtcV6gjuQu3mg8GJfTwvxaZS_1fupg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

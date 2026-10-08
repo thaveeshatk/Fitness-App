@@ -1,4 +1,7 @@
 import 'dart:developer' as developer;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fitness_app/core/services/firebase_service.dart';
+import 'package:fitness_app/features/auth/data/services/auth_service.dart';
 import 'package:fitness_app/features/profile/data/models/profile_model.dart';
 import 'package:fitness_app/features/profile/data/services/profile_service.dart';
 import 'package:fitness_app/features/workouts/data/models/workout_model.dart';
@@ -10,8 +13,10 @@ import 'package:fitness_app/features/plan/data/models/plan_schedule_item.dart';
 class PlanService {
   PlanService._();
 
+  static const String _completionsCollection = 'plan_completions';
+
   static List<PlanScheduleItem>? _cachedPlan;
-  
+
   // Simulated database for schedule settings
   static Set<String> _savedDays = {'Mon', 'Wed', 'Fri', 'Sat'};
   static String _savedTime = '07:00';
@@ -35,7 +40,8 @@ class PlanService {
     };
   }
 
-  /// Loads the weekly plan tailored to the user's profile.
+  /// Loads the weekly plan tailored to the user's profile, overlaying any
+  /// completion status the signed-in user has saved in Firestore.
   static Future<List<PlanScheduleItem>> getWeeklyPlan({bool forceRefresh = false}) async {
     if (_cachedPlan != null && !forceRefresh) {
       return _cachedPlan!;
@@ -44,9 +50,41 @@ class PlanService {
     final profile = await ProfileService.getProfile();
     final allWorkouts = WorkoutRepository.getMockWorkouts();
 
-    _cachedPlan = _buildScheduleFromProfile(profile, allWorkouts);
+    final plan = _buildScheduleFromProfile(profile, allWorkouts);
+    _cachedPlan = await _applyPersistedCompletions(plan);
     developer.log('Weekly plan loaded: ${_cachedPlan!.length} items', name: 'PlanService');
     return _cachedPlan!;
+  }
+
+  /// Reads this user's saved completion flags from Firestore and overlays
+  /// them onto the generated plan, so completed-workout state survives app
+  /// restarts once Firebase is connected. Falls back to the plan unchanged
+  /// when Firebase is not initialized.
+  static Future<List<PlanScheduleItem>> _applyPersistedCompletions(List<PlanScheduleItem> plan) async {
+    if (!FirebaseService.isInitialized) {
+      return plan;
+    }
+
+    try {
+      final uid = AuthService.currentUser.uid;
+      final snapshot = await FirebaseFirestore.instance
+          .collection(_completionsCollection)
+          .where('uid', isEqualTo: uid)
+          .get();
+
+      final completedIds = snapshot.docs.map((doc) => doc.data()['itemId'] as String).toSet();
+      if (completedIds.isEmpty) return plan;
+
+      return plan.map((item) {
+        if (completedIds.contains(item.id) && !item.isCompleted) {
+          return item.copyWith(status: PlanItemStatus.completed);
+        }
+        return item;
+      }).toList();
+    } catch (e) {
+      developer.log('Failed to load persisted plan completions: $e', name: 'PlanService');
+      return plan;
+    }
   }
 
   /// Calculates the current progress metrics:
@@ -68,8 +106,10 @@ class PlanService {
     };
   }
 
-  /// Updates status of a workout item (e.g. mark completed when finished)
-  static void markWorkoutCompleted(String itemId) {
+  /// Marks a plan item completed locally and persists it to Firestore for
+  /// the signed-in user, so the status survives across sessions once
+  /// Firebase is connected.
+  static Future<void> markWorkoutCompleted(String itemId) async {
     if (_cachedPlan == null) return;
     _cachedPlan = _cachedPlan!.map((item) {
       if (item.id == itemId) {
@@ -77,6 +117,22 @@ class PlanService {
       }
       return item;
     }).toList();
+
+    if (!FirebaseService.isInitialized) return;
+
+    try {
+      final uid = AuthService.currentUser.uid;
+      await FirebaseFirestore.instance
+          .collection(_completionsCollection)
+          .doc('${uid}_$itemId')
+          .set({
+        'uid': uid,
+        'itemId': itemId,
+        'completedAt': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      developer.log('Failed to persist plan completion: $e', name: 'PlanService');
+    }
   }
 
   /// Generates the wireframe-specified plan items enriched with profile data and linked workouts.

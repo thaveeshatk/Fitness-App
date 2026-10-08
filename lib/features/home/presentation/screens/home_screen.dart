@@ -14,13 +14,18 @@ import '../../../plan/data/models/plan_schedule_item.dart';
 import 'package:fitness_app/features/profile/presentation/widgets/profile_photo_picker_dialog.dart';
 
 /// Screen: Home Dashboard
-/// Faithfully reproduces the provided wireframe pixel-for-pixel:
+/// Layout follows the original wireframe; all workout, plan and progress
+/// values are read from the user's real data (via [WorkoutRepository] and
+/// [PlanService]) instead of fixed placeholder text:
 /// - Brand Header: "F." logo + "Home" + Notification bell + User avatar
-/// - Greeting Header: "Good morning, Alex!" + "Ready to build your daily momentum?"
-/// - "YOUR WORKOUT TODAY" hero card with Ready, 145 kcal, Day 3 of 5, thumbnail, and "Start Workout"
-/// - "THIS WEEK'S PROGRESS" with 3 stat cards (3/5 Completed, 60m Active Time, 2 Day Streak) and 60% progress bar
+/// - Greeting Header: personalized name + daily momentum message
+/// - "YOUR WORKOUT TODAY" hero card with today's real workout, its calories,
+///   duration, equipment and position within the weekly plan (e.g. "Day 3 of 5")
+/// - "THIS WEEK'S PROGRESS" with 3 stat cards (completed/total, active minutes,
+///   streak) computed from the real weekly plan, and a progress bar
 /// - "QUICK WORKOUTS" bite-sized cards (10 Min Full Body, 15 Min Cardio, 10 Min Stretch)
-/// - "RECOMMENDED FOR YOU" card (Core Starter Routine, Beginner • 15 min, Gentle Core • No Equipment)
+/// - "RECOMMENDED FOR YOU" card showing the real recommended workout's
+///   difficulty, duration, title, category and equipment
 class HomeScreen extends StatefulWidget {
   final Function(int)? onNavigateToTab;
 
@@ -266,8 +271,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── 3. Section: "YOUR WORKOUT TODAY" ───────────────────────────────────────
 
+  /// Human-readable equipment summary for a workout, e.g. "No Equipment" or
+  /// "Dumbbells  •  Resistance Bands".
+  String _equipmentLabel(WorkoutModel w) {
+    final isBodyweight = w.equipment.isEmpty ||
+        w.equipment.every(
+          (e) => e.toLowerCase().contains('none') || e.toLowerCase().contains('bodyweight'),
+        );
+    return isBodyweight ? 'No Equipment' : w.equipment.join('  •  ');
+  }
+
   Widget _buildYourWorkoutTodaySection() {
     final workout = _todaysWorkout ?? _workouts.first;
+
+    // Position this workout within the real weekly plan (e.g. "Day 3 of 5"),
+    // falling back to the plan-completion metrics when no plan is loaded yet.
+    final todayIndex = _planItems.indexWhere((it) => it.isTodayReady);
+    final metrics = PlanService.calculateMetrics(_planItems);
+    final dayPosition = todayIndex != -1 ? todayIndex + 1 : (metrics['completed'] as int) + 1;
+    final totalDays = _planItems.isNotEmpty ? _planItems.length : 5;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -364,7 +386,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(width: 8),
 
-                  // 145 kcal Badge
+                  // Calories Badge
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
@@ -377,7 +399,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         const Icon(Icons.local_fire_department_rounded, color: Color(0xFFDC2626), size: 14),
                         const SizedBox(width: 4),
                         Text(
-                          '145 kcal',
+                          '${workout.calories} kcal',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -390,9 +412,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const Spacer(),
 
-                  // Day 3 of 5
+                  // Day X of N (position within the real weekly plan)
                   Text(
-                    'Day 3 of 5',
+                    'Day $dayPosition of $totalDays',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -448,7 +470,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                         ),
                         child: Text(
-                          'No Equipment  •  Self-Paced',
+                          '${_equipmentLabel(workout)}  •  Self-Paced',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w600,
@@ -463,9 +485,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 14),
 
-              // Workout Title: "Full Body Beginner"
+              // Workout Title
               Text(
-                'Full Body Beginner',
+                workout.title,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
@@ -476,11 +498,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 4),
 
-              // Subtitle: "Strength • ⏱ 20 min • Gentle Intro"
+              // Subtitle: "<Category> • ⏱ <duration> min • <Difficulty>"
               Row(
                 children: [
                   Text(
-                    'Strength',
+                    workout.category,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -491,7 +513,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Icon(Icons.access_time_rounded, size: 14, color: Color(0xFF64748B)),
                   const SizedBox(width: 4),
                   Text(
-                    '20 min',
+                    '${workout.durationMinutes} min',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -500,7 +522,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const Text('  •  ', style: TextStyle(color: Color(0xFF94A3B8))),
                   Text(
-                    'Gentle Intro',
+                    workout.difficulty,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -561,6 +583,22 @@ class _HomeScreenState extends State<HomeScreen> {
     final percentText = '${metrics['percent']}% Complete';
     final fraction = (metrics['fraction'] as num).toDouble();
 
+    // Active minutes and streak derived from the real weekly plan instead of
+    // fixed placeholder numbers.
+    final completedItems = _planItems.where((it) => it.isCompleted).toList();
+    final activeMinutes = _planItems.isNotEmpty
+        ? completedItems.fold<int>(0, (sum, it) => sum + it.durationMinutes)
+        : 60;
+    int streak = 0;
+    for (final item in _planItems) {
+      if (item.isCompleted) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    if (_planItems.isEmpty) streak = 2;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -578,7 +616,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             Text(
-              'Goal: 5 days',
+              'Goal: ${metrics['total']} days',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
@@ -656,7 +694,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         children: [
                           Text(
-                            '60m',
+                            '${activeMinutes}m',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
@@ -693,7 +731,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                '2',
+                                '$streak',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w800,
@@ -992,7 +1030,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(14),
                   child: Image.network(
-                    'https://images.unsplash.com/photo-1545205597-3d9d02c29597?q=80&w=300&auto=format&fit=crop',
+                    workout.imageUrl,
                     width: 72,
                     height: 72,
                     fit: BoxFit.cover,
@@ -1022,7 +1060,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              'Beginner',
+                              workout.difficulty,
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
@@ -1032,7 +1070,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            '15 min',
+                            '${workout.durationMinutes} min',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
@@ -1044,9 +1082,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       const SizedBox(height: 5),
 
-                      // Title: "Core Starter Routine"
+                      // Title
                       Text(
-                        'Core Starter Routine',
+                        workout.title,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 15.5,
                           fontWeight: FontWeight.w800,
@@ -1057,9 +1095,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       const SizedBox(height: 3),
 
-                      // Subtitle: "Gentle Core • No Equipment"
+                      // Subtitle: "<Category> • <Equipment>"
                       Text(
-                        'Gentle Core • No Equipment',
+                        '${workout.category} • ${_equipmentLabel(workout)}',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,

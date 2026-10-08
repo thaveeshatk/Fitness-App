@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/services/firebase_service.dart';
+import '../../../auth/data/services/auth_service.dart';
 import '../models/workout_model.dart';
 import '../repositories/workout_repository.dart';
 
@@ -65,7 +66,7 @@ class WorkoutService {
     ),
   ];
 
-  /// Fetches custom user workouts from Firestore or in-memory fallback.
+  /// Fetches the signed-in user's own custom workouts from Firestore, or in-memory fallback.
   static Future<List<WorkoutModel>> getCustomWorkouts() async {
     if (!FirebaseService.isInitialized) {
       return List.unmodifiable(_inMemoryCustomWorkouts);
@@ -74,6 +75,7 @@ class WorkoutService {
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection(_collection)
+          .where('ownerId', isEqualTo: AuthService.currentUser.uid)
           .get();
 
       if (snapshot.docs.isNotEmpty) {
@@ -130,7 +132,10 @@ class WorkoutService {
         await FirebaseFirestore.instance
             .collection(_collection)
             .doc(workoutId)
-            .set(readyWorkout.toMap());
+            .set({
+          ...readyWorkout.toMap(),
+          'ownerId': AuthService.currentUser.uid,
+        });
 
         developer.log('Custom workout created in Firestore: $workoutId', name: 'WorkoutService');
       } catch (e, stack) {
@@ -165,7 +170,10 @@ class WorkoutService {
         await FirebaseFirestore.instance
             .collection(_collection)
             .doc(workout.id)
-            .set(workout.toMap(), SetOptions(merge: true));
+            .set({
+          ...workout.toMap(),
+          'ownerId': AuthService.currentUser.uid,
+        }, SetOptions(merge: true));
 
         developer.log('Custom workout updated in Firestore: ${workout.id}', name: 'WorkoutService');
       } catch (e, stack) {

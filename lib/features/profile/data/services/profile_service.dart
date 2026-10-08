@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/services/firebase_service.dart';
+import '../../../auth/data/services/auth_service.dart';
 import '../models/profile_model.dart';
 
 /// Service responsible for persisting and retrieving the user's fitness profile.
@@ -14,8 +15,10 @@ class ProfileService {
   /// Gets the current profile (from cache or initial fallback).
   static ProfileModel get currentProfile => _cachedProfile ?? ProfileModel.initial();
 
-  /// Saves the profile to Firestore under an anonymous/guest document ID and updates cache.
-  static Future<void> saveProfile(ProfileModel profile, {String docId = 'guest'}) async {
+  /// Saves the profile to Firestore under the signed-in user's own document and updates cache.
+  /// Defaults to the current user's uid so each user's profile is kept separate.
+  static Future<void> saveProfile(ProfileModel profile, {String? docId}) async {
+    final resolvedDocId = docId ?? AuthService.currentUser.uid;
     _cachedProfile = profile;
 
     if (!FirebaseService.isInitialized) {
@@ -31,10 +34,10 @@ class ProfileService {
     try {
       await FirebaseFirestore.instance
           .collection(_collection)
-          .doc(docId)
+          .doc(resolvedDocId)
           .set(profile.toMap(), SetOptions(merge: true));
 
-      developer.log('Profile saved successfully for doc: $docId', name: 'ProfileService');
+      developer.log('Profile saved successfully for doc: $resolvedDocId', name: 'ProfileService');
     } catch (e, stack) {
       developer.log('Failed to save profile: $e', name: 'ProfileService', error: e, stackTrace: stack);
       rethrow;
@@ -42,13 +45,15 @@ class ProfileService {
   }
 
   /// Loads profile from Firestore if available, otherwise returns cached.
-  static Future<ProfileModel> getProfile({String docId = 'guest'}) async {
+  /// Defaults to the current user's uid so each user gets their own profile back.
+  static Future<ProfileModel> getProfile({String? docId}) async {
     if (!FirebaseService.isInitialized) {
       return currentProfile;
     }
 
+    final resolvedDocId = docId ?? AuthService.currentUser.uid;
     try {
-      final doc = await FirebaseFirestore.instance.collection(_collection).doc(docId).get();
+      final doc = await FirebaseFirestore.instance.collection(_collection).doc(resolvedDocId).get();
       if (doc.exists && doc.data() != null) {
         _cachedProfile = ProfileModel.fromMap(doc.data()!);
         return _cachedProfile!;

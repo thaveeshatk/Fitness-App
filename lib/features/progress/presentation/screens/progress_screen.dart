@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/asset_paths.dart';
 import '../../data/models/progress_data.dart';
 import '../../data/services/progress_service.dart';
+import '../../../workouts/data/services/workout_log_service.dart';
 import 'history_screen.dart';
 
 /// Progress Tracker Screen
@@ -82,41 +83,46 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Refresh data in case profile was updated in another tab
-    _data = ProgressService.getProgressData(_selectedTimeframe);
+    return ListenableBuilder(
+      listenable: WorkoutLogService.instance,
+      builder: (context, _) {
+        // Refresh data in case workout was completed or profile was updated
+        _data = ProgressService.getProgressData(_selectedTimeframe);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTopHeader(),
-              const SizedBox(height: 16),
-              _buildSegmentedFilter(),
-              const SizedBox(height: 14),
-              _buildRoutineCapsuleBadge(),
-              const SizedBox(height: 14),
-              _buildStatsCardsRow(),
-              const SizedBox(height: 12),
-              _buildEnergyExpendedCard(),
-              const SizedBox(height: 14),
-              _buildHabitHealthCard(),
-              const SizedBox(height: 14),
-              _buildDailyActivityCard(),
-              const SizedBox(height: 14),
-              _buildMilestoneJourneyCard(),
-              const SizedBox(height: 14),
-              _buildDailyReflectionCard(),
-              const SizedBox(height: 24),
-            ],
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTopHeader(),
+                  const SizedBox(height: 16),
+                  _buildSegmentedFilter(),
+                  const SizedBox(height: 14),
+                  _buildRoutineCapsuleBadge(),
+                  const SizedBox(height: 14),
+                  _buildStatsCardsRow(),
+                  const SizedBox(height: 12),
+                  _buildEnergyExpendedCard(),
+                  const SizedBox(height: 14),
+                  _buildHabitHealthCard(),
+                  const SizedBox(height: 14),
+                  _buildDailyActivityCard(),
+                  const SizedBox(height: 14),
+                  _buildMilestoneJourneyCard(),
+                  const SizedBox(height: 14),
+                  _buildDailyReflectionCard(),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -782,14 +788,27 @@ class _ProgressScreenState extends State<ProgressScreen> {
           ),
           const SizedBox(height: 22),
           // 7-day bar chart
-          SizedBox(
-            height: 130,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: _data.dailyActivities.map((day) => _buildDayBar(day)).toList(),
-            ),
-          ),
+          _data.dailyActivities.isEmpty
+              ? Container(
+                  height: 120,
+                  alignment: Alignment.center,
+                  child: Text(
+                    'No activity recorded for this timeframe.',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                )
+              : SizedBox(
+                  height: 172,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: _data.dailyActivities.map((day) => _buildDayBar(day)).toList(),
+                  ),
+                ),
           const SizedBox(height: 16),
           // Bottom banner: gentle stretch day note
           Container(
@@ -847,15 +866,16 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _buildDayBar(DailyActivityItem day) {
-    const double maxBarHeight = 72.0;
+    const double maxBarHeight = 60.0;
     final maxMinutes = _data.dailyActivities
         .map((d) => d.minutes)
         .fold(1, (a, b) => a > b ? a : b);
     final double barHeight = day.isRest
         ? 5.0
-        : ((day.minutes / maxMinutes) * maxBarHeight).clamp(12.0, maxBarHeight);
+        : ((day.minutes / maxMinutes) * maxBarHeight).clamp(10.0, maxBarHeight);
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         // Tag badge (Today or Plan)

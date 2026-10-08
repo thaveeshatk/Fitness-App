@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/asset_paths.dart';
+import '../../../workouts/data/models/workout_session.dart';
+import '../../../workouts/data/services/workout_log_service.dart';
 import 'goals_screen.dart';
 
 // ── Data model for a single workout history entry ────────────────────────────
@@ -30,109 +32,6 @@ class WorkoutHistoryEntry {
   });
 }
 
-// ── Full dataset (September routine — 14 sessions) ───────────────────────────
-const _allWorkouts = <WorkoutHistoryEntry>[
-  WorkoutHistoryEntry(
-    date: 'THU, 18 SEP',
-    title: 'Full Body Strength',
-    duration: '25 min',
-    kcal: '180 kcal',
-    category: 'Strength',
-  ),
-  WorkoutHistoryEntry(
-    date: 'WED, 17 SEP',
-    title: 'Gentle Cardio Blast',
-    duration: '20 min',
-    kcal: '145 kcal',
-    category: 'Cardio',
-  ),
-  WorkoutHistoryEntry(
-    date: 'TUE, 16 SEP',
-    title: 'Morning Yoga Flow',
-    duration: '18 min',
-    kcal: '80 kcal',
-    category: 'Mobility',
-  ),
-  WorkoutHistoryEntry(
-    date: 'MON, 15 SEP',
-    title: 'Upper Body Light Strength',
-    duration: '20 min',
-    kcal: '130 kcal',
-    category: 'Strength',
-  ),
-  WorkoutHistoryEntry(
-    date: 'SAT, 13 SEP',
-    title: 'Morning Mobility & Core',
-    duration: '15 min',
-    kcal: '95 kcal',
-    category: 'Mobility',
-  ),
-  WorkoutHistoryEntry(
-    date: 'FRI, 12 SEP',
-    title: 'Interval Run',
-    duration: '22 min',
-    kcal: '210 kcal',
-    category: 'Cardio',
-  ),
-  WorkoutHistoryEntry(
-    date: 'THU, 11 SEP',
-    title: 'Rest & Active Recovery',
-    duration: '10 min',
-    kcal: '45 kcal',
-    category: 'Recovery',
-    isRest: true,
-  ),
-  WorkoutHistoryEntry(
-    date: 'WED, 10 SEP',
-    title: 'Lower Body Strength',
-    duration: '28 min',
-    kcal: '195 kcal',
-    category: 'Strength',
-  ),
-  WorkoutHistoryEntry(
-    date: 'TUE, 9 SEP',
-    title: 'Hip & Spine Mobility',
-    duration: '20 min',
-    kcal: '70 kcal',
-    category: 'Mobility',
-  ),
-  WorkoutHistoryEntry(
-    date: 'MON, 8 SEP',
-    title: 'Power Walk Cardio',
-    duration: '30 min',
-    kcal: '165 kcal',
-    category: 'Cardio',
-  ),
-  WorkoutHistoryEntry(
-    date: 'SAT, 6 SEP',
-    title: 'Core & Shoulders',
-    duration: '22 min',
-    kcal: '140 kcal',
-    category: 'Strength',
-  ),
-  WorkoutHistoryEntry(
-    date: 'FRI, 5 SEP',
-    title: 'Stretching & Breathwork',
-    duration: '15 min',
-    kcal: '55 kcal',
-    category: 'Mobility',
-  ),
-  WorkoutHistoryEntry(
-    date: 'WED, 3 SEP',
-    title: 'HIIT Circuit',
-    duration: '20 min',
-    kcal: '220 kcal',
-    category: 'Cardio',
-  ),
-  WorkoutHistoryEntry(
-    date: 'MON, 1 SEP',
-    title: 'Full Body Foundation',
-    duration: '25 min',
-    kcal: '175 kcal',
-    category: 'Strength',
-  ),
-];
-
 // ── Screen ───────────────────────────────────────────────────────────────────
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -147,107 +46,126 @@ class _HistoryScreenState extends State<HistoryScreen> {
   static const Color _mintGreenTint = Color(0xFFE6FAF3);
   static const Color _darkTeal = Color(0xFF0A4D4E);
 
+  static const _days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+  static const _months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
   String _selectedFilter = 'All';
 
-  List<WorkoutHistoryEntry> get _filteredWorkouts {
-    if (_selectedFilter == 'All') return _allWorkouts;
-    return _allWorkouts
-        .where((w) => w.category == _selectedFilter)
-        .toList();
+  String _formatSessionDate(DateTime dt) {
+    final dayName = _days[dt.weekday - 1];
+    final monthName = _months[dt.month - 1];
+    return '$dayName, ${dt.day} $monthName';
+  }
+
+  bool _matchesCategory(String sessionCategory, String filter) {
+    if (filter == 'All') return true;
+    final cat = sessionCategory.toLowerCase();
+    final f = filter.toLowerCase();
+    if (f == 'cardio') {
+      return cat.contains('cardio') || cat.contains('hiit') || cat.contains('run');
+    }
+    if (f == 'mobility') {
+      return cat.contains('mobility') || cat.contains('yoga') || cat.contains('stretch') || cat.contains('flex');
+    }
+    if (f == 'strength') {
+      return cat.contains('strength') || cat.contains('power') || cat.contains('body') || cat.contains('core');
+    }
+    return cat == f;
+  }
+
+  List<WorkoutHistoryEntry> _getFilteredEntries(List<WorkoutSession> sessions) {
+    final filtered = sessions.where((s) => _matchesCategory(s.category, _selectedFilter));
+    return filtered.map((s) {
+      return WorkoutHistoryEntry(
+        date: _formatSessionDate(s.endTime),
+        title: s.title,
+        duration: '${s.durationMinutes} min',
+        kcal: '${s.calories} kcal',
+        category: s.category,
+      );
+    }).toList();
   }
 
   // Category → accent colour mapping
   Color _categoryColor(String category) {
-    switch (category) {
-      case 'Strength':
-        return const Color(0xFF6366F1); // indigo
-      case 'Cardio':
-        return const Color(0xFFEF4444); // red-orange
-      case 'Mobility':
-        return const Color(0xFF10B981); // emerald
-      case 'Recovery':
-        return const Color(0xFF8B5CF6); // violet
-      default:
-        return _primaryTeal;
-    }
+    final cat = category.toLowerCase();
+    if (cat.contains('strength')) return const Color(0xFF6366F1); // indigo
+    if (cat.contains('cardio') || cat.contains('hiit')) return const Color(0xFFEF4444); // red-orange
+    if (cat.contains('mobility') || cat.contains('yoga')) return const Color(0xFF10B981); // emerald
+    if (cat.contains('recovery')) return const Color(0xFF8B5CF6); // violet
+    return _primaryTeal;
   }
 
   Color _categoryBg(String category) {
-    switch (category) {
-      case 'Strength':
-        return const Color(0xFFEEF2FF);
-      case 'Cardio':
-        return const Color(0xFFFEE2E2);
-      case 'Mobility':
-        return const Color(0xFFD1FAE5);
-      case 'Recovery':
-        return const Color(0xFFEDE9FE);
-      default:
-        return _mintGreenTint;
-    }
+    final cat = category.toLowerCase();
+    if (cat.contains('strength')) return const Color(0xFFEEF2FF);
+    if (cat.contains('cardio') || cat.contains('hiit')) return const Color(0xFFFEE2E2);
+    if (cat.contains('mobility') || cat.contains('yoga')) return const Color(0xFFD1FAE5);
+    if (cat.contains('recovery')) return const Color(0xFFEDE9FE);
+    return _mintGreenTint;
   }
 
   IconData _categoryIcon(String category) {
-    switch (category) {
-      case 'Strength':
-        return Icons.fitness_center_rounded;
-      case 'Cardio':
-        return Icons.directions_run_rounded;
-      case 'Mobility':
-        return Icons.self_improvement_rounded;
-      case 'Recovery':
-        return Icons.spa_rounded;
-      default:
-        return Icons.sports_gymnastics_rounded;
-    }
+    final cat = category.toLowerCase();
+    if (cat.contains('strength')) return Icons.fitness_center_rounded;
+    if (cat.contains('cardio') || cat.contains('hiit')) return Icons.directions_run_rounded;
+    if (cat.contains('mobility') || cat.contains('yoga')) return Icons.self_improvement_rounded;
+    if (cat.contains('recovery')) return Icons.spa_rounded;
+    return Icons.sports_gymnastics_rounded;
   }
 
   @override
   Widget build(BuildContext context) {
-    final filtered = _filteredWorkouts;
+    return ListenableBuilder(
+      listenable: WorkoutLogService.instance,
+      builder: (context, _) {
+        final allSessions = WorkoutLogService.instance.sessions;
+        final filteredEntries = _getFilteredEntries(allSessions);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-              child: _buildTopHeader(context),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 12),
-                    _buildBanner(context),
-                    const SizedBox(height: 24),
-                    _buildFilters(),
-                    const SizedBox(height: 20),
-                    _buildHistoryList(filtered),
-                    const SizedBox(height: 24),
-                    Center(
-                      child: Text(
-                        'Consistency beats intensity. Every session counts!',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-                  ],
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                  child: _buildTopHeader(context),
                 ),
-              ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 12),
+                        _buildBanner(context, allSessions),
+                        const SizedBox(height: 24),
+                        _buildFilters(allSessions),
+                        const SizedBox(height: 20),
+                        _buildHistoryList(filteredEntries),
+                        const SizedBox(height: 24),
+                        Center(
+                          child: Text(
+                            'Consistency beats intensity. Every session counts!',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -311,7 +229,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildBanner(BuildContext context) {
+  Widget _buildBanner(BuildContext context, List<WorkoutSession> sessions) {
+    final totalCount = sessions.length;
+    final totalMinutes = sessions.fold(0, (sum, s) => sum + s.durationMinutes);
+    final monthName = _months[DateTime.now().month - 1];
+
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
@@ -342,7 +264,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         const Icon(Icons.calendar_today_rounded, size: 10, color: _primaryTeal),
                         const SizedBox(width: 4),
                         Text(
-                          'SEPTEMBER ROUTINE',
+                          '$monthName ROUTINE',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 9,
                             fontWeight: FontWeight.w800,
@@ -355,7 +277,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '${_allWorkouts.length} workouts completed',
+                    totalCount == 1 ? '1 workout completed' : '$totalCount workouts completed',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
@@ -368,7 +290,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       const Icon(Icons.timer_outlined, size: 14, color: _primaryTeal),
                       const SizedBox(width: 4),
                       Text(
-                        '350 active mins\nlogged',
+                        '$totalMinutes active mins\nlogged',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -382,7 +304,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       const Icon(Icons.trending_up_rounded, size: 14, color: _primaryTeal),
                       const SizedBox(width: 4),
                       Text(
-                        'Steady\nmomentum',
+                        totalCount > 0 ? 'Steady\nmomentum' : 'Start your\njourney',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -413,30 +335,30 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildFilters() {
+  Widget _buildFilters(List<WorkoutSession> sessions) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: Row(
         children: [
-          _filterPill('All', Icons.grid_view_rounded),
+          _filterPill('All', Icons.grid_view_rounded, sessions),
           const SizedBox(width: 10),
-          _filterPill('Strength', Icons.fitness_center_rounded),
+          _filterPill('Strength', Icons.fitness_center_rounded, sessions),
           const SizedBox(width: 10),
-          _filterPill('Cardio', Icons.directions_run_rounded),
+          _filterPill('Cardio', Icons.directions_run_rounded, sessions),
           const SizedBox(width: 10),
-          _filterPill('Mobility', Icons.self_improvement_rounded),
+          _filterPill('Mobility', Icons.self_improvement_rounded, sessions),
         ],
       ),
     );
   }
 
-  Widget _filterPill(String title, IconData icon) {
+  Widget _filterPill(String title, IconData icon, List<WorkoutSession> sessions) {
     final isSelected = _selectedFilter == title;
     // Count matching items for the badge
     final count = title == 'All'
-        ? _allWorkouts.length
-        : _allWorkouts.where((w) => w.category == title).length;
+        ? sessions.length
+        : sessions.where((w) => _matchesCategory(w.category, title)).length;
 
     return GestureDetector(
       onTap: () {

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../data/models/workout_model.dart';
+import '../../data/models/workout_session.dart';
+import '../../data/services/workout_log_service.dart';
 import 'exercise_guidance_screen.dart';
 import 'workout_complete_screen.dart';
 
@@ -28,9 +30,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
   final int _restDurationSeconds = 30; // Standard 30-sec rest between sets
   Timer? _timer;
 
+  late final DateTime _sessionStartTime;
+  bool _hasSavedSession = false;
+
   @override
   void initState() {
     super.initState();
+    _sessionStartTime = DateTime.now();
     if (widget.workout.exercises.isNotEmpty) {
       final firstEx = widget.workout.exercises.first;
       _totalIntervalSeconds = _calculateExerciseInterval(firstEx);
@@ -157,8 +163,62 @@ class _ActivityScreenState extends State<ActivityScreen> {
     }
   }
 
+  void _finishSession() {
+    if (_hasSavedSession) return;
+    _hasSavedSession = true;
+    _timer?.cancel();
+
+    final now = DateTime.now();
+    final elapsedSec = _elapsedSeconds;
+    final durationMinutes = (elapsedSec / 60).ceil();
+    final activeMinutes = (elapsedSec / 60).floor();
+
+    // Calculate real scaled calories based on actual vs planned duration
+    final plannedDurationSeconds = (widget.workout.durationMinutes * 60);
+    int calculatedCalories = 0;
+    if (plannedDurationSeconds > 0 && elapsedSec > 0) {
+      calculatedCalories = ((widget.workout.calories * (elapsedSec / plannedDurationSeconds))).round();
+    } else if (elapsedSec > 0) {
+      calculatedCalories = (elapsedSec * (widget.workout.calories / 1200)).round().clamp(1, 9999);
+    }
+
+    final session = WorkoutSession(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      title: widget.workout.title,
+      category: widget.workout.category,
+      startTime: _sessionStartTime,
+      endTime: now,
+      durationSeconds: elapsedSec,
+      calories: calculatedCalories,
+      exercisesCompleted: _currentExerciseIndex + 1,
+      coachName: widget.workout.coach,
+      coachAvatar: widget.workout.coachAvatar,
+    );
+
+    // Save session to local storage & notify listeners
+    WorkoutLogService.instance.addSession(session);
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => WorkoutCompleteScreen(
+          workoutTitle: widget.workout.title,
+          durationMinutes: durationMinutes,
+          activeMinutes: activeMinutes,
+          caloriesBurned: calculatedCalories,
+          coachName: widget.workout.coach,
+          coachAvatar: widget.workout.coachAvatar,
+        ),
+      ),
+    );
+  }
+
   void _showCompletionDialog() {
     _timer?.cancel();
+    final plannedDurationSeconds = (widget.workout.durationMinutes * 60);
+    final calculatedCalories = (plannedDurationSeconds > 0 && _elapsedSeconds > 0)
+        ? ((widget.workout.calories * (_elapsedSeconds / plannedDurationSeconds))).round()
+        : widget.workout.calories;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -187,7 +247,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'You successfully completed all 6 exercises in "${widget.workout.title}".',
+              'You successfully completed all ${widget.workout.exercises.length} exercises in "${widget.workout.title}".',
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
@@ -199,7 +259,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildStatPill('TIME', '${(_elapsedSeconds / 60).floor()}m ${(_elapsedSeconds % 60)}s'),
-                _buildStatPill('CALORIES', '~${widget.workout.calories} kcal'),
+                _buildStatPill('CALORIES', '~$calculatedCalories kcal'),
               ],
             ),
             const SizedBox(height: 24),
@@ -214,18 +274,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 ),
                 onPressed: () {
                   Navigator.of(ctx).pop(); // Close dialog
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (_) => WorkoutCompleteScreen(
-                        workoutTitle: widget.workout.title,
-                        durationMinutes: (_elapsedSeconds / 60).ceil() > 0 ? (_elapsedSeconds / 60).ceil() : 25,
-                        activeMinutes: (_elapsedSeconds / 60).floor() > 0 ? (_elapsedSeconds / 60).floor() : 22,
-                        caloriesBurned: widget.workout.calories,
-                        coachName: widget.workout.coach,
-                        coachAvatar: widget.workout.coachAvatar,
-                      ),
-                    ),
-                  );
+                  _finishSession();
                 },
                 child: Text(
                   'Finish & Return',
@@ -374,18 +423,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         ),
                         onPressed: () {
                           Navigator.of(ctx).pop();
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (_) => WorkoutCompleteScreen(
-                                workoutTitle: widget.workout.title,
-                                durationMinutes: (_elapsedSeconds / 60).ceil() > 0 ? (_elapsedSeconds / 60).ceil() : 25,
-                                activeMinutes: (_elapsedSeconds / 60).floor() > 0 ? (_elapsedSeconds / 60).floor() : 22,
-                                caloriesBurned: widget.workout.calories,
-                                coachName: widget.workout.coach,
-                                coachAvatar: widget.workout.coachAvatar,
-                              ),
-                            ),
-                          );
+                          _finishSession();
                         },
                         child: Text(
                           'End Session',

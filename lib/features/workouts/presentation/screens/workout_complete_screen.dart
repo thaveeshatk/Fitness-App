@@ -152,8 +152,8 @@ class WorkoutCompleteScreen extends StatelessWidget {
                       ),
                       _buildStatCard(
                         title: 'HEART RATE',
-                        value: '$averageHeartRate bpm',
-                        subtitle: 'Moderate intensity',
+                        value: averageHeartRate > 0 ? '$averageHeartRate bpm' : '--',
+                        subtitle: averageHeartRate > 0 ? 'Moderate intensity' : 'No sensor connected',
                         icon: Icons.favorite_border_rounded,
                         iconBgColor: const Color(0xFFFFE4E6),
                         iconColor: const Color(0xFFE11D48),
@@ -267,10 +267,9 @@ class WorkoutCompleteScreen extends StatelessWidget {
 
   /// Weekly Goal Card matching Figma design
   Widget _buildWeeklyGoalCard(ProgressData progressData) {
-    // Dynamic progress values with defaults matching Figma 60% (3/5)
-    final completed = progressData.habitCompletedDays > 0 ? progressData.habitCompletedDays : 3;
-    final total = progressData.habitScheduledDays > 0 ? progressData.habitScheduledDays : 5;
-    final percent = ((completed / total) * 100).toInt();
+    final completed = progressData.completedWorkouts;
+    final total = progressData.targetWorkouts > 0 ? progressData.targetWorkouts : 3;
+    final percent = ((completed / total) * 100).toInt().clamp(0, 100);
 
     return Container(
       width: double.infinity,
@@ -328,20 +327,23 @@ class WorkoutCompleteScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-
-          const SizedBox(height: 16),
           Row(
-            children: [
-              _buildDaySegment('Mon', true),
-              const SizedBox(width: 6),
-              _buildDaySegment('Tue', true),
-              const SizedBox(width: 6),
-              _buildDaySegment('Today', true, isToday: true),
-              const SizedBox(width: 6),
-              _buildDaySegment('Fri', false),
-              const SizedBox(width: 6),
-              _buildDaySegment('Sun', false),
-            ],
+            children: progressData.dailyActivities.isNotEmpty
+                ? progressData.dailyActivities.map((day) {
+                    return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        child: _buildDaySegment(day.dayName, day.minutes > 0, isToday: day.isToday),
+                      ),
+                    );
+                  }).toList()
+                : [
+                    _buildDaySegment('Mon', false),
+                    const SizedBox(width: 6),
+                    _buildDaySegment('Wed', false),
+                    const SizedBox(width: 6),
+                    _buildDaySegment('Fri', false),
+                  ],
           ),
         ],
       ),

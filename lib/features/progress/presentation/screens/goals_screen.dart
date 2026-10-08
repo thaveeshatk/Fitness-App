@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/asset_paths.dart';
+import '../../../workouts/data/services/workout_log_service.dart';
+import '../../../profile/data/services/profile_service.dart';
 
 class GoalsScreen extends StatelessWidget {
   const GoalsScreen({super.key});
@@ -14,67 +15,118 @@ class GoalsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-              child: _buildTopHeader(context),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 12),
-                    _buildGreeting(),
-                    const SizedBox(height: 20),
-                    _buildMainObjectiveCard(),
-                    const SizedBox(height: 16),
-                    _buildStreakCard(),
-                    const SizedBox(height: 24),
-                    _buildSectionHeader('Active Challenges', '2 Ongoing'),
-                    const SizedBox(height: 16),
-                    _buildChallengeCard(
-                      title: 'Consistency Starter',
-                      subtitle: 'Work out 3 days in a row',
-                      icon: Icons.repeat_rounded,
-                      iconBg: _mintGreenTint,
-                      iconColor: _primaryTeal,
-                      status: 'In Progress',
-                      progress: 0.66,
-                      progressText: '2 / 3 days (66%)',
-                    ),
-                    const SizedBox(height: 12),
-                    _buildChallengeCard(
-                      title: 'Weekend Warrior',
-                      subtitle: 'Complete 1 weekend mobility session',
-                      icon: Icons.self_improvement_rounded,
-                      iconBg: const Color(0xFFFEF3C7),
-                      iconColor: const Color(0xFFD97706),
-                      status: 'upcoming',
-                      rewardText: 'Reward: Consistency Badge',
-                      unlocksText: 'Unlocks Sat',
-                    ),
-                    const SizedBox(height: 24),
-                    _buildSectionHeader('Achievements & Badges', 'View All'),
-                    const SizedBox(height: 16),
-                    _buildBadgesGrid(),
-                    const SizedBox(height: 24),
-                    _buildGentleReminder(),
-                    const SizedBox(height: 40),
-                  ],
+    return ListenableBuilder(
+      listenable: WorkoutLogService.instance,
+      builder: (context, _) {
+        final sessions = WorkoutLogService.instance.sessions;
+        final profile = ProfileService.currentProfile;
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+        final startOfWeek = today.subtract(Duration(days: now.weekday - 1));
+        final endOfWeek = startOfWeek.add(const Duration(days: 7));
+
+        // This week sessions
+        final thisWeekSessions = sessions.where((s) {
+          return !s.endTime.isBefore(startOfWeek) && s.endTime.isBefore(endOfWeek);
+        }).toList();
+
+        final targetWorkouts = profile.weeklyRoutineDays.isNotEmpty ? profile.weeklyRoutineDays.length : 3;
+        final completedThisWeek = thisWeekSessions.length;
+        final weekPercent = targetWorkouts > 0
+            ? ((completedThisWeek / targetWorkouts) * 100).round().clamp(0, 100)
+            : 0;
+
+        final streakDays = WorkoutLogService.instance.getStreakDays(now);
+        final totalSessions = sessions.length;
+
+        // Day segment completed map for Mon..Sun (1..7)
+        final List<bool> daySegments = List.generate(7, (index) {
+          final dayDate = startOfWeek.add(Duration(days: index));
+          return sessions.any((s) {
+            final sDate = DateTime(s.endTime.year, s.endTime.month, s.endTime.day);
+            return sDate == dayDate;
+          });
+        });
+
+        final daysLeftInWeek = 7 - now.weekday;
+
+        // Challenges calculations
+        final consistencyProgress = (streakDays / 3.0).clamp(0.0, 1.0);
+        final isConsistencyComplete = streakDays >= 3;
+
+        final hasWeekendWorkout = sessions.any((s) {
+          return s.endTime.weekday == DateTime.saturday || s.endTime.weekday == DateTime.sunday;
+        });
+
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                  child: _buildTopHeader(context),
                 ),
-              ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 12),
+                        _buildGreeting(streakDays),
+                        const SizedBox(height: 20),
+                        _buildMainObjectiveCard(
+                          targetWorkouts: targetWorkouts,
+                          completedWorkouts: completedThisWeek,
+                          percent: weekPercent,
+                          daySegments: daySegments,
+                          daysLeft: daysLeftInWeek,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildStreakCard(streakDays),
+                        const SizedBox(height: 24),
+                        _buildSectionHeader('Active Challenges', '${isConsistencyComplete ? 1 : 2} Ongoing'),
+                        const SizedBox(height: 16),
+                        _buildChallengeCard(
+                          title: 'Consistency Starter',
+                          subtitle: 'Work out 3 days in a row',
+                          icon: Icons.repeat_rounded,
+                          iconBg: _mintGreenTint,
+                          iconColor: _primaryTeal,
+                          status: isConsistencyComplete ? 'Completed' : 'In Progress',
+                          progress: consistencyProgress,
+                          progressText: '$streakDays / 3 days ($weekPercent%)',
+                        ),
+                        const SizedBox(height: 12),
+                        _buildChallengeCard(
+                          title: 'Weekend Warrior',
+                          subtitle: 'Complete 1 weekend session',
+                          icon: Icons.self_improvement_rounded,
+                          iconBg: const Color(0xFFFEF3C7),
+                          iconColor: const Color(0xFFD97706),
+                          status: hasWeekendWorkout ? 'Completed' : 'Upcoming',
+                          rewardText: 'Reward: Consistency Badge',
+                          unlocksText: hasWeekendWorkout ? 'Unlocked!' : 'Unlocks Sat',
+                        ),
+                        const SizedBox(height: 24),
+                        _buildSectionHeader('Achievements & Badges', 'View All'),
+                        const SizedBox(height: 16),
+                        _buildBadgesGrid(totalSessions: totalSessions, streakDays: streakDays),
+                        const SizedBox(height: 24),
+                        _buildGentleReminder(),
+                        const SizedBox(height: 40),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -142,7 +194,8 @@ class GoalsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGreeting() {
+  Widget _buildGreeting(int streak) {
+    final message = streak > 0 ? "You're in the flow!" : "Start your routine today!";
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -161,7 +214,7 @@ class GoalsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              "You're in the flow, Alex!",
+              message,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -185,7 +238,15 @@ class GoalsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMainObjectiveCard() {
+  Widget _buildMainObjectiveCard({
+    required int targetWorkouts,
+    required int completedWorkouts,
+    required int percent,
+    required List<bool> daySegments,
+    required int daysLeft,
+  }) {
+    final dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -233,7 +294,7 @@ class GoalsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Complete 5\nworkouts this week',
+                    'Complete $targetWorkouts\nworkouts this week',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
@@ -247,7 +308,7 @@ class GoalsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '60%',
+                    '$percent%',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 28,
                       fontWeight: FontWeight.w800,
@@ -271,15 +332,9 @@ class GoalsScreen extends StatelessWidget {
           // Segmented progress
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildDaySegment('M', true),
-              _buildDaySegment('T', true),
-              _buildDaySegment('W', true),
-              _buildDaySegment('T', false),
-              _buildDaySegment('F', false),
-              _buildDaySegment('S', false),
-              _buildDaySegment('S', false),
-            ],
+            children: List.generate(7, (i) {
+              return _buildDaySegment(dayLabels[i], daySegments[i]);
+            }),
           ),
           const SizedBox(height: 20),
           Row(
@@ -290,7 +345,7 @@ class GoalsScreen extends StatelessWidget {
                   const Icon(Icons.check_circle_rounded, size: 14, color: _mintGreen),
                   const SizedBox(width: 6),
                   Text(
-                    '3 / 5 workouts completed',
+                    '$completedWorkouts / $targetWorkouts workouts completed',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -304,7 +359,7 @@ class GoalsScreen extends StatelessWidget {
                   Icon(Icons.access_time_rounded, size: 14, color: Colors.white.withOpacity(0.8)),
                   const SizedBox(width: 6),
                   Text(
-                    '2 days left',
+                    '$daysLeft days left',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -346,7 +401,8 @@ class GoalsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStreakCard() {
+  Widget _buildStreakCard(int streak) {
+    final isActive = streak > 0;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -366,11 +422,15 @@ class GoalsScreen extends StatelessWidget {
           Container(
             width: 44,
             height: 44,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFEE2E2),
+            decoration: BoxDecoration(
+              color: isActive ? const Color(0xFFFEE2E2) : const Color(0xFFF1F5F9),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.local_fire_department_rounded, color: Color(0xFFEF4444), size: 24),
+            child: Icon(
+              Icons.local_fire_department_rounded,
+              color: isActive ? const Color(0xFFEF4444) : AppColors.textMuted,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -380,7 +440,7 @@ class GoalsScreen extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      '4-Day Streak',
+                      '$streak-Day Streak',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
@@ -391,15 +451,15 @@ class GoalsScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFEE2E2),
+                        color: isActive ? const Color(0xFFFEE2E2) : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        'Active',
+                        isActive ? 'Active' : 'Start Today',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 9,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFFEF4444),
+                          color: isActive ? const Color(0xFFEF4444) : AppColors.textSecondary,
                         ),
                       ),
                     ),
@@ -407,7 +467,9 @@ class GoalsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Personal best: 5 days. Keep the momentum!',
+                  isActive
+                      ? 'Great dedication! Keep the momentum going.'
+                      : 'Complete a workout today to start your streak!',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     color: AppColors.textSecondary,
@@ -515,7 +577,9 @@ class GoalsScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: status == 'In Progress' ? _mintGreenTint : const Color(0xFFF1F5F9),
+                  color: status == 'Completed'
+                      ? _mintGreenTint
+                      : (status == 'In Progress' ? _mintGreenTint : const Color(0xFFF1F5F9)),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -523,7 +587,7 @@ class GoalsScreen extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
-                    color: status == 'In Progress' ? _primaryTeal : AppColors.textSecondary,
+                    color: status == 'Completed' || status == 'In Progress' ? _primaryTeal : AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -601,19 +665,47 @@ class GoalsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBadgesGrid() {
+  Widget _buildBadgesGrid({required int totalSessions, required int streakDays}) {
+    final firstMilestone = totalSessions >= 1;
+    final streakMaster = streakDays >= 3;
+    final explorer = totalSessions >= 5;
+
     return Row(
       children: [
-        Expanded(child: _badgeItem('First\nMilestone', Icons.stars_rounded, _mintGreen, true)),
+        Expanded(
+          child: _badgeItem(
+            'First\nMilestone',
+            Icons.stars_rounded,
+            _mintGreen,
+            firstMilestone,
+            firstMilestone ? 'Unlocked' : '1 session left',
+          ),
+        ),
         const SizedBox(width: 12),
-        Expanded(child: _badgeItem('Streak\nMaster', Icons.local_fire_department_rounded, const Color(0xFFD97706), true)),
+        Expanded(
+          child: _badgeItem(
+            'Streak\nMaster',
+            Icons.local_fire_department_rounded,
+            const Color(0xFFD97706),
+            streakMaster,
+            streakMaster ? 'Unlocked' : '${3 - streakDays} days left',
+          ),
+        ),
         const SizedBox(width: 12),
-        Expanded(child: _badgeItem('Core\nExplorer', Icons.fitness_center_rounded, AppColors.textMuted, false)),
+        Expanded(
+          child: _badgeItem(
+            'Core\nExplorer',
+            Icons.fitness_center_rounded,
+            const Color(0xFF6366F1),
+            explorer,
+            explorer ? 'Unlocked' : '${5 - totalSessions} left',
+          ),
+        ),
       ],
     );
   }
 
-  Widget _badgeItem(String title, IconData icon, Color color, bool unlocked) {
+  Widget _badgeItem(String title, IconData icon, Color color, bool unlocked, String statusText) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -637,7 +729,7 @@ class GoalsScreen extends StatelessWidget {
               color: unlocked ? color.withOpacity(0.1) : const Color(0xFFF1F5F9),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: Icon(icon, color: unlocked ? color : AppColors.textMuted, size: 24),
           ),
           const SizedBox(height: 12),
           Text(
@@ -657,7 +749,7 @@ class GoalsScreen extends StatelessWidget {
               if (unlocked) const Icon(Icons.check_rounded, size: 10, color: _primaryTeal),
               if (unlocked) const SizedBox(width: 2),
               Text(
-                unlocked ? 'Unlocked' : '1 session left',
+                statusText,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 9,
                   fontWeight: FontWeight.w700,

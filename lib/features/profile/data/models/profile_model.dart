@@ -14,7 +14,7 @@ class ProfileModel {
     required this.goals,
     required this.workoutMinutes,
     required this.equipment,
-    this.weeklyRoutineDays = const ['M', 'W', 'F'],
+    this.weeklyRoutineDays = const ['M1', 'W', 'F'],
     this.preferredStyles = const ['HIIT', 'Yoga', 'Stretching'],
   });
 
@@ -25,7 +25,7 @@ class ProfileModel {
       previousExperience: 'No previous experience',
       goals: ['Weight Loss'],
       workoutMinutes: 20,
-      weeklyRoutineDays: ['M', 'W', 'F'],
+      weeklyRoutineDays: ['M1', 'W', 'F'],
       preferredStyles: ['HIIT', 'Yoga', 'Stretching'],
       equipment: ['Bodyweight Only', 'Yoga / Exercise Mat'],
     );
@@ -47,6 +47,8 @@ class ProfileModel {
 
   /// Factory constructor for reconstructing from a map.
   factory ProfileModel.fromMap(Map<String, dynamic> map) {
+    final rawDays = (map['weeklyRoutineDays'] as List<dynamic>?)?.map((e) => e.toString()).toList();
+    final normalizedDays = rawDays?.map((d) => d == 'M' ? 'M1' : d).toList() ?? ['M1', 'W', 'F'];
     return ProfileModel(
       fitnessLevel: map['fitnessLevel'] as String? ?? 'Beginner',
       previousExperience: map['previousExperience'] as String? ?? 'No previous experience',
@@ -54,8 +56,7 @@ class ProfileModel {
       workoutMinutes: map['workoutMinutes'] as int? ?? 20,
       equipment: (map['equipment'] as List<dynamic>?)?.map((e) => e.toString()).toList() ??
           ['Bodyweight Only', 'Yoga / Exercise Mat'],
-      weeklyRoutineDays: (map['weeklyRoutineDays'] as List<dynamic>?)?.map((e) => e.toString()).toList() ??
-          ['M', 'W', 'F'],
+      weeklyRoutineDays: normalizedDays,
       preferredStyles: (map['preferredStyles'] as List<dynamic>?)?.map((e) => e.toString()).toList() ??
           ['HIIT', 'Yoga', 'Stretching'],
     );

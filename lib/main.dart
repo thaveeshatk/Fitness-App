@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'app.dart';
 import 'core/constants/app_colors.dart';
 import 'core/services/firebase_service.dart';
+import 'features/workouts/data/services/workout_log_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,9 @@ void main() async {
 
   // Initialize Firebase (safely prepared for project services)
   await FirebaseService.initialize();
+
+  // Initialize local workout logs
+  await WorkoutLogService.instance.init();
 
   runApp(const FitOnApp());
 }

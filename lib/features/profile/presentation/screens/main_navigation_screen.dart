@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fitness_app/features/home/presentation/screens/home_screen.dart';
 import 'package:fitness_app/features/plan/presentation/screens/my_plan_screen.dart';
 import 'package:fitness_app/features/workouts/presentation/screens/workouts_screen.dart';
+import 'package:fitness_app/features/progress/presentation/screens/progress_screen.dart';
 import 'profile_preferences_screen.dart';
 
 /// Main navigation shell hosting persistent bottom navigation bar.
@@ -41,10 +42,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             onNavigateToTab: (index) => setState(() => _currentIndex = index),
           ),
           const WorkoutsScreen(),
-          _buildPlaceholderPage('Progress', Icons.bar_chart_outlined),
-          ProfilePreferencesScreen(
-            onBack: () => setState(() => _currentIndex = 0),
-          ),
+          const ProgressScreen(),
+          const ProfilePreferencesScreen(),
         ],
       ),
       bottomNavigationBar: _buildBottomBar(),

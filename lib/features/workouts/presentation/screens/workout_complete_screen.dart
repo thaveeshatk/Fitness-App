@@ -5,6 +5,7 @@ import '../../../profile/presentation/screens/main_navigation_screen.dart';
 import '../../../progress/data/models/progress_data.dart';
 import '../../../progress/data/services/progress_service.dart';
 import '../widgets/celebration_hero_section.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 
 /// Pixel-perfect "Workout Complete" summary screen matching Coach Maya's Figma design.
 class WorkoutCompleteScreen extends StatelessWidget {
@@ -74,20 +75,9 @@ class WorkoutCompleteScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.notifications_none_rounded,
-              color: Color(0xFF334155),
-              size: 22,
-            ),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('No new notifications'),
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            },
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: NotificationBell(size: 24, iconColor: Color(0xFF334155)),
           ),
           const Padding(
             padding: EdgeInsets.only(right: 20, left: 4),

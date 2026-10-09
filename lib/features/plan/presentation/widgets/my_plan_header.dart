@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fitness_app/core/constants/app_colors.dart';
 import 'package:fitness_app/core/widgets/fiton_logo.dart';
 import 'package:fitness_app/core/widgets/user_avatar.dart';
+import 'package:fitness_app/features/notifications/presentation/widgets/notification_bell.dart';
 
 /// Top App Bar / Brand Header for the "My Plan" screen.
 /// Matches the wireframe header:
@@ -58,53 +59,7 @@ class MyPlanHeader extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Notification Bell with badge dot
-                InkWell(
-                  onTap: onNotificationTap ??
-                      () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'You have 1 workout scheduled for today!',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
-                            ),
-                            behavior: SnackBarBehavior.floating,
-                            backgroundColor: const Color(0xFF005953),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        );
-                      },
-                  borderRadius: BorderRadius.circular(20),
-                  child: Padding(
-                    padding: const EdgeInsets.all(6.0),
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        const Icon(
-                          Icons.notifications_none_rounded,
-                          color: Color(0xFF334155),
-                          size: 24,
-                        ),
-                        Positioned(
-                          top: 2,
-                          right: 2,
-                          child: Container(
-                            width: 7,
-                            height: 7,
-                            decoration: const BoxDecoration(
-                              color: AppColors.logoOrange,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                const NotificationBell(),
 
                 const SizedBox(width: 8),
 

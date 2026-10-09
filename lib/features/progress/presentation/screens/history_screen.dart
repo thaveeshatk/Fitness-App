@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/asset_paths.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 import 'goals_screen.dart';
 
 // ── Data model for a single workout history entry ────────────────────────────
@@ -278,16 +279,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
         ),
         const Spacer(),
-        Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.cardBorder),
-          ),
-          child: const Icon(Icons.notifications_none_rounded, size: 20, color: Color(0xFF475569)),
-        ),
+        const NotificationBell(),
         const SizedBox(width: 10),
         Container(
           width: 38,

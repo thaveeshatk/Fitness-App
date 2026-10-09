@@ -12,6 +12,7 @@ import '../../../workouts/presentation/screens/activity_screen.dart';
 import '../../../plan/data/services/plan_service.dart';
 import '../../../plan/data/models/plan_schedule_item.dart';
 import 'package:fitness_app/features/profile/presentation/widgets/profile_photo_picker_dialog.dart';
+import '../../../../features/notifications/presentation/widgets/notification_bell.dart';
 
 /// Screen: Home Dashboard
 /// Faithfully reproduces the provided wireframe pixel-for-pixel:
@@ -163,48 +164,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         const Spacer(),
-        // Notification bell with red dot
-        InkWell(
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'No new notifications. You are on track for today! 🎯',
-                  style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w500),
-                ),
-                backgroundColor: AppColors.primaryTeal,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            );
-          },
-          borderRadius: BorderRadius.circular(20),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(6.0),
-                child: Icon(
-                  Icons.notifications_none_rounded,
-                  color: Color(0xFF334155),
-                  size: 26,
-                ),
-              ),
-              Positioned(
-                top: 6,
-                right: 7,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFF3B30),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        // Notification bell
+        const NotificationBell(),
         const SizedBox(width: 12),
         // User profile avatar
         UserAvatar(

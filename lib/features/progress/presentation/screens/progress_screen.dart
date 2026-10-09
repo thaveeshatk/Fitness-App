@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 import '../../../../core/constants/asset_paths.dart';
 import '../../data/models/progress_data.dart';
 import '../../data/services/progress_service.dart';
@@ -167,44 +168,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
         ),
         const Spacer(),
         // Notification bell
-        Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.cardBorder),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              const Icon(
-                Icons.notifications_none_rounded,
-                size: 20,
-                color: Color(0xFF475569),
-              ),
-              Positioned(
-                top: 9,
-                right: 9,
-                child: Container(
-                  width: 6,
-                  height: 6,
-                  decoration: const BoxDecoration(
-                    color: _mintGreen,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        const NotificationBell(),
         const SizedBox(width: 10),
         // User Avatar
         Container(

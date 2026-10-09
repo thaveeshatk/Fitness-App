@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fitness_app/features/plan/presentation/screens/updated_my_plan_screen.dart';
 import 'package:fitness_app/features/plan/presentation/screens/weekly_schedule_screen.dart';
+import 'package:fitness_app/features/notifications/presentation/widgets/notification_bell.dart';
 
 class AdaptiveDashboardScreen extends StatelessWidget {
   const AdaptiveDashboardScreen({super.key});
@@ -44,10 +45,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () {},
-          ),
+          const NotificationBell(),
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: CircleAvatar(

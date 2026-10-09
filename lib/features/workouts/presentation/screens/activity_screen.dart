@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../data/models/workout_model.dart';
 import 'exercise_guidance_screen.dart';
 import 'workout_complete_screen.dart';
+import '../../../notifications/data/services/notification_service.dart';
 
 class ActivityScreen extends StatefulWidget {
   final WorkoutModel workout;
@@ -213,6 +214,11 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   elevation: 0,
                 ),
                 onPressed: () {
+                  NotificationService.addNotification(
+                    title: 'Workout Complete! 🏆',
+                    message: 'You completed ${widget.workout.title}. Great job!',
+                    category: 'workout_completed',
+                  );
                   Navigator.of(ctx).pop(); // Close dialog
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
@@ -373,6 +379,11 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           ),
                         ),
                         onPressed: () {
+                          NotificationService.addNotification(
+                            title: 'Workout Ended',
+                            message: 'You ended ${widget.workout.title} early.',
+                            category: 'workout_completed',
+                          );
                           Navigator.of(ctx).pop();
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(

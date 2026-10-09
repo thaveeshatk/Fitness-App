@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'app.dart';
 import 'core/constants/app_colors.dart';
 import 'core/services/firebase_service.dart';
+import 'features/notifications/data/services/notification_service.dart';
+import 'features/notifications/data/services/reminder_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +21,10 @@ void main() async {
 
   // Initialize Firebase (safely prepared for project services)
   await FirebaseService.initialize();
+
+  // Initialize notification service
+  NotificationService.initialize();
+  ReminderService.initialize();
 
   runApp(const FitOnApp());
 }

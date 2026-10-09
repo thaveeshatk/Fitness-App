@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fitness_app/features/plan/data/services/plan_service.dart';
 import 'package:fitness_app/features/plan/data/models/plan_schedule_item.dart';
 import 'package:fitness_app/features/workouts/presentation/screens/workout_detail_screen.dart';
+import 'package:fitness_app/features/notifications/presentation/widgets/notification_bell.dart';
 
 class UpdatedMyPlanScreen extends StatefulWidget {
   const UpdatedMyPlanScreen({super.key});
@@ -113,10 +114,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () {},
-          ),
+          const NotificationBell(),
           Padding(
             padding: const EdgeInsets.only(right: 20.0),
             child: CircleAvatar(

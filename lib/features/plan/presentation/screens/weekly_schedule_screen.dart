@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fitness_app/features/plan/data/services/plan_service.dart';
 import 'package:fitness_app/features/plan/presentation/screens/adaptive_dashboard_screen.dart';
+import 'package:fitness_app/features/notifications/data/services/notification_service.dart';
+import 'package:fitness_app/features/notifications/presentation/widgets/notification_bell.dart';
 
 class WeeklyScheduleScreen extends StatefulWidget {
   const WeeklyScheduleScreen({super.key});
@@ -130,10 +132,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () {},
-          ),
+          const NotificationBell(),
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: CircleAvatar(
@@ -702,6 +701,13 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                     await PlanService.saveSchedule(_selectedDays, _time, _isAm);
                     
                     if (!context.mounted) return;
+                    
+                    NotificationService.addNotification(
+                      title: 'Adaptive Plan Updated',
+                      message: 'Your weekly schedule has been optimized based on your preferences.',
+                      category: 'adaptive_plan_update',
+                    );
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Schedule Saved Successfully!')),
                     );

@@ -27,7 +27,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: tealColor,
                 shape: BoxShape.circle,
               ),
@@ -44,14 +44,14 @@ class AdaptiveDashboardScreen extends StatelessWidget {
             ),
           ],
         ),
-        actions: [
-          const NotificationBell(),
+        actions: const [
+          NotificationBell(),
           Padding(
-            padding: const EdgeInsets.only(right: 16.0),
+            padding: EdgeInsets.only(right: 16.0),
             child: CircleAvatar(
               radius: 16,
               backgroundColor: tealColor,
-              child: const Icon(Icons.person, color: Colors.white, size: 18),
+              child: Icon(Icons.person, color: Colors.white, size: 18),
             ),
           ),
         ],
@@ -109,9 +109,9 @@ class AdaptiveDashboardScreen extends StatelessWidget {
 
             // Info Card 1
             Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFFCF3E9),
-                borderRadius: const BorderRadius.only(
+              decoration: const BoxDecoration(
+                color: Color(0xFFFCF3E9),
+                borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(16),
                   topRight: Radius.circular(16),
                 ),
@@ -237,8 +237,8 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                     children: [
                       Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF1F5F9),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.event_busy, color: Color(0xFF94A3B8), size: 16),
@@ -329,7 +329,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: tealColor,
                             shape: BoxShape.circle,
                           ),
@@ -387,7 +387,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                             color: Colors.white,
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.check, color: tealColor, size: 16),
+                          child: const Icon(Icons.check, color: tealColor, size: 16),
                         ),
                       ],
                     ),

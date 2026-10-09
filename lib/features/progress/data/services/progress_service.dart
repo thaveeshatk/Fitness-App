@@ -1,5 +1,4 @@
 import '../models/progress_data.dart';
-import 'dart:math';
 
 class ProgressService {
   static final ProgressService _instance = ProgressService._internal();

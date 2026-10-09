@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/widgets/primary_pill_button.dart';
-import '../../../../core/widgets/user_avatar.dart';
 import '../../../auth/data/services/auth_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -88,7 +87,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 onTap: () {
                   Navigator.pop(context);
                   // For demo, we just cycle through preset avatars
-                  final presets = AuthService.presetAvatars;
+                  const presets = AuthService.presetAvatars;
                   setState(() {
                     _currentPhotoUrl = presets[(presets.indexOf(_currentPhotoUrl ?? '') + 1) % presets.length];
                   });
@@ -144,8 +143,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldPop = await _onWillPop();
+        if (shouldPop && context.mounted) {
+          Navigator.pop(context);
+        }
+      },
       child: Scaffold(
         backgroundColor: const Color(0xFFFAFBFD),
         appBar: AppBar(
@@ -154,7 +160,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           leading: IconButton(
             icon: const Icon(Icons.chevron_left_rounded, color: Color(0xFF334155), size: 28),
             onPressed: () async {
-              if (await _onWillPop()) {
+              if (await _onWillPop() && context.mounted) {
                 Navigator.pop(context);
               }
             },
@@ -192,7 +198,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               border: Border.all(color: Colors.white, width: 3),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withValues(alpha: 0.1),
                                   blurRadius: 10,
                                   offset: const Offset(0, 4),
                                 ),

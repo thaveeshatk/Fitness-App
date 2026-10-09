@@ -74,12 +74,12 @@ class WorkoutCompleteScreen extends StatelessWidget {
             ),
           ],
         ),
-        actions: [
-          const Padding(
+        actions: const [
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: NotificationBell(size: 24, iconColor: Color(0xFF334155)),
           ),
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(right: 20, left: 4),
             child: CircleAvatar(
               radius: 16,

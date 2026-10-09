@@ -50,42 +50,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  Widget _buildPlaceholderPage(String title, IconData icon) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFAFBFD),
-      appBar: AppBar(
-        title: Text(
-          title,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF0F172A),
-          ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 56, color: const Color(0xFF94A3B8)),
-            const SizedBox(height: 16),
-            Text(
-              '$title Screen',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF475569),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildBottomBar() {
     return Container(
       decoration: const BoxDecoration(

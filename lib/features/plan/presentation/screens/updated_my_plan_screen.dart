@@ -68,9 +68,9 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
     const bgLightColor = Color(0xFFF9F9FC);
 
     if (_isLoading) {
-      return Scaffold(
+      return const Scaffold(
         backgroundColor: bgLightColor,
-        body: const Center(child: CircularProgressIndicator(color: Color(0xFF006257))),
+        body: Center(child: CircularProgressIndicator(color: Color(0xFF006257))),
       );
     }
 
@@ -96,7 +96,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: tealColor,
                 shape: BoxShape.circle,
               ),
@@ -113,14 +113,14 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
             ),
           ],
         ),
-        actions: [
-          const NotificationBell(),
+        actions: const [
+          NotificationBell(),
           Padding(
-            padding: const EdgeInsets.only(right: 20.0),
+            padding: EdgeInsets.only(right: 20.0),
             child: CircleAvatar(
               radius: 16,
               backgroundColor: tealColor,
-              child: const Icon(Icons.person, color: Colors.white, size: 18),
+              child: Icon(Icons.person, color: Colors.white, size: 18),
             ),
           ),
         ],
@@ -218,7 +218,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                           Container(
                             width: 8,
                             height: 8,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               color: tealColor,
                               shape: BoxShape.circle,
                             ),

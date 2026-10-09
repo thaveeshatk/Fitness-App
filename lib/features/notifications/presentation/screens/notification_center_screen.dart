@@ -182,11 +182,11 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
             color: notif.isRead ? Colors.white : const Color(0xFFF0FDF4),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: notif.isRead ? Colors.transparent : const Color(0xFF00635A).withOpacity(0.3),
+              color: notif.isRead ? Colors.transparent : const Color(0xFF00635A).withValues(alpha: 0.3),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.03),
+                color: Colors.black.withValues(alpha: 0.03),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -282,7 +282,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: isRead ? const Color(0xFFF1F5F9) : color.withOpacity(0.1),
+        color: isRead ? const Color(0xFFF1F5F9) : color.withValues(alpha: 0.1),
         shape: BoxShape.circle,
       ),
       child: Icon(iconData, color: isRead ? const Color(0xFF94A3B8) : color, size: 20),

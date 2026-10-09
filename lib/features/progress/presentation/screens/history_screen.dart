@@ -314,7 +314,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         decoration: BoxDecoration(
           color: _mintGreenTint,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: _mintGreen.withOpacity(0.3)),
+          border: Border.all(color: _mintGreen.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
@@ -325,7 +325,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -369,7 +369,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      Container(width: 1, height: 24, color: _primaryTeal.withOpacity(0.2)),
+                      Container(width: 1, height: 24, color: _primaryTeal.withValues(alpha: 0.2)),
                       const SizedBox(width: 16),
                       const Icon(Icons.trending_up_rounded, size: 14, color: _primaryTeal),
                       const SizedBox(width: 4),
@@ -394,7 +394,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 color: Colors.white,
                 shape: BoxShape.circle,
                 boxShadow: [
-                  BoxShadow(color: _mintGreen.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4)),
+                  BoxShadow(color: _mintGreen.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4)),
                 ],
               ),
               child: const Icon(Icons.check_rounded, color: _mintGreen, size: 28),
@@ -443,7 +443,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: isSelected ? _primaryTeal : AppColors.cardBorder),
           boxShadow: isSelected
-              ? [BoxShadow(color: _primaryTeal.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 2))]
+              ? [BoxShadow(color: _primaryTeal.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, 2))]
               : [],
         ),
         child: Row(
@@ -462,7 +462,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.white.withOpacity(0.25) : const Color(0xFFF1F5F9),
+                color: isSelected ? Colors.white.withValues(alpha: 0.25) : const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -503,8 +503,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
           Container(
             width: 72,
             height: 72,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF1F5F9),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.search_off_rounded, size: 34, color: AppColors.textMuted),
@@ -546,7 +546,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.cardBorder),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 2)),
+            BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 2)),
           ],
         ),
         child: Row(
@@ -597,7 +597,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 shape: BoxShape.circle,
-                                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4)],
+                                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4)],
                               ),
                               child: Icon(icon, size: 10, color: accentColor),
                             ),
@@ -715,9 +715,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ),
             // Chevron
-            Center(
+            const Center(
               child: Padding(
-                padding: const EdgeInsets.only(right: 12),
+                padding: EdgeInsets.only(right: 12),
                 child: Icon(Icons.chevron_right_rounded, color: AppColors.cardBorder, size: 22),
               ),
             ),

@@ -12,7 +12,7 @@ class NotificationService {
 
   static const String _notificationsCollection = 'notifications';
   static const String _preferencesCollection = 'notification_preferences';
-  static final _uuid = const Uuid();
+  static const _uuid = Uuid();
 
   static final ValueNotifier<List<NotificationModel>> notificationsNotifier = ValueNotifier([]);
   static final ValueNotifier<int> unreadCountNotifier = ValueNotifier(0);
@@ -169,7 +169,9 @@ class NotificationService {
               .collection(_notificationsCollection)
               .doc(notificationId)
               .update({'isRead': true});
-        } catch (e) {}
+        } catch (e) {
+          developer.log('Error marking as read: $e', name: 'NotificationService');
+        }
       }
     }
   }
@@ -193,7 +195,9 @@ class NotificationService {
           batch.update(doc.reference, {'isRead': true});
         }
         await batch.commit();
-      } catch (e) {}
+      } catch (e) {
+        developer.log('Error marking all as read: $e', name: 'NotificationService');
+      }
     }
   }
 
@@ -204,7 +208,9 @@ class NotificationService {
     if (FirebaseService.isInitialized) {
       try {
         await FirebaseFirestore.instance.collection(_notificationsCollection).doc(notificationId).delete();
-      } catch (e) {}
+      } catch (e) {
+        developer.log('Error deleting notification: $e', name: 'NotificationService');
+      }
     }
   }
 
@@ -225,7 +231,9 @@ class NotificationService {
           batch.delete(doc.reference);
         }
         await batch.commit();
-      } catch (e) {}
+      } catch (e) {
+        developer.log('Error clearing notifications: $e', name: 'NotificationService');
+      }
     }
   }
 }

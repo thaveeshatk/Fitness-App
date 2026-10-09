@@ -114,7 +114,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: tealColor,
                 shape: BoxShape.circle,
               ),
@@ -131,14 +131,14 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
             ),
           ],
         ),
-        actions: [
-          const NotificationBell(),
+        actions: const [
+          NotificationBell(),
           Padding(
-            padding: const EdgeInsets.only(right: 16.0),
+            padding: EdgeInsets.only(right: 16.0),
             child: CircleAvatar(
               radius: 16,
               backgroundColor: tealColor,
-              child: const Icon(Icons.person, color: Colors.white, size: 18),
+              child: Icon(Icons.person, color: Colors.white, size: 18),
             ),
           ),
         ],
@@ -248,7 +248,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.calendar_today, color: tealColor, size: 20),
+                          const Icon(Icons.calendar_today, color: tealColor, size: 20),
                           const SizedBox(width: 8),
                           Text(
                             'Choose your workout days',
@@ -398,7 +398,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.access_alarm, color: tealColor, size: 20),
+                          const Icon(Icons.access_alarm, color: tealColor, size: 20),
                           const SizedBox(width: 8),
                           Text(
                             'Daily reminder time',
@@ -439,7 +439,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                               color: Color(0xFFE2EBF5),
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(Icons.nightlight_round, color: tealColor, size: 20),
+                            child: const Icon(Icons.nightlight_round, color: tealColor, size: 20),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -556,7 +556,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                       color: const Color(0xFFE2F3F0),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(Icons.notifications, color: tealColor, size: 20),
+                    child: const Icon(Icons.notifications, color: tealColor, size: 20),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -637,7 +637,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.checklist, color: tealColor, size: 18),
+                          const Icon(Icons.checklist, color: tealColor, size: 18),
                           const SizedBox(width: 6),
                           Text(
                             'ROUTINE RECAP',
@@ -750,7 +750,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
             Center(
               child: TextButton.icon(
                 onPressed: () {},
-                icon: Icon(Icons.sync, color: tealColor, size: 18),
+                icon: const Icon(Icons.sync, color: tealColor, size: 18),
                 label: Text(
                   'Sync with Apple Health / Google Calendar',
                   style: GoogleFonts.plusJakartaSans(

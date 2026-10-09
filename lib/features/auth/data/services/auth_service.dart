@@ -30,7 +30,7 @@ class AuthService {
   ];
 
   /// Updates profile picture URL across the app and notifies all listeners
-  static Future<void> updateProfilePhoto(String newPhotoUrl) async {
+  static Future<void> updateProfilePhoto(String? newPhotoUrl) async {
     final current = _currentUser ?? AuthUser.mockDefault();
     _currentUser = current.copyWith(photoUrl: newPhotoUrl);
     userNotifier.value = _currentUser;
@@ -44,6 +44,46 @@ class AuthService {
         developer.log('Failed updating Firebase user photo: $e', name: 'AuthService');
       }
     }
+  }
+
+  /// Updates profile information including name, email, and optionally photo.
+  static Future<void> updateProfileInfo({
+    required String name,
+    required String email,
+    String? photoUrl,
+  }) async {
+    final current = _currentUser ?? AuthUser.mockDefault();
+    _currentUser = AuthUser(
+      uid: current.uid,
+      name: name,
+      email: email,
+      photoUrl: photoUrl ?? current.photoUrl,
+    );
+    userNotifier.value = _currentUser;
+
+    developer.log('Updated profile info: $name, $email', name: 'AuthService');
+
+    if (FirebaseService.isInitialized) {
+      try {
+        final fbUser = FirebaseAuth.instance.currentUser;
+        if (fbUser != null) {
+          if (name != fbUser.displayName) {
+            await fbUser.updateDisplayName(name);
+          }
+          if (photoUrl != null && photoUrl != fbUser.photoURL) {
+            await fbUser.updatePhotoURL(photoUrl);
+          }
+          if (email != fbUser.email) {
+            await fbUser.verifyBeforeUpdateEmail(email); // Firebase recommended way
+          }
+        }
+      } catch (e) {
+        developer.log('Failed updating Firebase user info: $e', name: 'AuthService');
+      }
+    }
+    
+    // Simulate network delay for local usage
+    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   /// Sign in with Email and Password

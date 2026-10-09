@@ -29,13 +29,16 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   String _selectedDuration = '';
   late String _selectedDifficulty;
   final Set<String> _selectedEquipment = {};
+  bool _hasUserChangedDifficulty = false;
 
   late List<WorkoutModel> _allWorkouts;
 
   @override
   void initState() {
     super.initState();
-    _selectedDifficulty = ProfileService.currentProfile.fitnessLevel;
+    _selectedDifficulty = ProfileService.currentProfile.fitnessLevel.isNotEmpty
+        ? ProfileService.currentProfile.fitnessLevel
+        : 'All';
     _allWorkouts = WorkoutRepository.getMockWorkouts();
     _loadWorkouts();
     WorkoutService.workoutsRevisionNotifier.addListener(_loadWorkouts);
@@ -54,7 +57,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     final workouts = await WorkoutService.getAllWorkouts();
     try {
       final profile = await ProfileService.getProfile();
-      if (mounted && profile.fitnessLevel.isNotEmpty) {
+      if (mounted && profile.fitnessLevel.isNotEmpty && !_hasUserChangedDifficulty) {
         setState(() {
           _allWorkouts = workouts;
           _selectedDifficulty = profile.fitnessLevel;
@@ -219,9 +222,10 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
 
   void _resetFilters() {
     setState(() {
+      _hasUserChangedDifficulty = true;
       _selectedCategory = 'All';
       _selectedDuration = '';
-      _selectedDifficulty = ProfileService.currentProfile.fitnessLevel;
+      _selectedDifficulty = 'All';
       _selectedEquipment.clear();
       _searchController.clear();
     });
@@ -978,7 +982,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _selectedDifficulty = label;
+          _hasUserChangedDifficulty = true;
+          _selectedDifficulty = isSelected ? 'All' : label;
         });
       },
       child: Container(

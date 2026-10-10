@@ -15,7 +15,7 @@ class PlanService {
 
   static const String _completionsCollection = 'plan_completions';
 
-  static List<PlanScheduleItem>? _cachedPlan;
+  static final Map<String, List<PlanScheduleItem>> _planCache = {};
 
   // Simulated database for schedule settings
   static Set<String> _savedDays = {'Mon', 'Wed', 'Fri', 'Sat'};
@@ -40,33 +40,62 @@ class PlanService {
     };
   }
 
-  /// Loads the weekly plan tailored to the user's profile, overlaying any
-  /// completion status the signed-in user has saved in Firestore.
-  static Future<List<PlanScheduleItem>> getWeeklyPlan({bool forceRefresh = false}) async {
-    if (_cachedPlan != null && !forceRefresh) {
-      return _cachedPlan!;
+  /// Clears in-memory plan cache (useful when switching user accounts)
+  static void clearCache() {
+    _planCache.clear();
+  }
+
+  /// Gets the count of plan workouts completed by this user in Firestore
+  static Future<int> getCompletedItemCount({String? uid}) async {
+    final currentUid = uid ?? AuthService.currentUser.uid;
+    if (!FirebaseService.isInitialized) {
+      final cached = _planCache[currentUid];
+      return cached?.where((it) => it.isCompleted).length ?? 0;
     }
 
-    final profile = await ProfileService.getProfile();
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection(_completionsCollection)
+          .where('uid', isEqualTo: currentUid)
+          .get();
+      return snapshot.docs.length;
+    } catch (e) {
+      developer.log('Error counting plan completions: $e', name: 'PlanService');
+      final cached = _planCache[currentUid];
+      return cached?.where((it) => it.isCompleted).length ?? 0;
+    }
+  }
+
+  /// Loads the weekly plan tailored to the user's profile, overlaying any
+  /// completion status the signed-in user has saved in Firestore.
+  static Future<List<PlanScheduleItem>> getWeeklyPlan({String? uid, bool forceRefresh = false}) async {
+    final currentUid = uid ?? AuthService.currentUser.uid;
+    if (_planCache.containsKey(currentUid) && !forceRefresh) {
+      return _planCache[currentUid]!;
+    }
+
+    final profile = await ProfileService.getProfile(docId: currentUid);
     final allWorkouts = WorkoutRepository.getMockWorkouts();
 
     final plan = _buildScheduleFromProfile(profile, allWorkouts);
-    _cachedPlan = await _applyPersistedCompletions(plan);
-    developer.log('Weekly plan loaded: ${_cachedPlan!.length} items', name: 'PlanService');
-    return _cachedPlan!;
+    final enrichedPlan = await _applyPersistedCompletions(plan, currentUid);
+    _planCache[currentUid] = enrichedPlan;
+    developer.log('Weekly plan loaded for $currentUid: ${enrichedPlan.length} items', name: 'PlanService');
+    return enrichedPlan;
   }
 
   /// Reads this user's saved completion flags from Firestore and overlays
   /// them onto the generated plan, so completed-workout state survives app
-  /// restarts once Firebase is connected. Falls back to the plan unchanged
-  /// when Firebase is not initialized.
-  static Future<List<PlanScheduleItem>> _applyPersistedCompletions(List<PlanScheduleItem> plan) async {
+  /// restarts once Firebase is connected.
+  static Future<List<PlanScheduleItem>> _applyPersistedCompletions(
+    List<PlanScheduleItem> plan,
+    String uid,
+  ) async {
     if (!FirebaseService.isInitialized) {
       return plan;
     }
 
     try {
-      final uid = AuthService.currentUser.uid;
       final snapshot = await FirebaseFirestore.instance
           .collection(_completionsCollection)
           .where('uid', isEqualTo: uid)
@@ -76,7 +105,7 @@ class PlanService {
       if (completedIds.isEmpty) return plan;
 
       return plan.map((item) {
-        if (completedIds.contains(item.id) && !item.isCompleted) {
+        if (completedIds.contains(item.id)) {
           return item.copyWith(status: PlanItemStatus.completed);
         }
         return item;
@@ -90,7 +119,6 @@ class PlanService {
   /// Calculates the current progress metrics:
   /// (completedCount, totalCount, progressFraction, remainingCount)
   static Map<String, dynamic> calculateMetrics(List<PlanScheduleItem> items) {
-    // According to wireframe: "3 of 5 completed", "2 sessions to go", 60%
     final completedCount = items.where((it) => it.isCompleted).length;
     final totalCount = items.length;
     final remainingCount = totalCount - completedCount;
@@ -107,26 +135,27 @@ class PlanService {
   }
 
   /// Marks a plan item completed locally and persists it to Firestore for
-  /// the signed-in user, so the status survives across sessions once
-  /// Firebase is connected.
-  static Future<void> markWorkoutCompleted(String itemId) async {
-    if (_cachedPlan == null) return;
-    _cachedPlan = _cachedPlan!.map((item) {
-      if (item.id == itemId) {
-        return item.copyWith(status: PlanItemStatus.completed);
-      }
-      return item;
-    }).toList();
+  /// the signed-in user, so the status survives across sessions.
+  static Future<void> markWorkoutCompleted(String itemId, {String? uid}) async {
+    final currentUid = uid ?? AuthService.currentUser.uid;
+    final plan = _planCache[currentUid];
+    if (plan != null) {
+      _planCache[currentUid] = plan.map((item) {
+        if (item.id == itemId) {
+          return item.copyWith(status: PlanItemStatus.completed);
+        }
+        return item;
+      }).toList();
+    }
 
     if (!FirebaseService.isInitialized) return;
 
     try {
-      final uid = AuthService.currentUser.uid;
       await FirebaseFirestore.instance
           .collection(_completionsCollection)
-          .doc('${uid}_$itemId')
+          .doc('${currentUid}_$itemId')
           .set({
-        'uid': uid,
+        'uid': currentUid,
         'itemId': itemId,
         'completedAt': DateTime.now().toIso8601String(),
       });
@@ -164,13 +193,13 @@ class PlanService {
     final mobilityWorkout = findWorkout('Mobility', titleKeyword: 'Mobility');
 
     return [
-      // 1. Monday 13 (Completed)
+      // 1. Monday
       PlanScheduleItem(
         id: 'plan_mon_13',
         dayLabel: 'MON',
         dayNumber: 13,
-        dateRangeLabel: 'Nov 13 – 19',
-        status: PlanItemStatus.completed,
+        dateRangeLabel: 'Current Week',
+        status: PlanItemStatus.todayReady,
         title: level == 'Advanced' ? 'Full Body Advanced' : 'Full Body Beginner',
         durationMinutes: userMinutes,
         category: 'Strength',
@@ -178,13 +207,13 @@ class PlanService {
         workout: fullBodyWorkout,
       ),
 
-      // 2. Tuesday 14 (Completed Active Rest / Recovery)
+      // 2. Tuesday (Active Rest / Recovery)
       PlanScheduleItem(
         id: 'plan_tue_14',
         dayLabel: 'TUE',
         dayNumber: 14,
-        dateRangeLabel: 'Nov 13 – 19',
-        status: PlanItemStatus.completed,
+        dateRangeLabel: 'Current Week',
+        status: PlanItemStatus.upcoming,
         title: 'Light Core & Walk',
         durationMinutes: 15,
         category: 'Recovery',
@@ -192,13 +221,13 @@ class PlanService {
         workout: mobilityWorkout,
       ),
 
-      // 3. Wednesday 15 (Today • Ready)
+      // 3. Wednesday (Ready)
       PlanScheduleItem(
         id: 'plan_wed_15',
         dayLabel: 'WED',
         dayNumber: 15,
-        dateRangeLabel: 'Nov 13 – 19',
-        status: PlanItemStatus.todayReady,
+        dateRangeLabel: 'Current Week',
+        status: PlanItemStatus.upcoming,
         title: 'Low Impact Cardio',
         durationMinutes: userMinutes,
         category: 'Cardio',
@@ -209,12 +238,12 @@ class PlanService {
         workout: cardioWorkout,
       ),
 
-      // 4. Friday 17 (Upcoming)
+      // 4. Friday (Upcoming)
       PlanScheduleItem(
         id: 'plan_fri_17',
         dayLabel: 'FRI',
         dayNumber: 17,
-        dateRangeLabel: 'Nov 13 – 19',
+        dateRangeLabel: 'Current Week',
         status: PlanItemStatus.upcoming,
         title: 'Beginner Strength',
         durationMinutes: userMinutes,
@@ -223,12 +252,12 @@ class PlanService {
         workout: strengthWorkout,
       ),
 
-      // 5. Sunday 19 (Upcoming)
+      // 5. Sunday (Upcoming)
       PlanScheduleItem(
         id: 'plan_sun_19',
         dayLabel: 'SUN',
         dayNumber: 19,
-        dateRangeLabel: 'Nov 13 – 19',
+        dateRangeLabel: 'Current Week',
         status: PlanItemStatus.upcoming,
         title: 'Mobility & Posture Reset',
         durationMinutes: 10,
@@ -239,3 +268,4 @@ class PlanService {
     ];
   }
 }
+

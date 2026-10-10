@@ -6,6 +6,7 @@ import '../../../../core/widgets/user_avatar.dart';
 import '../../data/models/workout_model.dart';
 import 'exercise_guidance_screen.dart';
 import 'workout_complete_screen.dart';
+import '../../../progress/data/services/user_activity_service.dart';
 
 class ActivityScreen extends StatefulWidget {
   final WorkoutModel workout;
@@ -413,6 +414,16 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   final active = (_elapsedSeconds / 60).floor() > 0 
                       ? (_elapsedSeconds / 60).floor() 
                       : (duration > 2 ? duration - 2 : duration);
+
+                  // Log completed workout to Firebase Firestore
+                  UserActivityService.logCompletedWorkout(
+                    workoutId: widget.workout.id,
+                    workoutTitle: widget.workout.title,
+                    category: widget.workout.category,
+                    durationMinutes: duration,
+                    calories: widget.workout.calories,
+                    difficulty: widget.workout.difficulty,
+                  );
 
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(

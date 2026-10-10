@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/routes/app_routes.dart';
@@ -98,6 +99,10 @@ class _AuthScreenState extends State<AuthScreen> {
           AppRoutes.mainNav,
           arguments: 0, // Tab 0 is Home
         );
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        _showErrorSnackBar(e.message ?? e.code);
       }
     } catch (e) {
       if (mounted) {

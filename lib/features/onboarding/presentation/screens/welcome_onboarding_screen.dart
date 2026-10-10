@@ -124,7 +124,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                   ),
                   child: RichText(
                     text: TextSpan(
-                      text: 'Already have an account? ',
+                      text: 'Already have an account ',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13.5,
                         color: AppColors.textSecondary,

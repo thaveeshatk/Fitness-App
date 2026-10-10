@@ -5,27 +5,28 @@ import '../../../../core/widgets/fiton_logo.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../../auth/data/models/auth_user.dart';
 import '../../../auth/data/services/auth_service.dart';
+import '../../../profile/data/models/profile_model.dart';
+import '../../../profile/data/services/profile_service.dart';
+import '../../../progress/data/services/user_activity_service.dart';
 import '../../../workouts/data/models/workout_model.dart';
 import '../../../workouts/data/repositories/workout_repository.dart';
+import '../../../workouts/data/services/workout_service.dart';
 import '../../../workouts/presentation/screens/workout_detail_screen.dart';
 import '../../../workouts/presentation/screens/activity_screen.dart';
 import '../../../plan/data/services/plan_service.dart';
 import '../../../plan/data/models/plan_schedule_item.dart';
+import '../../data/services/recommendation_service.dart';
 import 'package:fitness_app/features/profile/presentation/widgets/profile_photo_picker_dialog.dart';
 
 /// Screen: Home Dashboard
-/// Layout follows the original wireframe; all workout, plan and progress
-/// values are read from the user's real data (via [WorkoutRepository] and
-/// [PlanService]) instead of fixed placeholder text:
+/// Real dynamic, personalized data for each logged-in user using Firebase
+/// Authentication and Cloud Firestore:
 /// - Brand Header: "F." logo + "Home" + Notification bell + User avatar
 /// - Greeting Header: personalized name + daily momentum message
-/// - "YOUR WORKOUT TODAY" hero card with today's real workout, its calories,
-///   duration, equipment and position within the weekly plan (e.g. "Day 3 of 5")
-/// - "THIS WEEK'S PROGRESS" with 3 stat cards (completed/total, active minutes,
-///   streak) computed from the real weekly plan, and a progress bar
-/// - "QUICK WORKOUTS" bite-sized cards (10 Min Full Body, 15 Min Cardio, 10 Min Stretch)
-/// - "RECOMMENDED FOR YOU" card showing the real recommended workout's
-///   difficulty, duration, title, category and equipment
+/// - "YOUR WORKOUT TODAY" hero card with personalized recommended workout
+/// - "THIS WEEK'S PROGRESS" with real user workout activity, active minutes, and streak
+/// - "QUICK WORKOUTS" suitable bite-sized workouts based on user preferences
+/// - "RECOMMENDED FOR YOU" tailored recommendation based on profile and activity
 class HomeScreen extends StatefulWidget {
   final Function(int)? onNavigateToTab;
 
@@ -39,33 +40,91 @@ class _HomeScreenState extends State<HomeScreen> {
   late List<WorkoutModel> _workouts;
   WorkoutModel? _todaysWorkout;
   WorkoutModel? _recommendedWorkout;
+  String _recommendedReason = 'Based on activity';
+  List<QuickWorkoutItem> _quickWorkouts = [];
   List<PlanScheduleItem> _planItems = [];
+  Map<String, dynamic> _progress = {
+    'completed': 0,
+    'total': 3,
+    'activeMinutes': 0,
+    'streak': 0,
+    'fraction': 0.0,
+    'percent': 0,
+    'hasActivity': false,
+  };
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _loadDashboardData();
+    AuthService.userNotifier.addListener(_onAuthUserChanged);
+  }
+
+  @override
+  void dispose() {
+    AuthService.userNotifier.removeListener(_onAuthUserChanged);
+    super.dispose();
+  }
+
+  void _onAuthUserChanged() {
+    if (mounted) {
+      _loadDashboardData();
+    }
   }
 
   Future<void> _loadDashboardData() async {
-    _workouts = WorkoutRepository.getMockWorkouts();
-
-    // Find full body beginner or matching workout
-    _todaysWorkout = _workouts.firstWhere(
-      (w) => w.title.toLowerCase().contains('full body') || w.difficulty == 'Beginner',
-      orElse: () => _workouts.first,
-    );
-
-    // Find core or recommended workout
-    _recommendedWorkout = _workouts.firstWhere(
-      (w) => w.title.toLowerCase().contains('core') || w.category == 'Mobility',
-      orElse: () => _workouts.length > 2 ? _workouts[2] : _workouts.first,
-    );
+    final currentUid = AuthService.currentUser.uid;
 
     try {
-      _planItems = await PlanService.getWeeklyPlan();
-    } catch (_) {}
+      // 1. Fetch user's profile from Firestore
+      final profile = await ProfileService.getProfile(docId: currentUid, forceRefresh: true);
+
+      // 2. Fetch all available workouts (including custom workouts created by this user)
+      _workouts = await WorkoutService.getAllWorkouts();
+
+      // 3. Fetch user's real workout activity & progress from Firestore
+      final progressData = await UserActivityService.getWeeklyProgress(uid: currentUid);
+      final recentHistory = await UserActivityService.getRecentActivities(uid: currentUid);
+
+      // 4. Fetch user's weekly plan from Firestore
+      try {
+        _planItems = await PlanService.getWeeklyPlan(uid: currentUid, forceRefresh: true);
+      } catch (_) {
+        _planItems = [];
+      }
+
+      // 5. Personalize recommendations
+      _todaysWorkout = RecommendationService.getTodaysRecommendedWorkout(
+        profile: profile,
+        allWorkouts: _workouts,
+        recentHistory: recentHistory,
+      );
+
+      final rec = RecommendationService.getRecommendedForYou(
+        profile: profile,
+        allWorkouts: _workouts,
+        todaysWorkout: _todaysWorkout!,
+        recentHistory: recentHistory,
+      );
+      _recommendedWorkout = rec.workout;
+      _recommendedReason = rec.reason;
+
+      _quickWorkouts = RecommendationService.getQuickWorkouts(
+        profile: profile,
+        allWorkouts: _workouts,
+      );
+
+      _progress = progressData;
+    } catch (e) {
+      _workouts = WorkoutRepository.getMockWorkouts();
+      _todaysWorkout = _workouts.first;
+      _recommendedWorkout = _workouts.length > 2 ? _workouts[2] : _workouts.first;
+      _quickWorkouts = RecommendationService.getQuickWorkouts(
+        profile: ProfileModel.initial(),
+        allWorkouts: _workouts,
+      );
+    }
 
     if (mounted) {
       setState(() => _isLoading = false);
@@ -103,42 +162,46 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: const Color(0xFFFBFDFF),
       body: SafeArea(
         bottom: false,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. Top App Bar Header
-              _buildTopHeader(),
+        child: RefreshIndicator(
+          color: AppColors.primaryTeal,
+          onRefresh: _loadDashboardData,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. Top App Bar Header
+                _buildTopHeader(),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              // 2. Greeting Row
-              _buildGreetingRow(),
+                // 2. Greeting Row
+                _buildGreetingRow(),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              // 3. Section: "YOUR WORKOUT TODAY"
-              _buildYourWorkoutTodaySection(),
+                // 3. Section: "YOUR WORKOUT TODAY"
+                _buildYourWorkoutTodaySection(),
 
-              const SizedBox(height: 28),
+                const SizedBox(height: 28),
 
-              // 4. Section: "THIS WEEK'S PROGRESS"
-              _buildThisWeeksProgressSection(),
+                // 4. Section: "THIS WEEK'S PROGRESS"
+                _buildThisWeeksProgressSection(),
 
-              const SizedBox(height: 28),
+                const SizedBox(height: 28),
 
-              // 5. Section: "QUICK WORKOUTS"
-              _buildQuickWorkoutsSection(),
+                // 5. Section: "QUICK WORKOUTS"
+                _buildQuickWorkoutsSection(),
 
-              const SizedBox(height: 28),
+                const SizedBox(height: 28),
 
-              // 6. Section: "RECOMMENDED FOR YOU"
-              _buildRecommendedForYouSection(),
+                // 6. Section: "RECOMMENDED FOR YOU"
+                _buildRecommendedForYouSection(),
 
-              const SizedBox(height: 28),
-            ],
+                const SizedBox(height: 28),
+              ],
+            ),
           ),
         ),
       ),
@@ -282,14 +345,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildYourWorkoutTodaySection() {
-    final workout = _todaysWorkout ?? _workouts.first;
+    final workout = _todaysWorkout ?? (_workouts.isNotEmpty ? _workouts.first : WorkoutRepository.getMockWorkouts().first);
 
-    // Position this workout within the real weekly plan (e.g. "Day 3 of 5"),
-    // falling back to the plan-completion metrics when no plan is loaded yet.
+    // Position this workout within the user's weekly target / plan
     final todayIndex = _planItems.indexWhere((it) => it.isTodayReady);
-    final metrics = PlanService.calculateMetrics(_planItems);
-    final dayPosition = todayIndex != -1 ? todayIndex + 1 : (metrics['completed'] as int) + 1;
-    final totalDays = _planItems.isNotEmpty ? _planItems.length : 5;
+    final targetTotal = (_progress['total'] as int?) ?? 3;
+    final completed = (_progress['completed'] as int?) ?? 0;
+    final dayPosition = todayIndex != -1 ? (todayIndex + 1) : (completed < targetTotal ? completed + 1 : targetTotal);
+    final totalDays = _planItems.isNotEmpty ? _planItems.length : targetTotal;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -576,28 +639,14 @@ class _HomeScreenState extends State<HomeScreen> {
   // ── 4. Section: "THIS WEEK'S PROGRESS" ──────────────────────────────────────
 
   Widget _buildThisWeeksProgressSection() {
-    final metrics = _planItems.isNotEmpty
-        ? PlanService.calculateMetrics(_planItems)
-        : {'completed': 3, 'total': 5, 'percent': 60, 'fraction': 0.60};
-    final completedText = '${metrics['completed']}/${metrics['total']}';
-    final percentText = '${metrics['percent']}% Complete';
-    final fraction = (metrics['fraction'] as num).toDouble();
-
-    // Active minutes and streak derived from the real weekly plan instead of
-    // fixed placeholder numbers.
-    final completedItems = _planItems.where((it) => it.isCompleted).toList();
-    final activeMinutes = _planItems.isNotEmpty
-        ? completedItems.fold<int>(0, (sum, it) => sum + it.durationMinutes)
-        : 60;
-    int streak = 0;
-    for (final item in _planItems) {
-      if (item.isCompleted) {
-        streak++;
-      } else {
-        break;
-      }
-    }
-    if (_planItems.isEmpty) streak = 2;
+    final completed = (_progress['completed'] as int?) ?? 0;
+    final total = (_progress['total'] as int?) ?? 3;
+    final activeMinutes = (_progress['activeMinutes'] as int?) ?? 0;
+    final streak = (_progress['streak'] as int?) ?? 0;
+    final fraction = ((_progress['fraction'] as num?)?.toDouble() ?? 0.0);
+    final percent = (_progress['percent'] as int?) ?? 0;
+    final completedText = '$completed/$total';
+    final percentText = '$percent% Complete';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -616,7 +665,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             Text(
-              'Goal: ${metrics['total']} days',
+              'Goal: $total days',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
@@ -649,7 +698,7 @@ class _HomeScreenState extends State<HomeScreen> {
               // 3 Stat Cards Row
               Row(
                 children: [
-                  // Stat 1: 3/5 Completed
+                  // Stat 1: Completed
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -683,7 +732,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(width: 10),
 
-                  // Stat 2: 60m Active Time
+                  // Stat 2: Active Time
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -717,7 +766,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(width: 10),
 
-                  // Stat 3: 2 Day Streak
+                  // Stat 3: Day Streak
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -764,7 +813,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 16),
 
-              // Weekly target & 60% Complete Row
+              // Weekly target & percent complete Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -801,6 +850,45 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
+
+              // Empty state banner or encouraging progress message
+              const SizedBox(height: 12),
+              if (completed == 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info_outline_rounded, size: 16, color: Color(0xFF006257)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'No workouts logged yet this week. Complete today\'s workout to start your streak!',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF475569),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Text(
+                  completed >= total
+                      ? '🎉 Fantastic! You hit your weekly goal!'
+                      : '${total - completed} session${(total - completed) > 1 ? 's' : ''} to reach your weekly goal.',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF006257),
+                  ),
+                ),
             ],
           ),
         ),
@@ -841,140 +929,96 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 12),
 
         // 3 Horizontal Cards Row
-        Row(
-          children: [
-            // Card 1: 10 Min Full Body
-            Expanded(
-              child: _buildQuickWorkoutCard(
-                title: '10 Min Full\nBody',
-                duration: '10 min',
-                icon: Icons.accessibility_new_rounded,
-                iconBg: const Color(0xFFF1F5F9),
-                iconColor: const Color(0xFF64748B),
-                workoutKeyword: 'Full Body',
-              ),
-            ),
-
-            const SizedBox(width: 10),
-
-            // Card 2: 15 Min Cardio
-            Expanded(
-              child: _buildQuickWorkoutCard(
-                title: '15 Min\nCardio',
-                duration: '15 min',
-                icon: Icons.directions_run_rounded,
-                iconBg: const Color(0xFFFEE2E2),
-                iconColor: const Color(0xFFDC2626),
-                workoutKeyword: 'Cardio',
-              ),
-            ),
-
-            const SizedBox(width: 10),
-
-            // Card 3: 10 Min Stretch
-            Expanded(
-              child: _buildQuickWorkoutCard(
-                title: '10 Min\nStretch',
-                duration: '10 min',
-                icon: Icons.self_improvement_rounded,
-                iconBg: const Color(0xFFCCFBF1),
-                iconColor: const Color(0xFF0D9488),
-                workoutKeyword: 'Mobility',
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuickWorkoutCard({
-    required String title,
-    required String duration,
-    required IconData icon,
-    required Color iconBg,
-    required Color iconColor,
-    required String workoutKeyword,
-  }) {
-    return InkWell(
-      onTap: () {
-        final match = _workouts.firstWhere(
-          (w) => w.title.toLowerCase().contains(workoutKeyword.toLowerCase()) ||
-              w.category.toLowerCase().contains(workoutKeyword.toLowerCase()),
-          orElse: () => _workouts.first,
-        );
-        _openWorkout(match);
-      },
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        height: 128,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFF1F5F9)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Top Icon Box
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: iconBg,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: iconColor, size: 20),
-            ),
-            // Title & Duration
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0F172A),
-                    height: 1.2,
+        if (_quickWorkouts.isNotEmpty)
+          Row(
+            children: _quickWorkouts.asMap().entries.map((entry) {
+              final idx = entry.key;
+              final item = entry.value;
+              return Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: idx < _quickWorkouts.length - 1 ? 10.0 : 0.0,
                   ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Icons.access_time_rounded, size: 12, color: Color(0xFF64748B)),
-                    const SizedBox(width: 3),
-                    Text(
-                      duration,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF64748B),
+                  child: InkWell(
+                    onTap: () => _openWorkout(item.workout),
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      height: 128,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFF1F5F9)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Top Icon Box
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: item.iconBg,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(item.icon, color: item.iconColor, size: 20),
+                          ),
+                          // Title & Duration
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.title,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF0F172A),
+                                  height: 1.2,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Icon(Icons.access_time_rounded, size: 12, color: Color(0xFF64748B)),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    item.duration,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color(0xFF64748B),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ],
-            ),
-          ],
-        ),
-      ),
+              );
+            }).toList(),
+          ),
+      ],
     );
   }
 
   // ── 6. Section: "RECOMMENDED FOR YOU" ───────────────────────────────────────
 
   Widget _buildRecommendedForYouSection() {
-    final workout = _recommendedWorkout ?? _workouts.first;
+    final workout = _recommendedWorkout ?? (_workouts.isNotEmpty ? _workouts.first : WorkoutRepository.getMockWorkouts().first);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -993,11 +1037,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             Text(
-              'Based on activity',
+              _recommendedReason,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF64748B),
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF006257),
               ),
             ),
           ],

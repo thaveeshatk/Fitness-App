@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/services/firebase_service.dart';
 import '../models/auth_user.dart';
@@ -15,7 +16,48 @@ class AuthService {
   static final ValueNotifier<AuthUser?> userNotifier = ValueNotifier<AuthUser?>(_currentUser);
 
   static bool get isLoggedIn => _currentUser != null;
-  static AuthUser get currentUser => _currentUser ?? AuthUser.mockDefault();
+
+  static AuthUser get currentUser {
+    if (FirebaseService.isInitialized && FirebaseAuth.instance.currentUser != null) {
+      final fb = FirebaseAuth.instance.currentUser!;
+      if (_currentUser == null || _currentUser!.uid != fb.uid) {
+        _currentUser = _mapFirebaseUser(fb);
+      }
+    }
+    return _currentUser ?? AuthUser.mockDefault();
+  }
+
+  /// Initializes auth state listener when Firebase is available
+  static void initializeAuth() {
+    if (!FirebaseService.isInitialized) return;
+
+    final fbUser = FirebaseAuth.instance.currentUser;
+    if (fbUser != null) {
+      _currentUser = _mapFirebaseUser(fbUser);
+      userNotifier.value = _currentUser;
+    }
+
+    FirebaseAuth.instance.authStateChanges().listen((fbUser) {
+      if (fbUser != null) {
+        _currentUser = _mapFirebaseUser(fbUser);
+      } else {
+        _currentUser = null;
+      }
+      userNotifier.value = _currentUser;
+    });
+  }
+
+  static AuthUser _mapFirebaseUser(User fbUser) {
+    return AuthUser(
+      uid: fbUser.uid,
+      name: (fbUser.displayName != null && fbUser.displayName!.isNotEmpty)
+          ? fbUser.displayName!
+          : (fbUser.email?.split('@').first ?? 'Alex'),
+      email: fbUser.email ?? '',
+      photoUrl: fbUser.photoURL ??
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop',
+    );
+  }
 
   /// Preset profile avatars for quick selection
   static const List<String> presetAvatars = [
@@ -39,7 +81,14 @@ class AuthService {
 
     if (FirebaseService.isInitialized) {
       try {
-        await FirebaseAuth.instance.currentUser?.updatePhotoURL(newPhotoUrl);
+        final fbUser = FirebaseAuth.instance.currentUser;
+        if (fbUser != null) {
+          await fbUser.updatePhotoURL(newPhotoUrl);
+          await FirebaseFirestore.instance.collection('users').doc(fbUser.uid).set({
+            'photoUrl': newPhotoUrl,
+            'updatedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+        }
       } catch (e) {
         developer.log('Failed updating Firebase user photo: $e', name: 'AuthService');
       }
@@ -76,12 +125,18 @@ class AuthService {
           if (email != fbUser.email) {
             await fbUser.verifyBeforeUpdateEmail(email); // Firebase recommended way
           }
+          await FirebaseFirestore.instance.collection('users').doc(fbUser.uid).set({
+            'name': name,
+            'email': email,
+            if (photoUrl != null) 'photoUrl': photoUrl,
+            'updatedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
         }
       } catch (e) {
         developer.log('Failed updating Firebase user info: $e', name: 'AuthService');
       }
     }
-    
+
     // Simulate network delay for local usage
     await Future.delayed(const Duration(milliseconds: 500));
   }
@@ -110,6 +165,21 @@ class AuthService {
               'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop',
         );
         userNotifier.value = _currentUser;
+
+        // Sync user document in Firestore
+        if (fbUser != null) {
+          try {
+            await FirebaseFirestore.instance.collection('users').doc(fbUser.uid).set({
+              'uid': fbUser.uid,
+              'name': _currentUser!.name,
+              'email': fbUser.email ?? email.trim(),
+              'lastLoginAt': FieldValue.serverTimestamp(),
+            }, SetOptions(merge: true));
+          } catch (e) {
+            developer.log('Failed syncing user doc in Firestore: $e', name: 'AuthService');
+          }
+        }
+
         return _currentUser!;
       } catch (e) {
         developer.log('Firebase signIn failed: $e', name: 'AuthService');
@@ -159,6 +229,23 @@ class AuthService {
           photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop',
         );
         userNotifier.value = _currentUser;
+
+        // Persist new user in Firestore users collection
+        if (fbUser != null) {
+          try {
+            await FirebaseFirestore.instance.collection('users').doc(fbUser.uid).set({
+              'uid': fbUser.uid,
+              'name': _currentUser!.name,
+              'email': fbUser.email ?? email.trim(),
+              'createdAt': FieldValue.serverTimestamp(),
+              'lastLoginAt': FieldValue.serverTimestamp(),
+            }, SetOptions(merge: true));
+            developer.log('User document created in Firestore: ${fbUser.uid}', name: 'AuthService');
+          } catch (e) {
+            developer.log('Failed saving user doc to Firestore: $e', name: 'AuthService');
+          }
+        }
+
         return _currentUser!;
       } catch (e) {
         developer.log('Firebase signUp failed: $e', name: 'AuthService');
@@ -213,3 +300,4 @@ class AuthService {
     userNotifier.value = null;
   }
 }
+

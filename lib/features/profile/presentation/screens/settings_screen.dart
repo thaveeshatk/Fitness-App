@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'edit_profile_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -24,7 +25,12 @@ class SettingsScreen extends StatelessWidget {
                 iconWidget: const Icon(Icons.person, color: Color(0xFF0284C7), size: 26),
                 title: 'Edit Profile',
                 subtitle: 'Name, email, photo',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+                  );
+                },
               ),
               const SizedBox(height: 24),
               _buildSectionHeader('PREFERENCES'),

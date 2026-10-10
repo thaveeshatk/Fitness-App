@@ -20,6 +20,7 @@ class WorkoutService {
   static final List<WorkoutModel> _inMemoryCustomWorkouts = [
     const WorkoutModel(
       id: 'custom_default_01',
+      userId: 'user_alex_01',
       title: 'My Daily Core & Mobility',
       specificationSubtitle: 'Custom User Routine • Personalized Fitness Track',
       coach: 'You (Personal Routine)',
@@ -66,16 +67,20 @@ class WorkoutService {
     ),
   ];
 
-  /// Fetches the signed-in user's own custom workouts from Firestore, or in-memory fallback.
+  /// Fetches custom user workouts for current logged-in user from Firestore or in-memory fallback.
   static Future<List<WorkoutModel>> getCustomWorkouts() async {
+    final currentUid = AuthService.currentUser.uid;
+
     if (!FirebaseService.isInitialized) {
-      return List.unmodifiable(_inMemoryCustomWorkouts);
+      return List.unmodifiable(
+        _inMemoryCustomWorkouts.where((w) => w.userId == currentUid).toList(),
+      );
     }
 
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection(_collection)
-          .where('ownerId', isEqualTo: AuthService.currentUser.uid)
+          .where('userId', isEqualTo: currentUid)
           .get();
 
       if (snapshot.docs.isNotEmpty) {
@@ -84,10 +89,13 @@ class WorkoutService {
           return WorkoutModel.fromMap(data, doc.id);
         }).toList();
 
-        // Merge or replace in-memory cache
-        _inMemoryCustomWorkouts.clear();
+        // Merge or replace in-memory cache for this user
+        _inMemoryCustomWorkouts.removeWhere((w) => w.userId == currentUid);
         _inMemoryCustomWorkouts.addAll(firestoreList);
-        return List.unmodifiable(_inMemoryCustomWorkouts);
+        return List.unmodifiable(firestoreList);
+      } else {
+        _inMemoryCustomWorkouts.removeWhere((w) => w.userId == currentUid);
+        return const [];
       }
     } catch (e, stack) {
       developer.log(
@@ -98,10 +106,12 @@ class WorkoutService {
       );
     }
 
-    return List.unmodifiable(_inMemoryCustomWorkouts);
+    return List.unmodifiable(
+      _inMemoryCustomWorkouts.where((w) => w.userId == currentUid).toList(),
+    );
   }
 
-  /// Fetches all workouts (custom workouts first, followed by system curated workouts).
+  /// Fetches all workouts (custom workouts for current user first, followed by system curated workouts).
   static Future<List<WorkoutModel>> getAllWorkouts() async {
     final customList = await getCustomWorkouts();
     final systemList = WorkoutRepository.getMockWorkouts();
@@ -109,14 +119,16 @@ class WorkoutService {
     return [...customList, ...systemList];
   }
 
-  /// Creates a new custom workout and saves to Firestore & cache.
+  /// Creates a new custom workout scoped to current user and saves to Firestore & cache.
   static Future<WorkoutModel> createWorkout(WorkoutModel workout) async {
+    final currentUid = AuthService.currentUser.uid;
     final String workoutId = workout.id.isNotEmpty
         ? workout.id
         : 'custom_${DateTime.now().millisecondsSinceEpoch}';
 
     final readyWorkout = workout.copyWith(
       id: workoutId,
+      userId: workout.userId ?? currentUid,
       isCustom: true,
       coach: workout.coach.isEmpty ? 'You (Custom)' : workout.coach,
       subCategory: workout.subCategory.isEmpty ? 'CUSTOM ROUTINE' : workout.subCategory,
@@ -132,10 +144,7 @@ class WorkoutService {
         await FirebaseFirestore.instance
             .collection(_collection)
             .doc(workoutId)
-            .set({
-          ...readyWorkout.toMap(),
-          'ownerId': AuthService.currentUser.uid,
-        });
+            .set(readyWorkout.toMap());
 
         developer.log('Custom workout created in Firestore: $workoutId', name: 'WorkoutService');
       } catch (e, stack) {
@@ -156,11 +165,17 @@ class WorkoutService {
 
   /// Updates an existing custom workout in Firestore and cache.
   static Future<WorkoutModel> updateWorkout(WorkoutModel workout) async {
-    final index = _inMemoryCustomWorkouts.indexWhere((w) => w.id == workout.id);
+    final currentUid = AuthService.currentUser.uid;
+    final readyWorkout = workout.copyWith(
+      userId: workout.userId ?? currentUid,
+      isCustom: true,
+    );
+
+    final index = _inMemoryCustomWorkouts.indexWhere((w) => w.id == readyWorkout.id);
     if (index != -1) {
-      _inMemoryCustomWorkouts[index] = workout;
+      _inMemoryCustomWorkouts[index] = readyWorkout;
     } else {
-      _inMemoryCustomWorkouts.insert(0, workout);
+      _inMemoryCustomWorkouts.insert(0, readyWorkout);
     }
 
     workoutsRevisionNotifier.value++;
@@ -169,11 +184,8 @@ class WorkoutService {
       try {
         await FirebaseFirestore.instance
             .collection(_collection)
-            .doc(workout.id)
-            .set({
-          ...workout.toMap(),
-          'ownerId': AuthService.currentUser.uid,
-        }, SetOptions(merge: true));
+            .doc(readyWorkout.id)
+            .set(readyWorkout.toMap(), SetOptions(merge: true));
 
         developer.log('Custom workout updated in Firestore: ${workout.id}', name: 'WorkoutService');
       } catch (e, stack) {
@@ -188,7 +200,7 @@ class WorkoutService {
       await Future<void>.delayed(const Duration(milliseconds: 300));
     }
 
-    return workout;
+    return readyWorkout;
   }
 
   /// Deletes a custom workout by ID.

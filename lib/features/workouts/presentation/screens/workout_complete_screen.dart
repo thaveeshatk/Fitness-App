@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/asset_paths.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../../profile/presentation/screens/main_navigation_screen.dart';
 import '../../../progress/data/models/progress_data.dart';
 import '../../../progress/data/services/progress_service.dart';
@@ -55,16 +56,23 @@ class WorkoutCompleteScreen extends StatelessWidget {
               child: IconButton(
                 padding: EdgeInsets.zero,
                 icon: const Icon(
-                  Icons.open_in_full_rounded,
+                  Icons.arrow_back_rounded,
                   color: primaryGreen,
-                  size: 17,
+                  size: 18,
                 ),
-                onPressed: () => Navigator.of(context).maybePop(),
+                onPressed: () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (_) => const MainNavigationScreen(initialIndex: 2),
+                    ),
+                    (route) => false,
+                  );
+                },
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 12),
             Text(
-              'Plan',
+              'Workout Summary',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -91,15 +99,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
           ),
           const Padding(
             padding: EdgeInsets.only(right: 20, left: 4),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundColor: primaryGreen,
-              child: Icon(
-                Icons.person_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
+            child: UserAvatar(radius: 16),
           ),
         ],
       ),

@@ -225,10 +225,12 @@ class WorkoutModel {
   final String overview;
   final String safetyInfo;
   final List<ExerciseItem> exercises;
+  final String? userId;
   final bool isCustom;
 
   const WorkoutModel({
     required this.id,
+    this.userId,
     required this.title,
     this.specificationSubtitle = 'Architectural wireframe specification • Version 2.0 layout evaluation',
     required this.coach,
@@ -251,6 +253,7 @@ class WorkoutModel {
 
   WorkoutModel copyWith({
     String? id,
+    String? userId,
     String? title,
     String? specificationSubtitle,
     String? coach,
@@ -272,6 +275,7 @@ class WorkoutModel {
   }) {
     return WorkoutModel(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       title: title ?? this.title,
       specificationSubtitle: specificationSubtitle ?? this.specificationSubtitle,
       coach: coach ?? this.coach,
@@ -296,6 +300,7 @@ class WorkoutModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      if (userId != null) 'userId': userId,
       'title': title,
       'specificationSubtitle': specificationSubtitle,
       'coach': coach,
@@ -320,6 +325,7 @@ class WorkoutModel {
   factory WorkoutModel.fromMap(Map<String, dynamic> map, [String? docId]) {
     return WorkoutModel(
       id: docId ?? map['id']?.toString() ?? '',
+      userId: map['userId']?.toString() ?? map['ownerId']?.toString(),
       title: map['title']?.toString() ?? 'Custom Workout',
       specificationSubtitle: map['specificationSubtitle']?.toString() ?? 'Custom Routine • Personalized Training',
       coach: map['coach']?.toString() ?? 'You (Custom)',

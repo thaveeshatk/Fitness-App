@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../data/models/workout_model.dart';
 import 'exercise_guidance_screen.dart';
 import 'workout_complete_screen.dart';
@@ -16,6 +17,7 @@ class ActivityScreen extends StatefulWidget {
 }
 
 class _ActivityScreenState extends State<ActivityScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _currentExerciseIndex = 0;
   int _currentSet = 1;
   int _totalSets = 3;
@@ -25,6 +27,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
   int _elapsedSeconds = 0; // Starts fresh at 00:00
   bool _isRunning = true;
   bool _isResting = false;
+  bool _isTransitionToNextExercise = false;
   final int _restDurationSeconds = 30; // Standard 30-sec rest between sets
   Timer? _timer;
 
@@ -47,38 +50,104 @@ class _ActivityScreenState extends State<ActivityScreen> {
   }
 
   int _calculateExerciseInterval(ExerciseItem exercise) {
-    final badge = exercise.badge.toLowerCase();
+    final badge = exercise.badge.toLowerCase().trim();
 
-    // Check for exact seconds (e.g., '45 sec', '30 sec', '20 sec')
-    final secRegex = RegExp(r'(\d+)\s*(sec|s\b)');
+    // 1. Explicit seconds (e.g., '45 sec', '30 sec', '20 sec', '40 sec', '60 sec', '30 sec/side')
+    final secRegex = RegExp(r'(\d+)\s*(sec|seconds|s\b)');
     final secMatch = secRegex.firstMatch(badge);
     if (secMatch != null) {
       final val = int.tryParse(secMatch.group(1) ?? '');
       if (val != null && val > 0) return val;
     }
 
-    // Check for exact minutes (e.g., '3 min', '5 min', '2 min')
-    final minRegex = RegExp(r'(\d+)\s*(min|m\b)');
+    // 2. EMOM drills (e.g., '15 reps every min', '10 reps every min')
+    if (badge.contains('every min')) {
+      return 60;
+    }
+
+    // 3. Multi-minute or single-minute continuous duration (e.g., '1 min', '2 min', '3 min', '4 min', '5 min', '4 sets × 1 min')
+    final minRegex = RegExp(r'(\d+)\s*(min|minute|minutes|m\b)');
     final minMatch = minRegex.firstMatch(badge);
     if (minMatch != null) {
       final val = int.tryParse(minMatch.group(1) ?? '');
-      if (val != null && val > 0) return val * 60;
+      if (val != null && val > 0) {
+        return val * 60; // 1 min -> 60s, 2 min -> 120s, 3 min -> 180s, 4 min -> 240s, 5 min -> 300s
+      }
     }
 
-    // Default for rep-based movements (e.g., '3 sets × 12 reps') -> standard 60-second set
-    return 60;
+    // 4. Reps per side (e.g., '3 sets × 12 reps/side', '2 sets × 3 reps/side', '3 sets × 6 reps/side')
+    final repsPerSideRegex = RegExp(r'(\d+)\s*(?:reps|rep)\s*/\s*side');
+    final repsPerSideMatch = repsPerSideRegex.firstMatch(badge);
+    if (repsPerSideMatch != null) {
+      final reps = int.tryParse(repsPerSideMatch.group(1) ?? '');
+      if (reps != null && reps > 0) {
+        // Turkish get-up (3 reps) takes ~12s per rep (36s total); higher reps: ~4s/rep
+        return (reps <= 4) ? (reps * 12) : ((reps * 4).clamp(30, 75));
+      }
+    }
+
+    // 5. Standard repetitions (e.g., '3 sets × 6 reps', '3 sets × 8 reps', '3 sets × 10 reps', '3 sets × 12 reps', '3 sets × 16 reps', '3 sets × 20 reps')
+    final repsRegex = RegExp(r'(\d+)\s*(reps|rep\b)');
+    final repsMatch = repsRegex.firstMatch(badge);
+    if (repsMatch != null) {
+      final reps = int.tryParse(repsMatch.group(1) ?? '');
+      if (reps != null && reps > 0) {
+        // Natural pacing: ~3.5 seconds per repetition
+        // 6 reps -> 21s, 8 reps -> 28s, 10 reps -> 35s, 12 reps -> 42s, 15 reps -> 52s, 16 reps -> 56s, 20 reps -> 70s
+        return (reps * 3.5).round().clamp(20, 75);
+      }
+    }
+
+    // 6. Rep ladder (e.g., '10 - 20 - 30 reps')
+    if (badge.contains('10 - 20 - 30') || badge.contains('ladder')) {
+      return 60;
+    }
+
+    // 7. Steps (e.g., '3 sets × 20 steps')
+    final stepsRegex = RegExp(r'(\d+)\s*steps');
+    final stepsMatch = stepsRegex.firstMatch(badge);
+    if (stepsMatch != null) {
+      final steps = int.tryParse(stepsMatch.group(1) ?? '');
+      if (steps != null && steps > 0) {
+        return (steps * 2).clamp(20, 60); // 20 steps -> 40s
+      }
+    }
+
+    // 8. Cycles (e.g., '5 cycles')
+    final cyclesRegex = RegExp(r'(\d+)\s*cycles');
+    final cyclesMatch = cyclesRegex.firstMatch(badge);
+    if (cyclesMatch != null) {
+      final cycles = int.tryParse(cyclesMatch.group(1) ?? '');
+      if (cycles != null && cycles > 0) {
+        return (cycles * 8).clamp(20, 60); // 5 cycles -> 40s
+      }
+    }
+
+    // Fallback default
+    return 30;
   }
 
   int _calculateTotalSets(ExerciseItem exercise) {
-    final badge = exercise.badge.toLowerCase();
+    final badge = exercise.badge.toLowerCase().trim();
+
+    // Check for explicit sets / rounds / cycles
     final setsRegex = RegExp(r'(\d+)\s*(sets|rounds|cycles)');
     final setsMatch = setsRegex.firstMatch(badge);
     if (setsMatch != null) {
       final val = int.tryParse(setsMatch.group(1) ?? '');
       if (val != null && val > 0) return val;
     }
-    // Single continuous duration (e.g., '3 min' or '5 min')
-    if (badge.contains('min')) return 1;
+
+    // Rep ladder (e.g., '10 - 20 - 30 reps') has 3 stages/sets
+    if (badge.contains('10 - 20 - 30')) return 3;
+
+    // Single continuous duration (e.g., '2 min', '3 min', '4 min', '5 min' continuous warm-up / cool-down)
+    if (badge.contains('min') && !badge.contains('every min')) return 1;
+
+    // If unilateral per side without explicit sets, 2 sets (one per side)
+    if (badge.contains('/side') || badge.contains('per side')) return 2;
+
+    // Standard default sets
     return 3;
   }
 
@@ -92,24 +161,50 @@ class _ActivityScreenState extends State<ActivityScreen> {
         if (_intervalSecondsRemaining > 0) {
           _intervalSecondsRemaining--;
         } else {
-          // If in Active Interval and sets remain:
+          final exercises = widget.workout.exercises;
+          final hasMoreExercises = _currentExerciseIndex < exercises.length - 1;
+
           if (!_isResting) {
+            // Active Interval ended:
             if (_currentSet < _totalSets) {
-              // Transition into REST INTERVAL
+              // Transition into REST INTERVAL before the next set of this exercise
               _isResting = true;
+              _isTransitionToNextExercise = false;
+              _totalIntervalSeconds = _restDurationSeconds;
+              _intervalSecondsRemaining = _totalIntervalSeconds;
+            } else if (hasMoreExercises) {
+              // All sets finished for current exercise -> Transition rest before next exercise!
+              _isResting = true;
+              _isTransitionToNextExercise = true;
               _totalIntervalSeconds = _restDurationSeconds;
               _intervalSecondsRemaining = _totalIntervalSeconds;
             } else {
-              // All sets finished for this exercise
+              // All sets of final exercise finished!
+              _isRunning = false;
               _intervalSecondsRemaining = 0;
+              _showCompletionDialog();
             }
           } else {
-            // Rest interval finished -> transition back to ACTIVE INTERVAL for next set
+            // Rest Interval ended:
             _isResting = false;
-            _currentSet++;
-            final currentEx = widget.workout.exercises[_currentExerciseIndex];
-            _totalIntervalSeconds = _calculateExerciseInterval(currentEx);
-            _intervalSecondsRemaining = _totalIntervalSeconds;
+            if (_isTransitionToNextExercise) {
+              // Advance to next exercise automatically!
+              _isTransitionToNextExercise = false;
+              if (_currentExerciseIndex < exercises.length - 1) {
+                _currentExerciseIndex++;
+                _currentSet = 1;
+                final nextEx = exercises[_currentExerciseIndex];
+                _totalIntervalSeconds = _calculateExerciseInterval(nextEx);
+                _intervalSecondsRemaining = _totalIntervalSeconds;
+                _totalSets = _calculateTotalSets(nextEx);
+              }
+            } else {
+              // Advance to next set of current exercise!
+              _currentSet++;
+              final currentEx = exercises[_currentExerciseIndex];
+              _totalIntervalSeconds = _calculateExerciseInterval(currentEx);
+              _intervalSecondsRemaining = _totalIntervalSeconds;
+            }
           }
         }
       });
@@ -119,10 +214,25 @@ class _ActivityScreenState extends State<ActivityScreen> {
   void _skipRest() {
     setState(() {
       _isResting = false;
-      _currentSet++;
-      final currentEx = widget.workout.exercises[_currentExerciseIndex];
-      _totalIntervalSeconds = _calculateExerciseInterval(currentEx);
-      _intervalSecondsRemaining = _totalIntervalSeconds;
+      final exercises = widget.workout.exercises;
+      if (_isTransitionToNextExercise) {
+        _isTransitionToNextExercise = false;
+        if (_currentExerciseIndex < exercises.length - 1) {
+          _currentExerciseIndex++;
+          _currentSet = 1;
+          final nextEx = exercises[_currentExerciseIndex];
+          _totalIntervalSeconds = _calculateExerciseInterval(nextEx);
+          _intervalSecondsRemaining = _totalIntervalSeconds;
+          _totalSets = _calculateTotalSets(nextEx);
+        } else {
+          _showCompletionDialog();
+        }
+      } else {
+        _currentSet++;
+        final currentEx = exercises[_currentExerciseIndex];
+        _totalIntervalSeconds = _calculateExerciseInterval(currentEx);
+        _intervalSecondsRemaining = _totalIntervalSeconds;
+      }
       _isRunning = true;
     });
   }
@@ -145,6 +255,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
       setState(() {
         _currentExerciseIndex++;
         _isResting = false;
+        _isTransitionToNextExercise = false;
         final nextEx = exercises[_currentExerciseIndex];
         _totalIntervalSeconds = _calculateExerciseInterval(nextEx);
         _intervalSecondsRemaining = _totalIntervalSeconds;
@@ -155,6 +266,89 @@ class _ActivityScreenState extends State<ActivityScreen> {
     } else {
       _showCompletionDialog();
     }
+  }
+
+  void _jumpToExercise(int index) {
+    final exercises = widget.workout.exercises;
+    if (index >= 0 && index < exercises.length) {
+      setState(() {
+        _currentExerciseIndex = index;
+        _isResting = false;
+        _isTransitionToNextExercise = false;
+        final targetEx = exercises[index];
+        _totalIntervalSeconds = _calculateExerciseInterval(targetEx);
+        _intervalSecondsRemaining = _totalIntervalSeconds;
+        _totalSets = _calculateTotalSets(targetEx);
+        _currentSet = 1;
+        _isRunning = true;
+      });
+    }
+  }
+
+  void _confirmEndSession() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'End Activity?',
+          style: GoogleFonts.plusJakartaSans(
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to quit the current workout session?',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 14,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(
+              'Continue',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFDC2626),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (_) => WorkoutCompleteScreen(
+                    workoutTitle: widget.workout.title,
+                    durationMinutes: (_elapsedSeconds / 60).ceil() > 0 ? (_elapsedSeconds / 60).ceil() : 25,
+                    activeMinutes: (_elapsedSeconds / 60).floor() > 0 ? (_elapsedSeconds / 60).floor() : 22,
+                    caloriesBurned: widget.workout.calories,
+                    coachName: widget.workout.coach,
+                    coachAvatar: widget.workout.coachAvatar,
+                  ),
+                ),
+              );
+            },
+            child: Text(
+              'End Session',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showCompletionDialog() {
@@ -187,7 +381,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'You successfully completed all 6 exercises in "${widget.workout.title}".',
+              'You successfully completed all ${widget.workout.exercises.length} exercises in "${widget.workout.title}".',
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
@@ -214,12 +408,18 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 ),
                 onPressed: () {
                   Navigator.of(ctx).pop(); // Close dialog
+                  final elapsedMins = (_elapsedSeconds / 60).ceil();
+                  final duration = elapsedMins > 0 ? elapsedMins : widget.workout.durationMinutes;
+                  final active = (_elapsedSeconds / 60).floor() > 0 
+                      ? (_elapsedSeconds / 60).floor() 
+                      : (duration > 2 ? duration - 2 : duration);
+
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
                       builder: (_) => WorkoutCompleteScreen(
                         workoutTitle: widget.workout.title,
-                        durationMinutes: (_elapsedSeconds / 60).ceil() > 0 ? (_elapsedSeconds / 60).ceil() : 25,
-                        activeMinutes: (_elapsedSeconds / 60).floor() > 0 ? (_elapsedSeconds / 60).floor() : 22,
+                        durationMinutes: duration,
+                        activeMinutes: active,
                         caloriesBurned: widget.workout.calories,
                         coachName: widget.workout.coach,
                         coachAvatar: widget.workout.coachAvatar,
@@ -227,12 +427,20 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     ),
                   );
                 },
-                child: Text(
-                  'Finish & Return',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Finish & View Summary',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Icon(Icons.arrow_forward_rounded, size: 16, color: Colors.white),
+                  ],
                 ),
               ),
             ),
@@ -313,14 +521,16 @@ class _ActivityScreenState extends State<ActivityScreen> {
     final remainingCount = exercises.length - (_currentExerciseIndex + 1);
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: const Color(0xFFF8FAFC),
+      drawer: _buildSessionDrawer(context),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary, size: 24),
-          onPressed: () {},
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
         title: Text(
           'ACTIVITY',
@@ -334,71 +544,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
         actions: [
           Center(
             child: GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    title: Text(
-                      'End Activity?',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 18,
-                      ),
-                    ),
-                    content: Text(
-                      'Are you sure you want to quit the current workout session?',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(),
-                        child: Text(
-                          'Continue',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFDC2626),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.of(ctx).pop();
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (_) => WorkoutCompleteScreen(
-                                workoutTitle: widget.workout.title,
-                                durationMinutes: (_elapsedSeconds / 60).ceil() > 0 ? (_elapsedSeconds / 60).ceil() : 25,
-                                activeMinutes: (_elapsedSeconds / 60).floor() > 0 ? (_elapsedSeconds / 60).floor() : 22,
-                                caloriesBurned: widget.workout.calories,
-                                coachName: widget.workout.coach,
-                                coachAvatar: widget.workout.coachAvatar,
-                              ),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          'End Session',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+              onTap: _confirmEndSession,
               child: Container(
                 margin: const EdgeInsets.symmetric(vertical: 12),
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -420,13 +566,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
             ),
           ),
           const SizedBox(width: 10),
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              radius: 17,
-              backgroundImage: NetworkImage(widget.workout.coachAvatar),
-              backgroundColor: AppColors.surfaceMuted,
-            ),
+          const Padding(
+            padding: EdgeInsets.only(right: 16.0),
+            child: UserAvatar(radius: 17),
           ),
         ],
       ),
@@ -572,11 +714,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF005953),
+                              color: _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              'SET $_currentSet OF $_totalSets',
+                              _isResting
+                                  ? (_isTransitionToNextExercise ? 'REST BEFORE NEXT EXERCISE' : 'SET REST')
+                                  : 'SET $_currentSet OF $_totalSets',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,
@@ -620,7 +764,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            'Target rest: 60s',
+                            'Target rest: ${_restDurationSeconds}s',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w500,
@@ -635,23 +779,23 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       GestureDetector(
                         onTap: () => _openExerciseGuidance(currentExercise),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                            color: const Color(0xFFF0FDF4),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFFBBF7D0)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.info_outline, size: 15, color: Color(0xFF005953)),
+                              const Icon(Icons.menu_book_rounded, size: 15, color: Color(0xFF005953)),
                               const SizedBox(width: 6),
                               Text(
-                                '[ HOW TO PERFORM → ]',
+                                'HOW TO PERFORM GUIDE →',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w800,
-                                  color: AppColors.textPrimary,
+                                  color: const Color(0xFF005953),
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -685,6 +829,22 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     Stack(
                       alignment: Alignment.center,
                       children: [
+                        // Soft Ambient Glow Aura behind timer dial
+                        Container(
+                          width: 175,
+                          height: 175,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: (_isResting ? const Color(0xFFE65100) : const Color(0xFF005953))
+                                    .withValues(alpha: 0.08),
+                                blurRadius: 36,
+                                spreadRadius: 4,
+                              ),
+                            ],
+                          ),
+                        ),
                         SizedBox(
                           width: 190,
                           height: 190,
@@ -704,7 +864,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              _isResting ? 'REST INTERVAL' : 'INTERVAL',
+                              _isResting
+                                  ? (_isTransitionToNextExercise ? 'TRANSITION REST' : 'REST INTERVAL')
+                                  : 'ACTIVE INTERVAL',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 10.5,
                                 fontWeight: FontWeight.w700,
@@ -777,7 +939,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              _isResting ? 'REST INTERVAL' : 'ACTIVE INTERVAL',
+                              _isResting
+                                  ? (_isTransitionToNextExercise ? 'TRANSITION REST' : 'REST INTERVAL')
+                                  : 'ACTIVE INTERVAL',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
@@ -822,10 +986,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     children: [
                       Text(
                         _isResting
-                            ? '[ SKIP REST & START SET $_currentSet → ]'
+                            ? (_isTransitionToNextExercise && nextExercise != null
+                                ? '[ SKIP REST & START ${nextExercise.name.toUpperCase()} → ]'
+                                : '[ SKIP REST & START SET ${_currentSet + 1} → ]')
                             : '[ NEXT EXERCISE → ]',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 15,
+                          fontSize: 14.5,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
                           letterSpacing: 0.8,
@@ -923,6 +1089,342 @@ class _ActivityScreenState extends State<ActivityScreen> {
               const SizedBox(height: 24),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSessionDrawer(BuildContext context) {
+    final exercises = widget.workout.exercises;
+    final progressPercent = exercises.isNotEmpty
+        ? (((_currentExerciseIndex + 1) / exercises.length) * 100).toInt()
+        : 0;
+
+    return Drawer(
+      backgroundColor: Colors.white,
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Drawer Header
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF8FAFC),
+                border: Border(
+                  bottom: BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.featureTealBg,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Text(
+                          'ACTIVE SESSION',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primaryTeal,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        icon: const Icon(Icons.close_rounded, size: 20, color: AppColors.textSecondary),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    widget.workout.title,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${widget.workout.category} • ${widget.workout.difficulty} • ~${widget.workout.calories} kcal',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11.5,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Progress Bar
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: exercises.isNotEmpty ? (_currentExerciseIndex + 1) / exercises.length : 0.0,
+                      backgroundColor: const Color(0xFFE2E8F0),
+                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryTeal),
+                      minHeight: 6,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Exercise ${_currentExerciseIndex + 1} of ${exercises.length}',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        '$progressPercent%',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primaryTeal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // Controls Row (Pause / Resume)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: const BoxDecoration(
+                border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        side: BorderSide(
+                          color: _isRunning ? const Color(0xFFCBD5E1) : AppColors.primaryTeal,
+                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        backgroundColor: _isRunning ? Colors.white : AppColors.featureTealBg,
+                      ),
+                      icon: Icon(
+                        _isRunning ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                        size: 18,
+                        color: _isRunning ? AppColors.textPrimary : AppColors.primaryTeal,
+                      ),
+                      label: Text(
+                        _isRunning ? 'Pause Timer' : 'Resume Timer',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: _isRunning ? AppColors.textPrimary : AppColors.primaryTeal,
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          if (_isRunning) {
+                            _pauseTimer();
+                          } else {
+                            _resumeTimer();
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Checklist Section Title
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Text(
+                'CIRCUIT MOVEMENTS (${exercises.length})',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textMuted,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ),
+
+            // Exercises Flow List
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                itemCount: exercises.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 6),
+                itemBuilder: (context, idx) {
+                  final ex = exercises[idx];
+                  final isCurrent = idx == _currentExerciseIndex;
+                  final isDone = idx < _currentExerciseIndex;
+
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      _jumpToExercise(idx);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: isCurrent
+                            ? const Color(0xFFF0FDF4)
+                            : isDone
+                                ? const Color(0xFFF8FAFC)
+                                : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isCurrent
+                              ? const Color(0xFF86EFAC)
+                              : isDone
+                                  ? const Color(0xFFE2E8F0)
+                                  : const Color(0xFFF1F5F9),
+                          width: isCurrent ? 1.5 : 1.0,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          // Status Icon / Number
+                          Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: isCurrent
+                                  ? AppColors.primaryTeal
+                                  : isDone
+                                      ? const Color(0xFF10B981)
+                                      : const Color(0xFFE2E8F0),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: isDone
+                                  ? const Icon(Icons.check_rounded, color: Colors.white, size: 16)
+                                  : isCurrent
+                                      ? const Icon(Icons.fitness_center_rounded, color: Colors.white, size: 14)
+                                      : Text(
+                                          '${idx + 1}',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.textSecondary,
+                                          ),
+                                        ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  ex.name,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13,
+                                    fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
+                                    color: isCurrent
+                                        ? AppColors.textPrimary
+                                        : isDone
+                                            ? AppColors.textSecondary
+                                            : AppColors.textPrimary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  ex.badge,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11,
+                                    color: isCurrent ? AppColors.primaryTeal : AppColors.textMuted,
+                                    fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (isCurrent)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFDCFCE7),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                'ACTIVE',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFF16A34A),
+                                ),
+                              ),
+                            )
+                          else if (isDone)
+                            Text(
+                              'Done',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF10B981),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // Bottom Quit / End Session Button
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                border: Border(top: BorderSide(color: Color(0xFFF1F5F9))),
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFFDC2626),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: const BorderSide(color: Color(0xFFFEE2E2)),
+                    ),
+                    backgroundColor: const Color(0xFFFEF2F2),
+                  ),
+                  icon: const Icon(Icons.exit_to_app_rounded, size: 18),
+                  label: Text(
+                    'Quit Workout Session',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _confirmEndSession();
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

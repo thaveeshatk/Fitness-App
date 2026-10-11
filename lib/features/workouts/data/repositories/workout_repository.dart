@@ -332,7 +332,7 @@ class WorkoutRepository {
             phase: 'PHASE: MOBILITY FLOW',
             subtitle: 'Thoracic & hip opener',
             badge: '3 sets × 6 reps',
-            imageUrl: 'https://images.unsplash.com/photo-1552196563-5524e3a89047?q=80&w=1200&auto=format&fit=crop',
+            imageUrl: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1200&auto=format&fit=crop',
           ),
           ExerciseItem(
             id: 'e5_03',
@@ -385,7 +385,7 @@ class WorkoutRepository {
         difficulty: 'Beginner',
         equipment: ['Exercise Mat'],
         tags: ['EXERCISE MAT', 'BEGINNER'],
-        imageUrl: 'https://images.unsplash.com/photo-1552196563-5524e3a89047?q=80&w=600&auto=format&fit=crop',
+        imageUrl: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=600&auto=format&fit=crop',
         overview: 'Target forward head posture, rounded shoulders, and tight hip flexors caused by long hours of seated desk work.',
         safetyInfo: 'Tuck chin gently when performing cervical retractions. Avoid shrugging traps towards ears.',
         exercises: [
@@ -403,7 +403,7 @@ class WorkoutRepository {
             phase: 'PHASE: POSTURE',
             subtitle: 'Mid-trap & rhomboid recruitment',
             badge: '3 sets × 12 reps',
-            imageUrl: 'https://images.unsplash.com/photo-1552196563-5524e3a89047?q=80&w=1200&auto=format&fit=crop',
+            imageUrl: 'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?q=80&w=1200&auto=format&fit=crop',
           ),
           ExerciseItem(
             id: 'e6_03',
@@ -908,7 +908,7 @@ class WorkoutRepository {
             phase: 'PHASE: ASANA STRENGTH',
             subtitle: 'Grounded hip stability',
             badge: '2 sets × 45 sec',
-            imageUrl: 'https://images.unsplash.com/photo-1552196563-5524e3a89047?q=80&w=1200&auto=format&fit=crop',
+            imageUrl: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1200&auto=format&fit=crop',
           ),
           ExerciseItem(
             id: 'e13_04',
@@ -971,7 +971,7 @@ class WorkoutRepository {
             phase: 'PHASE: ARM BALANCE',
             subtitle: 'Scapular elevation & balance',
             badge: '4 sets × 20 sec',
-            imageUrl: 'https://images.unsplash.com/photo-1552196563-5524e3a89047?q=80&w=1200&auto=format&fit=crop',
+            imageUrl: 'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?q=80&w=1200&auto=format&fit=crop',
           ),
           ExerciseItem(
             id: 'e14_03',

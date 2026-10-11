@@ -37,18 +37,60 @@ class RecommendationService {
       return WorkoutRepository.getMockWorkouts().first;
     }
 
-    final scored = allWorkouts.map((workout) {
+    // 1. Filter out incompatible difficulty (Beginner never gets Advanced)
+    final userLevel = profile.fitnessLevel.trim().toLowerCase();
+    List<WorkoutModel> candidates = allWorkouts;
+    if (userLevel == 'beginner') {
+      candidates = allWorkouts.where((w) => w.difficulty.trim().toLowerCase() != 'advanced').toList();
+    } else if (userLevel == 'advanced') {
+      final adv = allWorkouts.where((w) => w.difficulty.trim().toLowerCase() == 'advanced').toList();
+      if (adv.isNotEmpty) candidates = adv;
+    }
+
+    if (candidates.isEmpty) {
+      candidates = allWorkouts;
+    }
+
+    // 2. When a workout is completed today, exclude it to recommend another suitable workout
+    if (recentHistory.isNotEmpty) {
+      final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+      final completedTodayIds = recentHistory
+          .where((h) => (h['completedAt']?.toString() ?? '').startsWith(todayStr))
+          .map((h) => h['workoutId']?.toString())
+          .toSet();
+
+      final uncompletedToday = candidates.where((w) => !completedTodayIds.contains(w.id)).toList();
+      if (uncompletedToday.isNotEmpty) {
+        candidates = uncompletedToday;
+      }
+    }
+
+    final scored = candidates.map((workout) {
       double score = _scoreWorkout(workout, profile, recentHistory);
       return MapEntry(workout, score);
     }).toList();
 
     scored.sort((a, b) => b.value.compareTo(a.value));
-    return scored.first.key;
+    final best = scored.first.key;
+
+    // Display only one recommended individual workout, not a workout set
+    if (best.exercises.length > 1) {
+      final individualExercise = best.exercises.firstWhere(
+        (e) => !e.phase.toLowerCase().contains('prep'),
+        orElse: () => best.exercises.first,
+      );
+      return best.copyWith(
+        exercises: [individualExercise],
+        durationMinutes: (best.durationMinutes / best.exercises.length).ceil().clamp(5, 15),
+        calories: (best.calories / best.exercises.length).round().clamp(40, 100),
+      );
+    }
+
+    return best;
   }
 
   /// Returns the secondary recommendation for "RECOMMENDED FOR YOU"
-  /// Picks the top workout in a different category from [todaysWorkout]
-  /// to provide variety and balanced training.
+  /// Workouts match user's selected fitness level (e.g. Beginner only receives Beginner recommendations).
   static ({WorkoutModel workout, String reason}) getRecommendedForYou({
     required ProfileModel profile,
     required List<WorkoutModel> allWorkouts,
@@ -59,10 +101,19 @@ class RecommendationService {
       return (workout: WorkoutRepository.getMockWorkouts().first, reason: 'Based on activity');
     }
 
-    // Filter out today's workout to avoid recommending the same one twice
-    final candidates = allWorkouts.where((w) => w.id != todaysWorkout.id).toList();
+    // 1. Strict fitness level match so user only receives level-appropriate recommendations
+    final userLevel = profile.fitnessLevel.trim().toLowerCase();
+    List<WorkoutModel> levelWorkouts = userLevel.isNotEmpty
+        ? allWorkouts.where((w) => w.difficulty.trim().toLowerCase() == userLevel).toList()
+        : allWorkouts;
+    if (levelWorkouts.isEmpty) {
+      levelWorkouts = allWorkouts;
+    }
+
+    // 2. Filter out today's workout to avoid recommending the same one twice
+    var candidates = levelWorkouts.where((w) => w.id != todaysWorkout.id).toList();
     if (candidates.isEmpty) {
-      return (workout: allWorkouts.first, reason: 'Based on activity');
+      candidates = levelWorkouts;
     }
 
     // Prefer complementary category if available
@@ -78,11 +129,9 @@ class RecommendationService {
     final best = scored.first.key;
 
     // Generate contextual reason string
-    String reason = 'Based on activity';
+    String reason = '${profile.fitnessLevel} friendly';
     if (profile.goals.isNotEmpty) {
       reason = 'Matches: ${profile.goals.first}';
-    } else if (profile.fitnessLevel.isNotEmpty) {
-      reason = '${profile.fitnessLevel} friendly';
     }
 
     return (workout: best, reason: reason);

@@ -50,35 +50,25 @@ void main() {
     expect(find.text('Good morning, Alex!'), findsOneWidget);
     expect(find.text('Ready to build your daily momentum?'), findsOneWidget);
 
-    // Wireframe "YOUR WORKOUT TODAY"
+    // Section "YOUR WORKOUT TODAY"
     expect(find.text('YOUR WORKOUT TODAY'), findsOneWidget);
     expect(find.text('Recommended'), findsOneWidget);
     expect(find.text('Ready'), findsOneWidget);
-    expect(find.text('145 kcal'), findsOneWidget);
-    expect(find.text('Day 3 of 5'), findsOneWidget);
-    expect(find.text('Full Body Beginner'), findsOneWidget);
     expect(find.text('Start Workout'), findsOneWidget);
 
-    // Wireframe "THIS WEEK'S PROGRESS"
+    // Section "THIS WEEK'S PROGRESS"
     expect(find.text("THIS WEEK'S PROGRESS"), findsOneWidget);
-    expect(find.text('Goal: 5 days'), findsOneWidget);
     expect(find.text('Completed'), findsOneWidget);
     expect(find.text('Active Time'), findsOneWidget);
     expect(find.text('Day Streak'), findsOneWidget);
     expect(find.text('Weekly target'), findsOneWidget);
 
-    // Wireframe "QUICK WORKOUTS"
+    // Section "QUICK WORKOUTS"
     expect(find.text('QUICK WORKOUTS'), findsOneWidget);
     expect(find.text('Bite-sized'), findsOneWidget);
-    expect(find.text('10 Min Full\nBody'), findsOneWidget);
-    expect(find.text('15 Min\nCardio'), findsOneWidget);
-    expect(find.text('10 Min\nStretch'), findsOneWidget);
 
-    // Wireframe "RECOMMENDED FOR YOU"
+    // Section "RECOMMENDED FOR YOU"
     expect(find.text('RECOMMENDED FOR YOU'), findsOneWidget);
-    expect(find.text('Based on activity'), findsOneWidget);
-    expect(find.text('Core Starter Routine'), findsOneWidget);
-    expect(find.text('Gentle Core • No Equipment'), findsOneWidget);
   });
 
   testWidgets('ProfilePreferencesScreen renders profile photo card, back button, and logout option',

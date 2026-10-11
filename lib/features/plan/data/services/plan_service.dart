@@ -8,6 +8,7 @@ import 'package:fitness_app/features/workouts/data/models/workout_model.dart';
 import 'package:fitness_app/features/workouts/data/repositories/workout_repository.dart';
 import 'package:fitness_app/features/plan/data/models/plan_schedule_item.dart';
 import 'package:fitness_app/features/notifications/data/services/notification_service.dart';
+import 'package:fitness_app/features/progress/data/services/user_activity_service.dart';
 
 /// Service responsible for managing the user's weekly workout plan.
 /// Dynamically connects user's profile preferences with workouts from [WorkoutRepository].
@@ -56,27 +57,30 @@ class PlanService {
   /// Gets the count of plan workouts completed by this user in Firestore
   static Future<int> getCompletedItemCount({String? uid}) async {
     final currentUid = uid ?? AuthService.currentUser.uid;
-    if (!FirebaseService.isInitialized) {
-      final cached = _planCache[currentUid];
-      return cached?.where((it) => it.isCompleted).length ?? 0;
+    final cached = _planCache[currentUid];
+    if (cached != null) {
+      return cached.where((it) => it.isCompleted).length;
     }
 
-    try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection(_completionsCollection)
-          .where('uid', isEqualTo: currentUid)
-          .get();
-      return snapshot.docs.length;
-    } catch (e) {
-      developer.log('Error counting plan completions: $e', name: 'PlanService');
-      final cached = _planCache[currentUid];
-      return cached?.where((it) => it.isCompleted).length ?? 0;
+    final items = await getWeeklyPlan(uid: currentUid);
+    return items.where((it) => it.isCompleted).length;
+  }
+
+  static bool _hasBoundProfileNotifier = false;
+
+  static void _ensureProfileNotifierBound() {
+    if (!_hasBoundProfileNotifier) {
+      _hasBoundProfileNotifier = true;
+      ProfileService.profileNotifier.addListener(() {
+        _planCache.clear();
+      });
     }
   }
 
   /// Loads the weekly plan tailored to the user's profile, overlaying any
   /// completion status the signed-in user has saved in Firestore.
   static Future<List<PlanScheduleItem>> getWeeklyPlan({String? uid, bool forceRefresh = false}) async {
+    _ensureProfileNotifierBound();
     final currentUid = uid ?? AuthService.currentUser.uid;
     if (_planCache.containsKey(currentUid) && !forceRefresh) {
       return _planCache[currentUid]!;
@@ -99,28 +103,39 @@ class PlanService {
     List<PlanScheduleItem> plan,
     String uid,
   ) async {
-    if (!FirebaseService.isInitialized) {
-      return plan;
+    final completedIds = <String>{};
+
+    if (FirebaseService.isInitialized) {
+      try {
+        final snapshot = await FirebaseFirestore.instance
+            .collection(_completionsCollection)
+            .where('uid', isEqualTo: uid)
+            .get();
+
+        completedIds.addAll(snapshot.docs.map((doc) => doc.data()['itemId'] as String));
+      } catch (e) {
+        developer.log('Failed to load persisted plan completions: $e', name: 'PlanService');
+      }
     }
 
+    // Also check if any workouts were completed this week in UserActivityService
     try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection(_completionsCollection)
-          .where('uid', isEqualTo: uid)
-          .get();
-
-      final completedIds = snapshot.docs.map((doc) => doc.data()['itemId'] as String).toSet();
+      final thisWeeksActs = await UserActivityService.getThisWeeksActivities(uid: uid);
+      final completedWorkoutIds = thisWeeksActs.map((a) => a['workoutId']?.toString()).toSet();
+      return plan.map((item) {
+        if (completedIds.contains(item.id) || completedWorkoutIds.contains(item.workout.id)) {
+          return item.copyWith(status: PlanItemStatus.completed);
+        }
+        return item;
+      }).toList();
+    } catch (_) {
       if (completedIds.isEmpty) return plan;
-
       return plan.map((item) {
         if (completedIds.contains(item.id)) {
           return item.copyWith(status: PlanItemStatus.completed);
         }
         return item;
       }).toList();
-    } catch (e) {
-      developer.log('Failed to load persisted plan completions: $e', name: 'PlanService');
-      return plan;
     }
   }
 
@@ -129,7 +144,7 @@ class PlanService {
   static Map<String, dynamic> calculateMetrics(List<PlanScheduleItem> items) {
     final completedCount = items.where((it) => it.isCompleted).length;
     final totalCount = items.length;
-    final remainingCount = totalCount - completedCount;
+    final remainingCount = (totalCount - completedCount).clamp(0, totalCount);
     final progressFraction = totalCount > 0 ? (completedCount / totalCount).clamp(0.0, 1.0) : 0.0;
     final percentInt = (progressFraction * 100).round();
 
@@ -172,108 +187,132 @@ class PlanService {
     }
   }
 
-  /// Generates the wireframe-specified plan items enriched with profile data and linked workouts.
+  /// Parses weekday tokens (e.g. 'M1', 'W', 'Mon', 'Fri') into unique sorted weekday integers (1..7)
+  static List<int> _parseWeekdays(List<String> routineDays) {
+    final daysSet = <int>{};
+    for (final d in routineDays) {
+      final clean = d.trim().toLowerCase();
+      if (clean == 'm1' || clean == 'm' || clean == 'mon' || clean == 'monday') {
+        daysSet.add(DateTime.monday);
+      } else if (clean == 't1' || clean == 'tue' || clean == 'tuesday') {
+        daysSet.add(DateTime.tuesday);
+      } else if (clean == 'w' || clean == 'wed' || clean == 'wednesday') {
+        daysSet.add(DateTime.wednesday);
+      } else if (clean == 't2' || clean == 'th' || clean == 'thu' || clean == 'thursday') {
+        daysSet.add(DateTime.thursday);
+      } else if (clean == 'f' || clean == 'fri' || clean == 'friday') {
+        daysSet.add(DateTime.friday);
+      } else if (clean == 's1' || clean == 'sa' || clean == 'sat' || clean == 'saturday') {
+        daysSet.add(DateTime.saturday);
+      } else if (clean == 's2' || clean == 'su' || clean == 'sun' || clean == 'sunday') {
+        daysSet.add(DateTime.sunday);
+      } else if (clean == 't') {
+        if (!daysSet.contains(DateTime.tuesday)) {
+          daysSet.add(DateTime.tuesday);
+        } else {
+          daysSet.add(DateTime.thursday);
+        }
+      } else if (clean == 's') {
+        if (!daysSet.contains(DateTime.saturday)) {
+          daysSet.add(DateTime.saturday);
+        } else {
+          daysSet.add(DateTime.sunday);
+        }
+      }
+    }
+    final list = daysSet.toList()..sort();
+    return list.isNotEmpty ? list : [DateTime.monday, DateTime.wednesday, DateTime.friday];
+  }
+
+  /// Generates schedule items based solely on user's profile, routine days, and fitness level.
   static List<PlanScheduleItem> _buildScheduleFromProfile(
     ProfileModel profile,
     List<WorkoutModel> allWorkouts,
   ) {
     final userMinutes = profile.workoutMinutes;
     final level = profile.fitnessLevel;
+    final userLevel = level.trim().toLowerCase();
 
-    // Helper to find closest matching workout from repository
-    WorkoutModel findWorkout(String categoryFallback, {String? titleKeyword}) {
-      if (titleKeyword != null) {
-        final match = allWorkouts.firstWhere(
-          (w) => w.title.toLowerCase().contains(titleKeyword.toLowerCase()),
-          orElse: () => allWorkouts.first,
-        );
-        return match;
+    // 1. Strict fitness level match so Beginner/Intermediate/Advanced receive level-appropriate workouts
+    List<WorkoutModel> levelWorkouts = userLevel.isNotEmpty
+        ? allWorkouts.where((w) => w.difficulty.trim().toLowerCase() == userLevel).toList()
+        : allWorkouts;
+    if (levelWorkouts.isEmpty) {
+      levelWorkouts = allWorkouts;
+    }
+
+    // 2. Parse weekdays selected by user
+    final weekdays = _parseWeekdays(profile.weeklyRoutineDays);
+
+    // 3. Compute dates for current calendar week (Monday to Sunday)
+    final now = DateTime.now();
+    final todayMidnight = DateTime(now.year, now.month, now.day);
+    final monday = todayMidnight.subtract(Duration(days: now.weekday - 1));
+    final sunday = monday.add(const Duration(days: 6));
+
+    const monthNames = [
+      '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    final dateRangeLabel = monday.month == sunday.month
+        ? '${monthNames[monday.month]} ${monday.day} – ${sunday.day}'
+        : '${monthNames[monday.month]} ${monday.day} – ${monthNames[sunday.month]} ${sunday.day}';
+
+    const dayLabels = ['', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+
+    final items = <PlanScheduleItem>[];
+
+    for (int i = 0; i < weekdays.length; i++) {
+      final weekday = weekdays[i];
+      final itemDate = monday.add(Duration(days: weekday - 1));
+      final dayLabel = dayLabels[weekday];
+      final isToday = now.weekday == weekday;
+
+      final workout = levelWorkouts[i % levelWorkouts.length];
+
+      String? subtitleDetail;
+      String? adviceHighlight;
+      String? readyBadgeText;
+
+      final cat = workout.category.toLowerCase();
+      if (cat.contains('cardio')) {
+        subtitleDetail = 'Equipment Free';
+        adviceHighlight = 'Gentle on joints • High calorie burn';
+      } else if (cat.contains('strength')) {
+        subtitleDetail = 'Strength & Core';
+        adviceHighlight = 'Build lean muscle & endurance';
+      } else if (cat.contains('mobility') || cat.contains('recovery') || cat.contains('yoga')) {
+        subtitleDetail = 'Recovery & Balance';
+        adviceHighlight = 'Gentle mobility • Posture reset';
+      } else {
+        subtitleDetail = workout.category;
+        adviceHighlight = 'Daily habit • Target consistency';
       }
-      return allWorkouts.firstWhere(
-        (w) => w.category.toLowerCase() == categoryFallback.toLowerCase(),
-        orElse: () => allWorkouts.first,
+
+      if (isToday) {
+        readyBadgeText = 'READY';
+      }
+
+      items.add(
+        PlanScheduleItem(
+          id: 'plan_${dayLabel.toLowerCase()}_${itemDate.day}',
+          dayLabel: dayLabel,
+          dayNumber: itemDate.day,
+          assignedWeekday: weekday,
+          dateRangeLabel: dateRangeLabel,
+          status: isToday ? PlanItemStatus.todayReady : PlanItemStatus.upcoming,
+          title: workout.title,
+          durationMinutes: workout.durationMinutes > 0 ? workout.durationMinutes : userMinutes,
+          category: workout.category,
+          subtitleDetail: subtitleDetail,
+          adviceHighlight: adviceHighlight,
+          readyBadgeText: readyBadgeText,
+          imageUrl: workout.imageUrl,
+          workout: workout,
+        ),
       );
     }
 
-    final fullBodyWorkout = findWorkout('Strength', titleKeyword: 'Full Body');
-    final cardioWorkout = findWorkout('Cardio', titleKeyword: 'Tabata');
-    final strengthWorkout = findWorkout('Strength', titleKeyword: 'Pyramid');
-    final mobilityWorkout = findWorkout('Mobility', titleKeyword: 'Mobility');
-
-    return [
-      // 1. Monday
-      PlanScheduleItem(
-        id: 'plan_mon_13',
-        dayLabel: 'MON',
-        dayNumber: 13,
-        dateRangeLabel: 'Current Week',
-        status: PlanItemStatus.todayReady,
-        title: level == 'Advanced' ? 'Full Body Advanced' : 'Full Body Beginner',
-        durationMinutes: userMinutes,
-        category: 'Strength',
-        imageUrl: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=600&auto=format&fit=crop',
-        workout: fullBodyWorkout,
-      ),
-
-      // 2. Tuesday (Active Rest / Recovery)
-      PlanScheduleItem(
-        id: 'plan_tue_14',
-        dayLabel: 'TUE',
-        dayNumber: 14,
-        dateRangeLabel: 'Current Week',
-        status: PlanItemStatus.upcoming,
-        title: 'Light Core & Walk',
-        durationMinutes: 15,
-        category: 'Recovery',
-        imageUrl: 'https://images.unsplash.com/photo-1545205597-3d9d02c29597?q=80&w=600&auto=format&fit=crop',
-        workout: mobilityWorkout,
-      ),
-
-      // 3. Wednesday (Ready)
-      PlanScheduleItem(
-        id: 'plan_wed_15',
-        dayLabel: 'WED',
-        dayNumber: 15,
-        dateRangeLabel: 'Current Week',
-        status: PlanItemStatus.upcoming,
-        title: 'Low Impact Cardio',
-        durationMinutes: userMinutes,
-        category: 'Cardio',
-        subtitleDetail: 'Equipment Free',
-        adviceHighlight: 'Gentle on knees • High calorie burn',
-        readyBadgeText: 'READY',
-        imageUrl: 'https://images.unsplash.com/photo-1548690312-e3b507d8c110?q=80&w=600&auto=format&fit=crop',
-        workout: cardioWorkout,
-      ),
-
-      // 4. Friday (Upcoming)
-      PlanScheduleItem(
-        id: 'plan_fri_17',
-        dayLabel: 'FRI',
-        dayNumber: 17,
-        dateRangeLabel: 'Current Week',
-        status: PlanItemStatus.upcoming,
-        title: 'Beginner Strength',
-        durationMinutes: userMinutes,
-        category: 'Strength',
-        imageUrl: 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=600&auto=format&fit=crop',
-        workout: strengthWorkout,
-      ),
-
-      // 5. Sunday (Upcoming)
-      PlanScheduleItem(
-        id: 'plan_sun_19',
-        dayLabel: 'SUN',
-        dayNumber: 19,
-        dateRangeLabel: 'Current Week',
-        status: PlanItemStatus.upcoming,
-        title: 'Mobility & Posture Reset',
-        durationMinutes: 10,
-        category: 'Recovery',
-        imageUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=600&auto=format&fit=crop',
-        workout: mobilityWorkout,
-      ),
-    ];
+    return items;
   }
 }
 

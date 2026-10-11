@@ -9,6 +9,7 @@ import '../../data/models/profile_model.dart';
 import '../../data/services/profile_service.dart';
 import '../widgets/profile_photo_picker_dialog.dart';
 import 'settings_screen.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 
 /// Screen for viewing and updating user fitness profile & preferences.
 /// Matches the provided wireframe pixel-for-pixel.
@@ -283,16 +284,9 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
           ),
         ),
         const SizedBox(width: 4),
-        // Notification bell
-        Container(
-          width: 36,
-          height: 36,
-          alignment: Alignment.center,
-          child: const Icon(
-            Icons.notifications_none_rounded,
-            color: Color(0xFF334155),
-            size: 24,
-          ),
+        const NotificationBell(
+          size: 36,
+          iconSize: 24,
         ),
         const SizedBox(width: 8),
         // User Avatar

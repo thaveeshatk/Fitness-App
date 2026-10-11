@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/user_avatar.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 import '../../../auth/data/services/auth_service.dart';
 import '../../../profile/data/services/profile_service.dart';
 import '../../data/models/workout_model.dart';
@@ -286,6 +287,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           ),
         ),
         actions: const [
+          NotificationBell(),
+          SizedBox(width: 4),
           Padding(
             padding: EdgeInsets.only(right: 16.0),
             child: UserAvatar(radius: 17),

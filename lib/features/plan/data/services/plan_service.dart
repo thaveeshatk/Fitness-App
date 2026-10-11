@@ -7,6 +7,7 @@ import 'package:fitness_app/features/profile/data/services/profile_service.dart'
 import 'package:fitness_app/features/workouts/data/models/workout_model.dart';
 import 'package:fitness_app/features/workouts/data/repositories/workout_repository.dart';
 import 'package:fitness_app/features/plan/data/models/plan_schedule_item.dart';
+import 'package:fitness_app/features/notifications/data/services/notification_service.dart';
 
 /// Service responsible for managing the user's weekly workout plan.
 /// Dynamically connects user's profile preferences with workouts from [WorkoutRepository].
@@ -28,6 +29,13 @@ class PlanService {
     _savedDays = days;
     _savedTime = time;
     _savedIsAm = isAm;
+    
+    // Trigger notification
+    await NotificationService.onScheduleUpdated(
+      days: days,
+      time: time,
+      isAm: isAm,
+    );
     
     developer.log('Schedule saved to backend DB: days=$days, time=$time, isAm=$isAm', name: 'PlanService');
   }

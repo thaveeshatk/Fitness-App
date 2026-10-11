@@ -7,6 +7,7 @@ import '../../../../core/constants/asset_paths.dart';
 import '../../data/models/progress_data.dart';
 import '../../data/services/progress_service.dart';
 import 'history_screen.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 
 /// Progress Tracker Screen
 /// Pixel-perfect, consistent with the rest of the application screens,
@@ -182,27 +183,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
               ),
             ],
           ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              const Icon(
-                Icons.notifications_none_rounded,
-                size: 20,
-                color: Color(0xFF475569),
-              ),
-              Positioned(
-                top: 9,
-                right: 9,
-                child: Container(
-                  width: 6,
-                  height: 6,
-                  decoration: const BoxDecoration(
-                    color: _mintGreen,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
+          child: const Center(
+            child: NotificationBell(
+              size: 36,
+              iconSize: 20,
+            ),
           ),
         ),
         const SizedBox(width: 10),

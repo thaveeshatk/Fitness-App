@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fitness_app/features/plan/presentation/screens/updated_my_plan_screen.dart';
 import 'package:fitness_app/features/plan/presentation/screens/weekly_schedule_screen.dart';
+import 'package:fitness_app/features/notifications/presentation/widgets/notification_bell.dart';
+import 'package:fitness_app/features/notifications/data/services/notification_service.dart';
 
 class AdaptiveDashboardScreen extends StatelessWidget {
   const AdaptiveDashboardScreen({super.key});
@@ -44,10 +46,8 @@ class AdaptiveDashboardScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () {},
-          ),
+          const NotificationBell(),
+          const SizedBox(width: 4),
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: CircleAvatar(
@@ -679,6 +679,10 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                   elevation: 0,
                 ),
                 onPressed: () {
+                  NotificationService.onAdaptivePlanUpdated(
+                    planTitle: 'Full Body Gentle Recovery',
+                    message: 'Your plan has been adapted with 15-minute sessions to maintain consistency.',
+                  );
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => const UpdatedMyPlanScreen(),

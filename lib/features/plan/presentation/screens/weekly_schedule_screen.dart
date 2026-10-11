@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fitness_app/features/plan/data/services/plan_service.dart';
 import 'package:fitness_app/features/plan/presentation/screens/adaptive_dashboard_screen.dart';
+import 'package:fitness_app/features/notifications/presentation/widgets/notification_bell.dart';
 
 class WeeklyScheduleScreen extends StatefulWidget {
   const WeeklyScheduleScreen({super.key});
@@ -130,10 +131,8 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () {},
-          ),
+          const NotificationBell(),
+          const SizedBox(width: 4),
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: CircleAvatar(

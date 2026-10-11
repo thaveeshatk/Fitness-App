@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/user_avatar.dart';
+import '../../../profile/presentation/screens/profile_preferences_screen.dart';
 import '../../data/models/workout_model.dart';
 import 'activity_screen.dart';
 import 'exercise_guidance_screen.dart';
@@ -35,10 +36,21 @@ class WorkoutDetailScreen extends StatelessWidget {
             letterSpacing: 1.5,
           ),
         ),
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: UserAvatar(radius: 17),
+            padding: const EdgeInsets.only(right: 16.0),
+            child: UserAvatar(
+              radius: 17,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ProfilePreferencesScreen(
+                      onBack: () => Navigator.of(context).pop(),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),

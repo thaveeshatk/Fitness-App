@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/services/firebase_service.dart';
 import '../../../auth/data/services/auth_service.dart';
@@ -13,6 +14,9 @@ class ProfileService {
   static const String _collection = 'user_profiles';
   static final Map<String, ProfileModel> _cache = {};
 
+  /// Global notifier that broadcasts when the user's profile is updated or saved.
+  static final ValueNotifier<ProfileModel?> profileNotifier = ValueNotifier<ProfileModel?>(null);
+
   /// Gets the current profile for the authenticated user (from cache or initial fallback).
   static ProfileModel get currentProfile {
     final uid = AuthService.currentUser.uid;
@@ -22,6 +26,7 @@ class ProfileService {
   /// Clears the local in-memory profile cache
   static void clearCache() {
     _cache.clear();
+    profileNotifier.value = null;
   }
 
   /// Saves the profile to Firestore under the signed-in user's own document and updates cache.
@@ -29,6 +34,7 @@ class ProfileService {
   static Future<void> saveProfile(ProfileModel profile, {String? docId}) async {
     final resolvedDocId = docId ?? AuthService.currentUser.uid;
     _cache[resolvedDocId] = profile;
+    profileNotifier.value = profile;
 
     // Trigger system notification for profile update
     await NotificationService.onProfileUpdated(

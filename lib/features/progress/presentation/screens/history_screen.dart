@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/asset_paths.dart';
 import 'goals_screen.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
+import '../../../auth/data/services/auth_service.dart';
+import '../../data/services/user_activity_service.dart';
+import '../../../../core/widgets/user_avatar.dart';
+import '../../../profile/presentation/screens/profile_preferences_screen.dart';
+import '../../../workouts/data/repositories/workout_repository.dart';
 
 // ── Data model for a single workout history entry ────────────────────────────
 class WorkoutHistoryEntry {
@@ -13,6 +17,7 @@ class WorkoutHistoryEntry {
   final String duration;
   final String kcal;
   final String category; // 'Strength' | 'Cardio' | 'Mobility' | 'Recovery'
+  final String? imageUrl;
   final bool isRest;
   final IconData? restIcon;
   final Color? restIconColor;
@@ -24,6 +29,7 @@ class WorkoutHistoryEntry {
     required this.duration,
     required this.kcal,
     required this.category,
+    this.imageUrl,
     this.isRest = false,
     this.restIcon,
     this.restIconColor,
@@ -31,112 +37,11 @@ class WorkoutHistoryEntry {
   });
 }
 
-// ── Full dataset (September routine — 14 sessions) ───────────────────────────
-const _allWorkouts = <WorkoutHistoryEntry>[
-  WorkoutHistoryEntry(
-    date: 'THU, 18 SEP',
-    title: 'Full Body Strength',
-    duration: '25 min',
-    kcal: '180 kcal',
-    category: 'Strength',
-  ),
-  WorkoutHistoryEntry(
-    date: 'WED, 17 SEP',
-    title: 'Gentle Cardio Blast',
-    duration: '20 min',
-    kcal: '145 kcal',
-    category: 'Cardio',
-  ),
-  WorkoutHistoryEntry(
-    date: 'TUE, 16 SEP',
-    title: 'Morning Yoga Flow',
-    duration: '18 min',
-    kcal: '80 kcal',
-    category: 'Mobility',
-  ),
-  WorkoutHistoryEntry(
-    date: 'MON, 15 SEP',
-    title: 'Upper Body Light Strength',
-    duration: '20 min',
-    kcal: '130 kcal',
-    category: 'Strength',
-  ),
-  WorkoutHistoryEntry(
-    date: 'SAT, 13 SEP',
-    title: 'Morning Mobility & Core',
-    duration: '15 min',
-    kcal: '95 kcal',
-    category: 'Mobility',
-  ),
-  WorkoutHistoryEntry(
-    date: 'FRI, 12 SEP',
-    title: 'Interval Run',
-    duration: '22 min',
-    kcal: '210 kcal',
-    category: 'Cardio',
-  ),
-  WorkoutHistoryEntry(
-    date: 'THU, 11 SEP',
-    title: 'Rest & Active Recovery',
-    duration: '10 min',
-    kcal: '45 kcal',
-    category: 'Recovery',
-    isRest: true,
-  ),
-  WorkoutHistoryEntry(
-    date: 'WED, 10 SEP',
-    title: 'Lower Body Strength',
-    duration: '28 min',
-    kcal: '195 kcal',
-    category: 'Strength',
-  ),
-  WorkoutHistoryEntry(
-    date: 'TUE, 9 SEP',
-    title: 'Hip & Spine Mobility',
-    duration: '20 min',
-    kcal: '70 kcal',
-    category: 'Mobility',
-  ),
-  WorkoutHistoryEntry(
-    date: 'MON, 8 SEP',
-    title: 'Power Walk Cardio',
-    duration: '30 min',
-    kcal: '165 kcal',
-    category: 'Cardio',
-  ),
-  WorkoutHistoryEntry(
-    date: 'SAT, 6 SEP',
-    title: 'Core & Shoulders',
-    duration: '22 min',
-    kcal: '140 kcal',
-    category: 'Strength',
-  ),
-  WorkoutHistoryEntry(
-    date: 'FRI, 5 SEP',
-    title: 'Stretching & Breathwork',
-    duration: '15 min',
-    kcal: '55 kcal',
-    category: 'Mobility',
-  ),
-  WorkoutHistoryEntry(
-    date: 'WED, 3 SEP',
-    title: 'HIIT Circuit',
-    duration: '20 min',
-    kcal: '220 kcal',
-    category: 'Cardio',
-  ),
-  WorkoutHistoryEntry(
-    date: 'MON, 1 SEP',
-    title: 'Full Body Foundation',
-    duration: '25 min',
-    kcal: '175 kcal',
-    category: 'Strength',
-  ),
-];
-
 // ── Screen ───────────────────────────────────────────────────────────────────
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+  final Function(int)? onNavigateToTab;
+
+  const HistoryScreen({super.key, this.onNavigateToTab});
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
@@ -149,11 +54,87 @@ class _HistoryScreenState extends State<HistoryScreen> {
   static const Color _darkTeal = Color(0xFF0A4D4E);
 
   String _selectedFilter = 'All';
+  List<WorkoutHistoryEntry> _userWorkouts = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+    AuthService.userNotifier.addListener(_onAuthChanged);
+  }
+
+  @override
+  void dispose() {
+    AuthService.userNotifier.removeListener(_onAuthChanged);
+    super.dispose();
+  }
+
+  void _onAuthChanged() {
+    if (mounted) _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    final activities = await UserActivityService.getAllActivities();
+    final systemWorkouts = WorkoutRepository.getMockWorkouts();
+
+    final entries = activities.map((act) {
+      final isoDate = act['completedAt']?.toString();
+      final title = act['workoutTitle']?.toString() ?? 'Workout Session';
+      final workoutId = act['workoutId']?.toString();
+
+      // Resolve matching workout image from act record or system workouts library
+      String? resolvedImageUrl = act['imageUrl']?.toString();
+      if (resolvedImageUrl == null || resolvedImageUrl.isEmpty) {
+        final match = systemWorkouts.where(
+          (w) => (workoutId != null && w.id == workoutId) || w.title.toLowerCase() == title.toLowerCase(),
+        ).firstOrNull;
+        resolvedImageUrl = match?.imageUrl;
+      }
+
+      return WorkoutHistoryEntry(
+        date: _formatWorkoutDate(isoDate),
+        title: title,
+        duration: '${act['durationMinutes'] ?? 20} min',
+        kcal: '${act['calories'] ?? 150} kcal',
+        category: act['category']?.toString() ?? 'Strength',
+        imageUrl: resolvedImageUrl,
+      );
+    }).toList();
+
+    if (mounted) {
+      setState(() {
+        _userWorkouts = entries;
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _formatWorkoutDate(String? isoString) {
+    if (isoString == null) return 'RECENT';
+    final dt = DateTime.tryParse(isoString);
+    if (dt == null) return 'RECENT';
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final itemDay = DateTime(dt.year, dt.month, dt.day);
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    const weekdays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+    final mStr = months[dt.month - 1];
+    final dStr = dt.day.toString();
+    if (itemDay == today) {
+      return 'TODAY, $dStr $mStr';
+    } else if (itemDay == today.subtract(const Duration(days: 1))) {
+      return 'YESTERDAY, $dStr $mStr';
+    } else {
+      final wStr = weekdays[dt.weekday - 1];
+      return '$wStr, $dStr $mStr';
+    }
+  }
 
   List<WorkoutHistoryEntry> get _filteredWorkouts {
-    if (_selectedFilter == 'All') return _allWorkouts;
-    return _allWorkouts
-        .where((w) => w.category == _selectedFilter)
+    if (_selectedFilter == 'All') return _userWorkouts;
+    return _userWorkouts
+        .where((w) => w.category.toLowerCase() == _selectedFilter.toLowerCase())
         .toList();
   }
 
@@ -218,31 +199,41 @@ class _HistoryScreenState extends State<HistoryScreen> {
               child: _buildTopHeader(context),
             ),
             Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 12),
-                    _buildBanner(context),
-                    const SizedBox(height: 24),
-                    _buildFilters(),
-                    const SizedBox(height: 20),
-                    _buildHistoryList(filtered),
-                    const SizedBox(height: 24),
-                    Center(
-                      child: Text(
-                        'Consistency beats intensity. Every session counts!',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w500,
+              child: RefreshIndicator(
+                color: _primaryTeal,
+                onRefresh: _loadHistory,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 12),
+                      _buildBanner(context),
+                      const SizedBox(height: 24),
+                      _buildFilters(),
+                      const SizedBox(height: 20),
+                      if (_isLoading)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 40),
+                          child: Center(child: CircularProgressIndicator(color: _primaryTeal)),
+                        )
+                      else
+                        _buildHistoryList(filtered),
+                      const SizedBox(height: 24),
+                      Center(
+                        child: Text(
+                          'Consistency beats intensity. Every session counts!',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 40),
-                  ],
+                      const SizedBox(height: 40),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -295,40 +286,55 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
         ),
         const SizedBox(width: 10),
-        Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: _mintGreen, width: 1.5),
-          ),
-          child: ClipOval(
-            child: Image.asset(
-              AssetPaths.userAvatar,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                color: _primaryTeal,
-                child: const Icon(Icons.person_rounded, color: Colors.white, size: 20),
-              ),
-            ),
-          ),
+        UserAvatar(
+          radius: 19,
+          border: Border.all(color: _mintGreen, width: 1.5),
+          onTap: () {
+            if (widget.onNavigateToTab != null) {
+              Navigator.of(context).pop();
+              widget.onNavigateToTab!(4);
+            } else {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => ProfilePreferencesScreen(
+                    onBack: () => Navigator.of(context).pop(),
+                  ),
+                ),
+              );
+            }
+          },
         ),
       ],
     );
   }
 
   Widget _buildBanner(BuildContext context) {
+    final totalMins = _userWorkouts.fold<int>(
+      0,
+      (s, w) => s + (int.tryParse(w.duration.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0),
+    );
+    final totalCalories = _userWorkouts.fold<int>(
+      0,
+      (s, w) => s + (int.tryParse(w.kcal.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0),
+    );
+
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GoalsScreen()));
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => GoalsScreen(
+              onNavigateToTab: widget.onNavigateToTab,
+            ),
+          ),
+        );
       },
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: _mintGreenTint,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: _mintGreen.withOpacity(0.3)),
+          border: Border.all(color: _mintGreen.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
@@ -339,7 +345,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -348,7 +354,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         const Icon(Icons.calendar_today_rounded, size: 10, color: _primaryTeal),
                         const SizedBox(width: 4),
                         Text(
-                          'SEPTEMBER ROUTINE',
+                          'ACTIVE TRAINING HISTORY',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 9,
                             fontWeight: FontWeight.w800,
@@ -361,7 +367,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '${_allWorkouts.length} workouts completed',
+                    '${_userWorkouts.length} workouts completed',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
@@ -374,7 +380,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       const Icon(Icons.timer_outlined, size: 14, color: _primaryTeal),
                       const SizedBox(width: 4),
                       Text(
-                        '350 active mins\nlogged',
+                        '$totalMins active mins\nlogged',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -383,12 +389,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      Container(width: 1, height: 24, color: _primaryTeal.withOpacity(0.2)),
+                      Container(width: 1, height: 24, color: _primaryTeal.withValues(alpha: 0.2)),
                       const SizedBox(width: 16),
-                      const Icon(Icons.trending_up_rounded, size: 14, color: _primaryTeal),
+                      const Icon(Icons.local_fire_department_rounded, size: 14, color: Color(0xFFEF4444)),
                       const SizedBox(width: 4),
                       Text(
-                        'Steady\nmomentum',
+                        '$totalCalories kcal\nburned',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -408,7 +414,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 color: Colors.white,
                 shape: BoxShape.circle,
                 boxShadow: [
-                  BoxShadow(color: _mintGreen.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4)),
+                  BoxShadow(color: _mintGreen.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4)),
                 ],
               ),
               child: const Icon(Icons.check_rounded, color: _mintGreen, size: 28),
@@ -438,11 +444,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _filterPill(String title, IconData icon) {
-    final isSelected = _selectedFilter == title;
+    final isSelected = _selectedFilter.toLowerCase() == title.toLowerCase();
     // Count matching items for the badge
     final count = title == 'All'
-        ? _allWorkouts.length
-        : _allWorkouts.where((w) => w.category == title).length;
+        ? _userWorkouts.length
+        : _userWorkouts.where((w) => w.category.toLowerCase() == title.toLowerCase()).length;
 
     return GestureDetector(
       onTap: () {
@@ -457,7 +463,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: isSelected ? _primaryTeal : AppColors.cardBorder),
           boxShadow: isSelected
-              ? [BoxShadow(color: _primaryTeal.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 2))]
+              ? [BoxShadow(color: _primaryTeal.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, 2))]
               : [],
         ),
         child: Row(
@@ -476,7 +482,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.white.withOpacity(0.25) : const Color(0xFFF1F5F9),
+                color: isSelected ? Colors.white.withValues(alpha: 0.25) : const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -517,15 +523,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
           Container(
             width: 72,
             height: 72,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF1F5F9),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.search_off_rounded, size: 34, color: AppColors.textMuted),
           ),
           const SizedBox(height: 16),
           Text(
-            'No $_selectedFilter sessions yet',
+            _selectedFilter == 'All'
+                ? 'No workouts completed yet'
+                : 'No $_selectedFilter sessions yet',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 15,
               fontWeight: FontWeight.w700,
@@ -534,7 +542,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            'Complete a $_selectedFilter workout to\nsee it logged here.',
+            _selectedFilter == 'All'
+                ? 'Complete your first workout to see your detailed training history here.'
+                : 'Complete a $_selectedFilter workout to see it logged here.',
             textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12,
@@ -560,7 +570,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.cardBorder),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 2)),
+            BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 2)),
           ],
         ),
         child: Row(
@@ -591,18 +601,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       )
                     : Stack(
                         children: [
-                          Image.asset(
-                            AssetPaths.heroWorkout,
-                            width: 64,
-                            height: 64,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              width: 64,
-                              height: 64,
-                              color: accentBg,
-                              child: Center(child: Icon(icon, color: accentColor, size: 28)),
-                            ),
-                          ),
+                          _buildWorkoutThumbnail(entry, accentBg, icon, accentColor),
                           Positioned(
                             bottom: 4,
                             right: 4,
@@ -611,7 +610,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 shape: BoxShape.circle,
-                                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4)],
+                                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4)],
                               ),
                               child: Icon(icon, size: 10, color: accentColor),
                             ),
@@ -729,15 +728,60 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ),
             // Chevron
-            Center(
+            const Center(
               child: Padding(
-                padding: const EdgeInsets.only(right: 12),
+                padding: EdgeInsets.only(right: 12),
                 child: Icon(Icons.chevron_right_rounded, color: AppColors.cardBorder, size: 22),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildWorkoutThumbnail(
+    WorkoutHistoryEntry entry,
+    Color fallbackBg,
+    IconData fallbackIcon,
+    Color fallbackColor,
+  ) {
+    final imgUrl = entry.imageUrl;
+    if (imgUrl != null && imgUrl.isNotEmpty) {
+      if (imgUrl.startsWith('http')) {
+        return Image.network(
+          imgUrl,
+          width: 64,
+          height: 64,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Container(
+            width: 64,
+            height: 64,
+            color: fallbackBg,
+            child: Center(child: Icon(fallbackIcon, color: fallbackColor, size: 28)),
+          ),
+        );
+      } else {
+        return Image.asset(
+          imgUrl,
+          width: 64,
+          height: 64,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Container(
+            width: 64,
+            height: 64,
+            color: fallbackBg,
+            child: Center(child: Icon(fallbackIcon, color: fallbackColor, size: 28)),
+          ),
+        );
+      }
+    }
+
+    return Container(
+      width: 64,
+      height: 64,
+      color: fallbackBg,
+      child: Center(child: Icon(fallbackIcon, color: fallbackColor, size: 28)),
     );
   }
 }

@@ -1,17 +1,118 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/asset_paths.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
+import '../../../auth/data/services/auth_service.dart';
+import '../../../profile/data/services/profile_service.dart';
+import '../../data/services/user_activity_service.dart';
+import '../../../../core/widgets/user_avatar.dart';
+import '../../../profile/presentation/screens/profile_preferences_screen.dart';
 
-class GoalsScreen extends StatelessWidget {
-  const GoalsScreen({super.key});
+class GoalsScreen extends StatefulWidget {
+  final Function(int)? onNavigateToTab;
+
+  const GoalsScreen({super.key, this.onNavigateToTab});
 
   static const Color _primaryTeal = Color(0xFF00635A);
   static const Color _mintGreen = Color(0xFF00D18D);
   static const Color _mintGreenTint = Color(0xFFE6FAF3);
   static const Color _darkTeal = Color(0xFF0A4D4E);
+
+  @override
+  State<GoalsScreen> createState() => _GoalsScreenState();
+}
+
+class _GoalsScreenState extends State<GoalsScreen> {
+  String _userName = 'Alex';
+  int _targetDays = 3;
+  int _completedDays = 0;
+  int _streak = 0;
+  int _percent = 0;
+  int _totalWorkouts = 0;
+  int _totalMinutes = 0;
+  List<bool> _completedDayFlags = List.filled(7, false);
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGoalData();
+    AuthService.userNotifier.addListener(_onAuthChanged);
+    ProfileService.profileNotifier.addListener(_onProfileChanged);
+  }
+
+  @override
+  void dispose() {
+    AuthService.userNotifier.removeListener(_onAuthChanged);
+    ProfileService.profileNotifier.removeListener(_onProfileChanged);
+    super.dispose();
+  }
+
+  void _onAuthChanged() {
+    if (mounted) _loadGoalData(forceRefresh: true);
+  }
+
+  void _onProfileChanged() {
+    if (mounted) _loadGoalData(forceRefresh: true);
+  }
+
+  Future<void> _loadGoalData({bool forceRefresh = false}) async {
+    final currentUid = AuthService.currentUser.uid;
+    final user = AuthService.currentUser;
+
+    try {
+      final profile = await ProfileService.getProfile(docId: currentUid, forceRefresh: forceRefresh);
+      final progress = await UserActivityService.getWeeklyProgress(uid: currentUid);
+      final allActivities = await UserActivityService.getAllActivities(uid: currentUid);
+      final thisWeeksActivities = await UserActivityService.getThisWeeksActivities(uid: currentUid);
+      final totalMinutes = allActivities.fold<int>(
+        0,
+        (sum, act) => sum + ((act['durationMinutes'] as num?)?.toInt() ?? 0),
+      );
+
+      final target = profile.weeklyRoutineDays.isNotEmpty ? profile.weeklyRoutineDays.length : 3;
+      final completed = (progress['completed'] as int?) ?? 0;
+      final streak = (progress['streak'] as int?) ?? 0;
+      final percent = target > 0 ? ((completed / target) * 100).round() : 0;
+
+      // 7 days of this week (Mon-Sun)
+      final now = DateTime.now();
+      final startOfWeek = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1));
+      final List<bool> flags = List.filled(7, false);
+
+      for (int i = 0; i < 7; i++) {
+        final d = startOfWeek.add(Duration(days: i));
+        flags[i] = thisWeeksActivities.any((a) {
+          final completedAtStr = a['completedAt']?.toString();
+          if (completedAtStr == null) return false;
+          final actDate = DateTime.tryParse(completedAtStr);
+          return actDate != null &&
+              actDate.year == d.year &&
+              actDate.month == d.month &&
+              actDate.day == d.day;
+        });
+      }
+
+      if (mounted) {
+        setState(() {
+          _userName = user.name;
+          _targetDays = target;
+          _completedDays = completed;
+          _streak = streak;
+          _percent = percent;
+          _totalWorkouts = allActivities.length;
+          _totalMinutes = totalMinutes;
+          _completedDayFlags = flags;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,50 +127,69 @@ class GoalsScreen extends StatelessWidget {
               child: _buildTopHeader(context),
             ),
             Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 12),
-                    _buildGreeting(),
-                    const SizedBox(height: 20),
-                    _buildMainObjectiveCard(),
-                    const SizedBox(height: 16),
-                    _buildStreakCard(),
-                    const SizedBox(height: 24),
-                    _buildSectionHeader('Active Challenges', '2 Ongoing'),
-                    const SizedBox(height: 16),
-                    _buildChallengeCard(
-                      title: 'Consistency Starter',
-                      subtitle: 'Work out 3 days in a row',
-                      icon: Icons.repeat_rounded,
-                      iconBg: _mintGreenTint,
-                      iconColor: _primaryTeal,
-                      status: 'In Progress',
-                      progress: 0.66,
-                      progressText: '2 / 3 days (66%)',
-                    ),
-                    const SizedBox(height: 12),
-                    _buildChallengeCard(
-                      title: 'Weekend Warrior',
-                      subtitle: 'Complete 1 weekend mobility session',
-                      icon: Icons.self_improvement_rounded,
-                      iconBg: const Color(0xFFFEF3C7),
-                      iconColor: const Color(0xFFD97706),
-                      status: 'upcoming',
-                      rewardText: 'Reward: Consistency Badge',
-                      unlocksText: 'Unlocks Sat',
-                    ),
-                    const SizedBox(height: 24),
-                    _buildSectionHeader('Achievements & Badges', 'View All'),
-                    const SizedBox(height: 16),
-                    _buildBadgesGrid(),
-                    const SizedBox(height: 24),
-                    _buildGentleReminder(),
-                    const SizedBox(height: 40),
-                  ],
+              child: RefreshIndicator(
+                color: GoalsScreen._primaryTeal,
+                onRefresh: _loadGoalData,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 12),
+                      _buildGreeting(),
+                      const SizedBox(height: 20),
+                      if (_isLoading)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 60),
+                          child: Center(
+                            child: CircularProgressIndicator(color: GoalsScreen._primaryTeal),
+                          ),
+                        )
+                      else ...[
+                        _buildMainObjectiveCard(),
+                        const SizedBox(height: 16),
+                        _buildStreakCard(),
+                        const SizedBox(height: 24),
+                        _buildSectionHeader('Active Challenges', '2 Ongoing'),
+                        const SizedBox(height: 16),
+                        _buildChallengeCard(
+                          title: 'Consistency Starter',
+                          subtitle: 'Work out 3 days in a row',
+                          icon: Icons.repeat_rounded,
+                          iconBg: GoalsScreen._mintGreenTint,
+                          iconColor: GoalsScreen._primaryTeal,
+                          status: _streak >= 3 ? 'Completed' : 'In Progress',
+                          progress: (_streak / 3).clamp(0.0, 1.0),
+                          progressText: _streak >= 3
+                              ? '3 / 3 days (100%)'
+                              : '$_streak / 3 days (${((_streak / 3) * 100).round()}%)',
+                        ),
+                        const SizedBox(height: 12),
+                        _buildChallengeCard(
+                          title: 'Weekend Warrior',
+                          subtitle: 'Complete 1 weekend mobility session',
+                          icon: Icons.self_improvement_rounded,
+                          iconBg: const Color(0xFFFEF3C7),
+                          iconColor: const Color(0xFFD97706),
+                          status: _completedDayFlags[5] || _completedDayFlags[6]
+                              ? 'Completed'
+                              : 'Upcoming',
+                          rewardText: 'Reward: Consistency Badge',
+                          unlocksText: _completedDayFlags[5] || _completedDayFlags[6]
+                              ? 'Unlocked 🎉'
+                              : 'Unlocks Sat/Sun',
+                        ),
+                        const SizedBox(height: 24),
+                        _buildSectionHeader('Achievements & Badges', 'View All'),
+                        const SizedBox(height: 16),
+                        _buildBadgesGrid(),
+                        const SizedBox(height: 24),
+                        _buildGentleReminder(),
+                        const SizedBox(height: 40),
+                      ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -122,23 +242,23 @@ class GoalsScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 10),
-        Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: _mintGreen, width: 1.5),
-          ),
-          child: ClipOval(
-            child: Image.asset(
-              AssetPaths.userAvatar,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                color: _primaryTeal,
-                child: const Icon(Icons.person_rounded, color: Colors.white, size: 20),
-              ),
-            ),
-          ),
+        UserAvatar(
+          radius: 19,
+          border: Border.all(color: GoalsScreen._mintGreen, width: 1.5),
+          onTap: () {
+            if (widget.onNavigateToTab != null) {
+              Navigator.of(context).pop();
+              widget.onNavigateToTab!(4);
+            } else {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => ProfilePreferencesScreen(
+                    onBack: () => Navigator.of(context).pop(),
+                  ),
+                ),
+              );
+            }
+          },
         ),
       ],
     );
@@ -163,7 +283,7 @@ class GoalsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              "You're in the flow, Alex!",
+              _completedDays > 0 ? "You're in the flow, $_userName!" : "Welcome to your goals, $_userName!",
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -181,21 +301,23 @@ class GoalsScreen extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.cardBorder),
           ),
-          child: const Icon(Icons.share_outlined, size: 16, color: _primaryTeal),
+          child: const Icon(Icons.share_outlined, size: 16, color: GoalsScreen._primaryTeal),
         ),
       ],
     );
   }
 
   Widget _buildMainObjectiveCard() {
+    final daysRemainingInWeek = 7 - DateTime.now().weekday;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _darkTeal,
+        color: GoalsScreen._darkTeal,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: _darkTeal.withOpacity(0.3),
+            color: GoalsScreen._darkTeal.withValues(alpha: 0.3),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -214,13 +336,13 @@ class GoalsScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.check_circle_outline_rounded, size: 12, color: _mintGreen),
+                        const Icon(Icons.check_circle_outline_rounded, size: 12, color: GoalsScreen._mintGreen),
                         const SizedBox(width: 4),
                         Text(
                           'Main Objective',
@@ -235,7 +357,7 @@ class GoalsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Complete 5\nworkouts this week',
+                    'Complete $_targetDays\nworkouts this week',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
@@ -249,11 +371,11 @@ class GoalsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '60%',
+                    '$_percent%',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 28,
                       fontWeight: FontWeight.w800,
-                      color: _mintGreen,
+                      color: GoalsScreen._mintGreen,
                       letterSpacing: -1,
                     ),
                   ),
@@ -262,7 +384,7 @@ class GoalsScreen extends StatelessWidget {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
@@ -270,17 +392,17 @@ class GoalsScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          // Segmented progress
+          // Segmented progress for Mon through Sun
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildDaySegment('M', true),
-              _buildDaySegment('T', true),
-              _buildDaySegment('W', true),
-              _buildDaySegment('T', false),
-              _buildDaySegment('F', false),
-              _buildDaySegment('S', false),
-              _buildDaySegment('S', false),
+              _buildDaySegment('M', _completedDayFlags[0]),
+              _buildDaySegment('T', _completedDayFlags[1]),
+              _buildDaySegment('W', _completedDayFlags[2]),
+              _buildDaySegment('T', _completedDayFlags[3]),
+              _buildDaySegment('F', _completedDayFlags[4]),
+              _buildDaySegment('S', _completedDayFlags[5]),
+              _buildDaySegment('S', _completedDayFlags[6]),
             ],
           ),
           const SizedBox(height: 20),
@@ -289,10 +411,10 @@ class GoalsScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.check_circle_rounded, size: 14, color: _mintGreen),
+                  const Icon(Icons.check_circle_rounded, size: 14, color: GoalsScreen._mintGreen),
                   const SizedBox(width: 6),
                   Text(
-                    '3 / 5 workouts completed',
+                    '$_completedDays / $_targetDays workouts completed',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -303,14 +425,14 @@ class GoalsScreen extends StatelessWidget {
               ),
               Row(
                 children: [
-                  Icon(Icons.access_time_rounded, size: 14, color: Colors.white.withOpacity(0.8)),
+                  Icon(Icons.access_time_rounded, size: 14, color: Colors.white.withValues(alpha: 0.8)),
                   const SizedBox(width: 6),
                   Text(
-                    '2 days left',
+                    daysRemainingInWeek > 0 ? '$daysRemainingInWeek days left' : 'Last day of week',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
@@ -330,7 +452,7 @@ class GoalsScreen extends StatelessWidget {
             height: 6,
             margin: const EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
-              color: isCompleted ? _mintGreen : Colors.white.withOpacity(0.2),
+              color: isCompleted ? GoalsScreen._mintGreen : Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(3),
             ),
           ),
@@ -340,7 +462,7 @@ class GoalsScreen extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 10,
               fontWeight: FontWeight.w700,
-              color: isCompleted ? Colors.white : Colors.white.withOpacity(0.5),
+              color: isCompleted ? Colors.white : Colors.white.withValues(alpha: 0.5),
             ),
           ),
         ],
@@ -357,7 +479,7 @@ class GoalsScreen extends StatelessWidget {
         border: Border.all(color: AppColors.cardBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -382,7 +504,7 @@ class GoalsScreen extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      '4-Day Streak',
+                      '$_streak-Day Streak',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
@@ -393,15 +515,15 @@ class GoalsScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFEE2E2),
+                        color: _streak > 0 ? const Color(0xFFFEE2E2) : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        'Active',
+                        _streak > 0 ? 'Active' : 'Start Today',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 9,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFFEF4444),
+                          color: _streak > 0 ? const Color(0xFFEF4444) : AppColors.textSecondary,
                         ),
                       ),
                     ),
@@ -409,7 +531,9 @@ class GoalsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Personal best: 5 days. Keep the momentum!',
+                  _streak > 0
+                      ? 'Keep the momentum going! Every session counts.'
+                      : 'Complete a workout today to light up your streak flame!',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     color: AppColors.textSecondary,
@@ -470,7 +594,7 @@ class GoalsScreen extends StatelessWidget {
         border: Border.all(color: AppColors.cardBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -517,7 +641,9 @@ class GoalsScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: status == 'In Progress' ? _mintGreenTint : const Color(0xFFF1F5F9),
+                  color: status == 'Completed'
+                      ? const Color(0xFFD1FAE5)
+                      : (status == 'In Progress' ? GoalsScreen._mintGreenTint : const Color(0xFFF1F5F9)),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -525,7 +651,9 @@ class GoalsScreen extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
-                    color: status == 'In Progress' ? _primaryTeal : AppColors.textSecondary,
+                    color: status == 'Completed'
+                        ? const Color(0xFF047857)
+                        : (status == 'In Progress' ? GoalsScreen._primaryTeal : AppColors.textSecondary),
                   ),
                 ),
               ),
@@ -561,7 +689,7 @@ class GoalsScreen extends StatelessWidget {
                 value: progress,
                 minHeight: 6,
                 backgroundColor: const Color(0xFFF1F5F9),
-                valueColor: const AlwaysStoppedAnimation<Color>(_primaryTeal),
+                valueColor: const AlwaysStoppedAnimation<Color>(GoalsScreen._primaryTeal),
               ),
             ),
           ],
@@ -570,7 +698,7 @@ class GoalsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFFFEF3C7).withOpacity(0.5),
+                color: const Color(0xFFFEF3C7).withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -604,66 +732,235 @@ class GoalsScreen extends StatelessWidget {
   }
 
   Widget _buildBadgesGrid() {
-    return Row(
+    final isFirstWorkoutUnlocked = _totalWorkouts >= 1;
+    final isTargetAchieverUnlocked = _completedDays >= _targetDays && _targetDays > 0;
+    final isConsistencyChampionUnlocked = _totalWorkouts >= 5;
+    final isCenturyClubUnlocked = _totalMinutes >= 100;
+
+    return Column(
       children: [
-        Expanded(child: _badgeItem('First\nMilestone', Icons.stars_rounded, _mintGreen, true)),
-        const SizedBox(width: 12),
-        Expanded(child: _badgeItem('Streak\nMaster', Icons.local_fire_department_rounded, const Color(0xFFD97706), true)),
-        const SizedBox(width: 12),
-        Expanded(child: _badgeItem('Core\nExplorer', Icons.fitness_center_rounded, AppColors.textMuted, false)),
+        Row(
+          children: [
+            // Badge 1: 🥇 First Workout Badge
+            Expanded(
+              child: _badgeCard(
+                title: 'First Workout',
+                badgeEmoji: '🥇',
+                accentColor: const Color(0xFFD97706),
+                unlocked: isFirstWorkoutUnlocked,
+                progress: isFirstWorkoutUnlocked ? 1.0 : (_totalWorkouts / 1.0),
+                progressText: isFirstWorkoutUnlocked ? '1 / 1 (100%)' : '0 / 1 workout',
+                remainingText: isFirstWorkoutUnlocked ? 'Unlocked 🎉' : '1 session left',
+                description: 'Complete 1st workout',
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Badge 2: 🎯 Target Achiever
+            Expanded(
+              child: _badgeCard(
+                title: 'Target Achiever',
+                badgeEmoji: '🎯',
+                accentColor: GoalsScreen._primaryTeal,
+                unlocked: isTargetAchieverUnlocked,
+                progress: _targetDays > 0 ? (_completedDays / _targetDays).clamp(0.0, 1.0) : 0.0,
+                progressText: isTargetAchieverUnlocked
+                    ? '$_completedDays / $_targetDays (100%)'
+                    : '$_completedDays / $_targetDays days',
+                remainingText: isTargetAchieverUnlocked
+                    ? 'Unlocked 🎉'
+                    : '${math.max(1, _targetDays - _completedDays)} sessions left',
+                description: 'Hit weekly target',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            // Badge 3: ⚡ Consistency Champion
+            Expanded(
+              child: _badgeCard(
+                title: 'Consistency\nChampion',
+                badgeEmoji: '⚡',
+                accentColor: const Color(0xFFF59E0B),
+                unlocked: isConsistencyChampionUnlocked,
+                progress: (_totalWorkouts / 5.0).clamp(0.0, 1.0),
+                progressText: isConsistencyChampionUnlocked
+                    ? '$_totalWorkouts / 5 (100%)'
+                    : '$_totalWorkouts / 5 workouts',
+                remainingText: isConsistencyChampionUnlocked
+                    ? 'Unlocked 🎉'
+                    : '${math.max(1, 5 - _totalWorkouts)} sessions left',
+                description: 'Log 5 workouts',
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Badge 4: ⏱️ Century Club
+            Expanded(
+              child: _badgeCard(
+                title: 'Century Club',
+                badgeEmoji: '⏱️',
+                accentColor: const Color(0xFF0D9488),
+                unlocked: isCenturyClubUnlocked,
+                progress: (_totalMinutes / 100.0).clamp(0.0, 1.0),
+                progressText: isCenturyClubUnlocked
+                    ? '${_totalMinutes}m / 100m'
+                    : '${_totalMinutes}m / 100m',
+                remainingText: isCenturyClubUnlocked
+                    ? 'Unlocked 🎉'
+                    : '${math.max(1, 100 - _totalMinutes)}m left',
+                description: '100 active mins',
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
 
-  Widget _badgeItem(String title, IconData icon, Color color, bool unlocked) {
+  Widget _badgeCard({
+    required String title,
+    required String badgeEmoji,
+    required Color accentColor,
+    required bool unlocked,
+    required double progress,
+    required String progressText,
+    required String remainingText,
+    required String description,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: unlocked ? color.withOpacity(0.5) : AppColors.cardBorder),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: unlocked ? accentColor.withValues(alpha: 0.45) : AppColors.cardBorder,
+          width: unlocked ? 1.5 : 1.0,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            color: unlocked
+                ? accentColor.withValues(alpha: 0.08)
+                : Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: unlocked ? color.withOpacity(0.1) : const Color(0xFFF1F5F9),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 24),
+          // Top row: Emoji avatar & Unlocked/In Progress Pill
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: unlocked ? accentColor.withValues(alpha: 0.12) : const Color(0xFFF1F5F9),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: unlocked ? accentColor.withValues(alpha: 0.3) : Colors.transparent,
+                    width: 1.2,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    badgeEmoji,
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: unlocked
+                      ? const Color(0xFFD1FAE5) // Soft green
+                      : const Color(0xFFF1F5F9), // Soft slate
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (unlocked) ...[
+                      const Icon(Icons.check_rounded, size: 10, color: Color(0xFF047857)),
+                      const SizedBox(width: 2),
+                    ],
+                    Text(
+                      unlocked ? 'Unlocked' : 'In Progress',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        color: unlocked ? const Color(0xFF047857) : AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
+
+          const SizedBox(height: 10),
+
+          // Title
           Text(
             title,
-            textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
+              fontSize: 12.5,
               fontWeight: FontWeight.w800,
               color: AppColors.textPrimary,
               height: 1.2,
             ),
           ),
+
+          const SizedBox(height: 2),
+
+          // Description
+          Text(
+            description,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textSecondary,
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // Progress Bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 5,
+              backgroundColor: const Color(0xFFF1F5F9),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                unlocked ? GoalsScreen._mintGreen : accentColor,
+              ),
+            ),
+          ),
+
           const SizedBox(height: 6),
+
+          // Progress text & remaining badge text
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (unlocked) const Icon(Icons.check_rounded, size: 10, color: _primaryTeal),
-              if (unlocked) const SizedBox(width: 2),
               Text(
-                unlocked ? 'Unlocked' : '1 session left',
+                unlocked ? 'Goal Met' : progressText,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textMuted,
+                ),
+              ),
+              Text(
+                remainingText,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 9,
                   fontWeight: FontWeight.w700,
-                  color: unlocked ? _primaryTeal : AppColors.textSecondary,
+                  color: unlocked ? GoalsScreen._primaryTeal : accentColor,
                 ),
               ),
             ],

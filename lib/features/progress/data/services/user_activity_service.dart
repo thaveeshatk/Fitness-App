@@ -7,6 +7,8 @@ import '../../../profile/data/services/profile_service.dart';
 import '../../../workouts/data/models/workout_model.dart';
 import '../../../notifications/data/services/notification_service.dart';
 
+import '../models/progress_data.dart';
+
 /// Service responsible for recording and querying user workout activity in Cloud Firestore.
 /// Uses collection 'workout_history' keyed by authenticated user's UID.
 class UserActivityService {
@@ -30,6 +32,7 @@ class UserActivityService {
     required int durationMinutes,
     required int calories,
     String? difficulty,
+    String? imageUrl,
     String? uid,
   }) async {
     final currentUid = uid ?? AuthService.currentUser.uid;
@@ -45,6 +48,7 @@ class UserActivityService {
       'difficulty': difficulty ?? 'Intermediate',
       'durationMinutes': durationMinutes,
       'calories': calories,
+      if (imageUrl != null) 'imageUrl': imageUrl,
       'completedAt': now.toIso8601String(),
     };
 
@@ -109,14 +113,9 @@ class UserActivityService {
     );
   }
 
-  /// Returns workouts completed in the current calendar week (Monday to Sunday)
-  static Future<List<Map<String, dynamic>>> getThisWeeksActivities({String? uid}) async {
+  /// Returns all completed workouts for the authenticated user, sorted by date descending
+  static Future<List<Map<String, dynamic>>> getAllActivities({String? uid}) async {
     final currentUid = uid ?? AuthService.currentUser.uid;
-    final now = DateTime.now();
-    // Start of week: Monday at 00:00:00
-    final startOfWeek = DateTime(now.year, now.month, now.day)
-        .subtract(Duration(days: now.weekday - 1));
-
     List<Map<String, dynamic>> results = [];
 
     if (FirebaseService.isInitialized) {
@@ -128,47 +127,11 @@ class UserActivityService {
 
         results = snapshot.docs.map((doc) => doc.data()).toList();
       } catch (e) {
-        developer.log('Error querying workout_history from Firestore: $e', name: 'UserActivityService');
+        developer.log('Error querying all activities from Firestore: $e', name: 'UserActivityService');
       }
     }
 
     // Merge in-memory activities for this user that may not have synced
-    for (final act in _inMemoryActivities) {
-      if (act['uid'] == currentUid && !results.any((r) => r['id'] == act['id'])) {
-        results.add(act);
-      }
-    }
-
-    // Filter to current week
-    return results.where((item) {
-      final dateStr = item['completedAt']?.toString();
-      if (dateStr == null) return false;
-      final date = DateTime.tryParse(dateStr);
-      return date != null && date.isAfter(startOfWeek.subtract(const Duration(seconds: 1)));
-    }).toList();
-  }
-
-  /// Returns recent completed workouts for this user
-  static Future<List<Map<String, dynamic>>> getRecentActivities({
-    String? uid,
-    int limit = 10,
-  }) async {
-    final currentUid = uid ?? AuthService.currentUser.uid;
-    List<Map<String, dynamic>> results = [];
-
-    if (FirebaseService.isInitialized) {
-      try {
-        final snapshot = await FirebaseFirestore.instance
-            .collection(_collection)
-            .where('uid', isEqualTo: currentUid)
-            .get();
-
-        results = snapshot.docs.map((doc) => doc.data()).toList();
-      } catch (e) {
-        developer.log('Error querying recent activities: $e', name: 'UserActivityService');
-      }
-    }
-
     for (final act in _inMemoryActivities) {
       if (act['uid'] == currentUid && !results.any((r) => r['id'] == act['id'])) {
         results.add(act);
@@ -181,10 +144,70 @@ class UserActivityService {
       return bDate.compareTo(aDate);
     });
 
-    if (results.length > limit) {
-      return results.sublist(0, limit);
-    }
     return results;
+  }
+
+  /// Returns workouts completed in the given timeframe
+  static Future<List<Map<String, dynamic>>> getActivitiesForTimeframe({
+    required ProgressTimeframe timeframe,
+    String? uid,
+  }) async {
+    final all = await getAllActivities(uid: uid);
+    final now = DateTime.now();
+
+    switch (timeframe) {
+      case ProgressTimeframe.thisWeek:
+        final startOfWeek = DateTime(now.year, now.month, now.day)
+            .subtract(Duration(days: now.weekday - 1));
+        return all.where((item) {
+          final dateStr = item['completedAt']?.toString();
+          if (dateStr == null) return false;
+          final d = DateTime.tryParse(dateStr);
+          return d != null && d.isAfter(startOfWeek.subtract(const Duration(seconds: 1)));
+        }).toList();
+
+      case ProgressTimeframe.lastWeek:
+        final startOfThisWeek = DateTime(now.year, now.month, now.day)
+            .subtract(Duration(days: now.weekday - 1));
+        final startOfLastWeek = startOfThisWeek.subtract(const Duration(days: 7));
+        return all.where((item) {
+          final dateStr = item['completedAt']?.toString();
+          if (dateStr == null) return false;
+          final d = DateTime.tryParse(dateStr);
+          return d != null &&
+              d.isAfter(startOfLastWeek.subtract(const Duration(seconds: 1))) &&
+              d.isBefore(startOfThisWeek);
+        }).toList();
+
+      case ProgressTimeframe.thisMonth:
+        final startOfMonth = DateTime(now.year, now.month, 1);
+        return all.where((item) {
+          final dateStr = item['completedAt']?.toString();
+          if (dateStr == null) return false;
+          final d = DateTime.tryParse(dateStr);
+          return d != null && d.isAfter(startOfMonth.subtract(const Duration(seconds: 1)));
+        }).toList();
+
+      case ProgressTimeframe.allTime:
+        return all;
+    }
+  }
+
+  /// Returns workouts completed in the current calendar week (Monday to Sunday)
+  static Future<List<Map<String, dynamic>>> getThisWeeksActivities({String? uid}) async {
+    return getActivitiesForTimeframe(timeframe: ProgressTimeframe.thisWeek, uid: uid);
+  }
+
+  /// Returns recent completed workouts for this user
+  static Future<List<Map<String, dynamic>>> getRecentActivities({
+    String? uid,
+    int limit = 10,
+  }) async {
+    final all = await getAllActivities(uid: uid);
+    if (all.length > limit) {
+      return all.sublist(0, limit);
+    }
+    return all;
   }
 
   /// Calculates real weekly progress data for the given user:
@@ -235,6 +258,8 @@ class UserActivityService {
   }
 
   /// Computes the consecutive daily streak based on unique workout dates
+  static int calculateStreak(List<Map<String, dynamic>> activities) => _calculateStreak(activities);
+
   static int _calculateStreak(List<Map<String, dynamic>> activities) {
     if (activities.isEmpty) return 0;
 

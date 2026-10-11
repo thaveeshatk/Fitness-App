@@ -13,13 +13,18 @@ class FirebaseService {
 
   static Future<void> initialize() async {
     try {
-      // Initialize Firebase with the FlutterFire-generated options
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
+      if (Firebase.apps.isEmpty) {
+        // Initialize Firebase with the FlutterFire-generated options
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+      }
       _isInitialized = true;
       developer.log('Firebase initialized successfully', name: 'FirebaseService');
     } catch (e, stack) {
+      if (Firebase.apps.isNotEmpty) {
+        _isInitialized = true;
+      }
       if (kDebugMode) {
         developer.log(
           'Firebase initialization error: $e',

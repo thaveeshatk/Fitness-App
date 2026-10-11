@@ -60,15 +60,23 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadDashboardData();
     AuthService.userNotifier.addListener(_onAuthUserChanged);
+    ProfileService.profileNotifier.addListener(_onProfileChanged);
   }
 
   @override
   void dispose() {
     AuthService.userNotifier.removeListener(_onAuthUserChanged);
+    ProfileService.profileNotifier.removeListener(_onProfileChanged);
     super.dispose();
   }
 
   void _onAuthUserChanged() {
+    if (mounted) {
+      _loadDashboardData();
+    }
+  }
+
+  void _onProfileChanged() {
     if (mounted) {
       _loadDashboardData();
     }
@@ -618,13 +626,22 @@ class _HomeScreenState extends State<HomeScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              "THIS WEEK'S PROGRESS",
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF475569),
-                letterSpacing: 0.8,
+            GestureDetector(
+              onTap: () => widget.onNavigateToTab?.call(3),
+              child: Row(
+                children: [
+                  Text(
+                    "THIS WEEK'S PROGRESS",
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF475569),
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.arrow_forward_ios_rounded, size: 10, color: Color(0xFF475569)),
+                ],
               ),
             ),
             Text(
@@ -641,7 +658,9 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 12),
 
         // Progress Card Container
-        Container(
+        GestureDetector(
+          onTap: () => widget.onNavigateToTab?.call(3),
+          child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
             color: Colors.white,
@@ -855,9 +874,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 
   // ── 5. Section: "QUICK WORKOUTS" ───────────────────────────────────────────
 

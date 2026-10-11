@@ -118,17 +118,53 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
   void initState() {
     super.initState();
     _loadCurrentProfile();
+    _fetchProfileFromFirestore();
   }
 
   void _loadCurrentProfile() {
     final profile = ProfileService.currentProfile;
+    _applyProfile(profile);
+  }
+
+  Future<void> _fetchProfileFromFirestore() async {
+    try {
+      final profile = await ProfileService.getProfile(forceRefresh: true);
+      if (mounted) {
+        setState(() => _applyProfile(profile));
+      }
+    } catch (_) {}
+  }
+
+  Set<String> _normalizeDayTokens(List<String> days) {
+    final normalized = <String>{};
+    for (final d in days) {
+      final clean = d.trim().toLowerCase();
+      if (clean == 'm1' || clean == 'm' || clean == 'mon' || clean == 'monday') {
+        normalized.add('M1');
+      } else if (clean == 't1' || clean == 't' || clean == 'tue' || clean == 'tuesday') {
+        normalized.add('T1');
+      } else if (clean == 'w' || clean == 'wed' || clean == 'wednesday') {
+        normalized.add('W');
+      } else if (clean == 't2' || clean == 'th' || clean == 'thu' || clean == 'thursday') {
+        normalized.add('T2');
+      } else if (clean == 'f' || clean == 'fri' || clean == 'friday') {
+        normalized.add('F');
+      } else if (clean == 's1' || clean == 'sa' || clean == 'sat' || clean == 'saturday') {
+        normalized.add('S1');
+      } else if (clean == 's2' || clean == 'su' || clean == 'sun' || clean == 'sunday') {
+        normalized.add('S2');
+      } else {
+        normalized.add(d);
+      }
+    }
+    return normalized.isEmpty ? {'M1', 'W', 'F'} : normalized;
+  }
+
+  void _applyProfile(ProfileModel profile) {
     _fitnessLevel = profile.fitnessLevel;
     _primaryGoal = profile.goals.isNotEmpty ? profile.goals.first : 'Weight Loss';
     _workoutMinutes = profile.workoutMinutes;
-    _weeklyRoutineDays = profile.weeklyRoutineDays.toSet();
-    if (_weeklyRoutineDays.isEmpty) {
-      _weeklyRoutineDays = {'M1', 'W', 'F'};
-    }
+    _weeklyRoutineDays = _normalizeDayTokens(profile.weeklyRoutineDays);
     _preferredStyles = profile.preferredStyles.toSet();
     if (_preferredStyles.isEmpty) {
       _preferredStyles = {'HIIT', 'Yoga', 'Stretching'};

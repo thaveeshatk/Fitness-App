@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/asset_paths.dart';
 import 'goals_screen.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 
 // ── Data model for a single workout history entry ────────────────────────────
 class WorkoutHistoryEntry {
@@ -286,7 +287,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.cardBorder),
           ),
-          child: const Icon(Icons.notifications_none_rounded, size: 20, color: Color(0xFF475569)),
+          child: const Center(
+            child: NotificationBell(
+              size: 36,
+              iconSize: 20,
+            ),
+          ),
         ),
         const SizedBox(width: 10),
         Container(

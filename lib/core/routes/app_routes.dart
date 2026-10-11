@@ -6,6 +6,8 @@ import '../../features/profile/presentation/screens/profile_setup_screen.dart';
 import '../../features/profile/presentation/screens/main_navigation_screen.dart';
 import '../../features/profile/presentation/screens/profile_preferences_screen.dart';
 import '../../features/plan/presentation/screens/my_plan_screen.dart';
+import '../../features/notifications/presentation/screens/notification_center_screen.dart';
+import '../../features/notifications/presentation/screens/notification_settings_screen.dart';
 
 /// App navigation routes definition and route generator
 class AppRoutes {
@@ -18,6 +20,8 @@ class AppRoutes {
   static const String mainNav = '/main-nav';
   static const String profilePreferences = '/profile-preferences';
   static const String myPlan = '/my-plan';
+  static const String notifications = '/notifications';
+  static const String notificationSettings = '/notification-settings';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -130,6 +134,18 @@ class AppRoutes {
       case profilePreferences:
         return MaterialPageRoute(
           builder: (_) => const ProfilePreferencesScreen(),
+          settings: settings,
+        );
+
+      case notifications:
+        return MaterialPageRoute(
+          builder: (_) => const NotificationCenterScreen(),
+          settings: settings,
+        );
+
+      case notificationSettings:
+        return MaterialPageRoute(
+          builder: (_) => const NotificationSettingsScreen(),
           settings: settings,
         );
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'edit_profile_screen.dart';
+import 'package:fitness_app/features/notifications/presentation/screens/notification_settings_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -54,7 +55,14 @@ class SettingsScreen extends StatelessWidget {
                 iconWidget: const Text('🔔', style: TextStyle(fontSize: 22)),
                 title: 'Notifications',
                 subtitle: 'Reminders and alerts',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const NotificationSettingsScreen(),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               _buildSettingsCard(

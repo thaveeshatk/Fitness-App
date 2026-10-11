@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/services/firebase_service.dart';
 import '../../../auth/data/services/auth_service.dart';
 import '../models/profile_model.dart';
+import '../../../notifications/data/services/notification_service.dart';
 
 /// Service responsible for persisting and retrieving the user's fitness profile.
 /// Uses Firestore when Firebase is initialized; maintains an in-memory cache keyed by UID.
@@ -28,6 +29,11 @@ class ProfileService {
   static Future<void> saveProfile(ProfileModel profile, {String? docId}) async {
     final resolvedDocId = docId ?? AuthService.currentUser.uid;
     _cache[resolvedDocId] = profile;
+
+    // Trigger system notification for profile update
+    await NotificationService.onProfileUpdated(
+      detail: 'Your fitness preferences (${profile.fitnessLevel}, ${profile.goals.join(", ")}) have been saved.',
+    );
 
     if (!FirebaseService.isInitialized) {
       developer.log(

@@ -5,6 +5,7 @@ import '../../../auth/data/services/auth_service.dart';
 import '../../../plan/data/services/plan_service.dart';
 import '../../../profile/data/services/profile_service.dart';
 import '../../../workouts/data/models/workout_model.dart';
+import '../../../notifications/data/services/notification_service.dart';
 
 /// Service responsible for recording and querying user workout activity in Cloud Firestore.
 /// Uses collection 'workout_history' keyed by authenticated user's UID.
@@ -49,6 +50,28 @@ class UserActivityService {
 
     // Store in-memory for instant feedback
     _inMemoryActivities.insert(0, data);
+
+    // Trigger Notification for Workout Completion
+    await NotificationService.onWorkoutCompleted(
+      workoutTitle: workoutTitle,
+      durationMinutes: durationMinutes,
+      calories: calories,
+      workoutId: workoutId,
+    );
+
+    // Milestone Check: If user completes first workout or hits 3 workouts
+    final totalCompleted = _inMemoryActivities.where((a) => a['uid'] == currentUid).length;
+    if (totalCompleted == 1) {
+      await NotificationService.onMilestoneReached(
+        milestoneTitle: 'First Workout Completed',
+        details: 'You completed your first workout session! 🌟 Keep the momentum going.',
+      );
+    } else if (totalCompleted == 3) {
+      await NotificationService.onGoalAchieved(
+        goalTitle: 'Weekly 3-Day Habit',
+        subtitle: 'Congratulations! You reached 3 completed workouts this week.',
+      );
+    }
 
     if (FirebaseService.isInitialized) {
       try {

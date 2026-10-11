@@ -423,6 +423,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     durationMinutes: duration,
                     calories: widget.workout.calories,
                     difficulty: widget.workout.difficulty,
+                    imageUrl: widget.workout.imageUrl,
                   );
 
                   Navigator.of(context).pushReplacement(

@@ -11,6 +11,9 @@ import 'profile_preferences_screen.dart';
 class MainNavigationScreen extends StatefulWidget {
   final int initialIndex;
 
+  /// Global notifier that broadcasts the currently active navigation tab index (0..4)
+  static final ValueNotifier<int> activeTabNotifier = ValueNotifier<int>(0);
+
   const MainNavigationScreen({
     super.key,
     this.initialIndex = 0, // Default to Home as requested
@@ -27,6 +30,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    MainNavigationScreen.activeTabNotifier.value = widget.initialIndex;
+  }
+
+  void _switchTab(int index) {
+    if (_currentIndex != index) {
+      setState(() => _currentIndex = index);
+    }
+    MainNavigationScreen.activeTabNotifier.value = index;
   }
 
   @override
@@ -36,53 +47,21 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         index: _currentIndex,
         children: [
           HomeScreen(
-            onNavigateToTab: (index) => setState(() => _currentIndex = index),
+            onNavigateToTab: _switchTab,
           ),
           MyPlanScreen(
-            onNavigateToTab: (index) => setState(() => _currentIndex = index),
+            onNavigateToTab: _switchTab,
           ),
-          const WorkoutsScreen(),
-          const ProgressScreen(),
+          WorkoutsScreen(
+            onNavigateToTab: _switchTab,
+          ),
+          ProgressScreen(
+            onNavigateToTab: _switchTab,
+          ),
           const ProfilePreferencesScreen(),
         ],
       ),
       bottomNavigationBar: _buildBottomBar(),
-    );
-  }
-
-  Widget _buildPlaceholderPage(String title, IconData icon) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFAFBFD),
-      appBar: AppBar(
-        title: Text(
-          title,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF0F172A),
-          ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 56, color: const Color(0xFF94A3B8)),
-            const SizedBox(height: 16),
-            Text(
-              '$title Screen',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF475569),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -121,7 +100,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
     return Expanded(
       child: InkWell(
-        onTap: () => setState(() => _currentIndex = index),
+        onTap: () => _switchTab(index),
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
         child: Column(

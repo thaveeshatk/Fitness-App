@@ -7,13 +7,21 @@ import '../../../../core/constants/asset_paths.dart';
 import '../../data/models/progress_data.dart';
 import '../../data/services/progress_service.dart';
 import 'history_screen.dart';
+import 'goals_screen.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
+import '../../../auth/data/services/auth_service.dart';
+import '../../../profile/data/services/profile_service.dart';
+import '../../../profile/presentation/screens/main_navigation_screen.dart';
+import '../../../profile/presentation/screens/profile_preferences_screen.dart';
+import '../../../../core/widgets/user_avatar.dart';
 
 /// Progress Tracker Screen
 /// Pixel-perfect, consistent with the rest of the application screens,
 /// powered by live user profile data and workout statistics.
 class ProgressScreen extends StatefulWidget {
-  const ProgressScreen({super.key});
+  final Function(int)? onNavigateToTab;
+
+  const ProgressScreen({super.key, this.onNavigateToTab});
 
   @override
   State<ProgressScreen> createState() => _ProgressScreenState();
@@ -28,26 +36,73 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
   ProgressTimeframe _selectedTimeframe = ProgressTimeframe.thisWeek;
   late ProgressData _data;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _data = ProgressService.getProgressData(_selectedTimeframe);
     _loadData();
+    AuthService.userNotifier.addListener(_onAuthChanged);
+    ProfileService.profileNotifier.addListener(_onProfileChanged);
+    MainNavigationScreen.activeTabNotifier.addListener(_onTabNavigated);
   }
 
-  void _loadData() {
-    setState(() {
-      _data = ProgressService.getProgressData(_selectedTimeframe);
-    });
+  @override
+  void dispose() {
+    AuthService.userNotifier.removeListener(_onAuthChanged);
+    ProfileService.profileNotifier.removeListener(_onProfileChanged);
+    MainNavigationScreen.activeTabNotifier.removeListener(_onTabNavigated);
+    super.dispose();
   }
 
-  void _onTimeframeChanged(ProgressTimeframe timeframe) {
+  void _onAuthChanged() {
+    if (mounted) {
+      _loadData(forceRefresh: true);
+    }
+  }
+
+  void _onProfileChanged() {
+    ProgressService.clearCache();
+    if (mounted) {
+      _loadData(forceRefresh: true);
+    }
+  }
+
+  void _onTabNavigated() {
+    // When user navigates to the Progress tab (index 3), refresh with latest data
+    if (MainNavigationScreen.activeTabNotifier.value == 3 && mounted) {
+      _loadData(forceRefresh: true);
+    }
+  }
+
+  Future<void> _loadData({bool forceRefresh = false}) async {
+    final fresh = await ProgressService.loadProgressData(
+      _selectedTimeframe,
+      forceRefresh: forceRefresh,
+    );
+    if (mounted) {
+      setState(() {
+        _data = fresh;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _onTimeframeChanged(ProgressTimeframe timeframe) async {
     if (_selectedTimeframe != timeframe) {
       HapticFeedback.selectionClick();
       setState(() {
         _selectedTimeframe = timeframe;
-        _data = ProgressService.getProgressData(timeframe);
+        _isLoading = true;
       });
+      final fresh = await ProgressService.loadProgressData(timeframe);
+      if (mounted) {
+        setState(() {
+          _data = fresh;
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -81,43 +136,172 @@ class _ProgressScreenState extends State<ProgressScreen> {
     );
   }
 
+  void _onProfileTap() {
+    HapticFeedback.lightImpact();
+    if (widget.onNavigateToTab != null) {
+      widget.onNavigateToTab!(4); // Switch to Profile tab in bottom navigation
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => ProfilePreferencesScreen(
+            onBack: () {
+              Navigator.of(context).pop();
+              _loadData(forceRefresh: true);
+            },
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Refresh data in case profile was updated in another tab
-    _data = ProgressService.getProgressData(_selectedTimeframe);
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTopHeader(),
-              const SizedBox(height: 16),
-              _buildSegmentedFilter(),
-              const SizedBox(height: 14),
-              _buildRoutineCapsuleBadge(),
-              const SizedBox(height: 14),
-              _buildStatsCardsRow(),
-              const SizedBox(height: 12),
-              _buildEnergyExpendedCard(),
-              const SizedBox(height: 14),
-              _buildHabitHealthCard(),
-              const SizedBox(height: 14),
-              _buildDailyActivityCard(),
-              const SizedBox(height: 14),
-              _buildMilestoneJourneyCard(),
-              const SizedBox(height: 14),
-              _buildDailyReflectionCard(),
-              const SizedBox(height: 24),
-            ],
+        child: RefreshIndicator(
+          color: _primaryTeal,
+          onRefresh: () => _loadData(forceRefresh: true),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildTopHeader(),
+                const SizedBox(height: 16),
+                _buildSegmentedFilter(),
+                const SizedBox(height: 12),
+                _buildSubNavPills(),
+                const SizedBox(height: 14),
+                if (_isLoading)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 60),
+                    child: Center(
+                      child: CircularProgressIndicator(color: _primaryTeal),
+                    ),
+                  )
+                else ...[
+                  _buildRoutineCapsuleBadge(),
+                  const SizedBox(height: 14),
+                  _buildStatsCardsRow(),
+                  const SizedBox(height: 12),
+                  _buildEnergyExpendedCard(),
+                  const SizedBox(height: 14),
+                  _buildHabitHealthCard(),
+                  const SizedBox(height: 14),
+                  _buildDailyActivityCard(),
+                  const SizedBox(height: 14),
+                  _buildMilestoneJourneyCard(),
+                  const SizedBox(height: 14),
+                  _buildDailyReflectionCard(),
+                  const SizedBox(height: 24),
+                ],
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  /// Sleek sub-navigation pills to jump to Workout History or Goals & Challenges
+  Widget _buildSubNavPills() {
+    return Row(
+      children: [
+        Expanded(
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => HistoryScreen(
+                    onNavigateToTab: widget.onNavigateToTab,
+                  ),
+                ),
+              ).then((_) => _loadData(forceRefresh: true));
+            },
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.cardBorder, width: 1.2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.history_rounded, size: 16, color: _primaryTeal),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Workout History',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => GoalsScreen(
+                    onNavigateToTab: widget.onNavigateToTab,
+                  ),
+                ),
+              ).then((_) => _loadData(forceRefresh: true));
+            },
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.cardBorder, width: 1.2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.emoji_events_outlined, size: 16, color: Color(0xFFD97706)),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Goals & Badges',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -192,32 +376,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
         ),
         const SizedBox(width: 10),
         // User Avatar
-        Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: _mintGreen, width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: _primaryTeal.withValues(alpha: 0.15),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ClipOval(
-            child: Image.asset(
-              AssetPaths.userAvatar,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                color: _primaryTeal,
-                child: const Center(
-                  child: Icon(Icons.person_rounded, color: Colors.white, size: 20),
-                ),
-              ),
-            ),
-          ),
+        UserAvatar(
+          radius: 19,
+          border: Border.all(color: _mintGreen, width: 1.5),
+          onTap: _onProfileTap,
         ),
       ],
     );
@@ -561,7 +723,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           MaterialPageRoute(
             builder: (_) => const HistoryScreen(),
           ),
-        );
+        ).then((_) => _loadData(forceRefresh: true));
       },
       child: Container(
       padding: const EdgeInsets.all(17),
@@ -586,14 +748,27 @@ class _ProgressScreenState extends State<ProgressScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'HABIT HEALTH',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 9.5,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textMuted,
-                      letterSpacing: 0.6,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        'HABIT HEALTH',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textMuted,
+                          letterSpacing: 0.6,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '• View History →',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w700,
+                          color: _primaryTeal,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -943,7 +1118,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
   // ── 8. Milestone Journey Card ──────────────────────────────────────────────
   Widget _buildMilestoneJourneyCard() {
-    return Container(
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const GoalsScreen()),
+        ).then((_) => _loadData(forceRefresh: true));
+      },
+      child: Container(
       padding: const EdgeInsets.all(17),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -981,14 +1163,27 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'MILESTONE JOURNEY',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textMuted,
-                        letterSpacing: 0.6,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          'MILESTONE JOURNEY',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textMuted,
+                            letterSpacing: 0.6,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '• View Goals →',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w700,
+                            color: _primaryTeal,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -1054,6 +1249,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             ],
           ),
         ],
+      ),
       ),
     );
   }

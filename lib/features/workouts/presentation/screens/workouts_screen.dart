@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
 import '../../../auth/data/services/auth_service.dart';
 import '../../../profile/data/services/profile_service.dart';
+import '../../../profile/presentation/screens/profile_preferences_screen.dart';
 import '../../data/models/workout_model.dart';
 import '../../data/repositories/workout_repository.dart';
 import '../../data/services/workout_service.dart';
@@ -12,7 +14,9 @@ import '../../data/services/workout_service.dart';
 import 'workout_detail_screen.dart';
 
 class WorkoutsScreen extends StatefulWidget {
-  const WorkoutsScreen({super.key});
+  final Function(int)? onNavigateToTab;
+
+  const WorkoutsScreen({super.key, this.onNavigateToTab});
 
   @override
   State<WorkoutsScreen> createState() => _WorkoutsScreenState();
@@ -52,6 +56,21 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     WorkoutService.workoutsRevisionNotifier.removeListener(_loadWorkouts);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onProfileTap() {
+    HapticFeedback.lightImpact();
+    if (widget.onNavigateToTab != null) {
+      widget.onNavigateToTab!(4); // Profile tab in persistent bottom nav
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => ProfilePreferencesScreen(
+            onBack: () => Navigator.of(context).pop(),
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> _loadWorkouts() async {
@@ -286,12 +305,15 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
             letterSpacing: 2.0,
           ),
         ),
-        actions: const [
-          NotificationBell(),
-          SizedBox(width: 4),
+        actions: [
+          const NotificationBell(),
+          const SizedBox(width: 4),
           Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: UserAvatar(radius: 17),
+            padding: const EdgeInsets.only(right: 16.0),
+            child: UserAvatar(
+              radius: 17,
+              onTap: _onProfileTap,
+            ),
           ),
         ],
       ),
@@ -1370,7 +1392,10 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               ),
               child: Row(
                 children: [
-                  const UserAvatar(radius: 26),
+                  UserAvatar(
+                    radius: 26,
+                    onTap: _onProfileTap,
+                  ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
@@ -1615,8 +1640,8 @@ class _WorkoutFormSheet extends StatefulWidget {
 
 class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
   late TextEditingController _titleController;
-  late String _category;
-  late String _difficulty;
+  String? _category;
+  String? _difficulty;
   late int _duration;
   late int _calories;
   late Set<String> _selectedEquipment;
@@ -1638,11 +1663,11 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
     super.initState();
     final ex = widget.existing;
     _titleController = TextEditingController(text: ex?.title ?? '');
-    _category = ex?.category ?? 'Strength';
-    _difficulty = ex?.difficulty ?? 'Intermediate';
+    _category = ex?.category;
+    _difficulty = ex?.difficulty;
     _duration = ex?.durationMinutes ?? 25;
     _calories = ex?.calories ?? 220;
-    _selectedEquipment = ex != null ? ex.equipment.toSet() : {'None / Bodyweight'};
+    _selectedEquipment = ex != null ? ex.equipment.toSet() : <String>{};
 
     _availableExercises = WorkoutRepository.getAvailableExercises();
     if (ex != null && ex.exercises.isNotEmpty) {
@@ -1681,6 +1706,36 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
       return;
     }
 
+    if (_category == null || _category!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a category for your workout.'),
+          backgroundColor: Color(0xFFDC2626),
+        ),
+      );
+      return;
+    }
+
+    if (_difficulty == null || _difficulty!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a difficulty level.'),
+          backgroundColor: Color(0xFFDC2626),
+        ),
+      );
+      return;
+    }
+
+    if (_selectedEquipment.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select required equipment (or "None / Bodyweight").'),
+          backgroundColor: Color(0xFFDC2626),
+        ),
+      );
+      return;
+    }
+
     if (_selectedExercises.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -1706,11 +1761,11 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
         rating: widget.existing?.rating ?? 5.0,
         durationMinutes: _duration,
         calories: _calories,
-        category: _category,
-        subCategory: '${_category.toUpperCase()} CIRCUIT',
-        difficulty: _difficulty,
+        category: _category!,
+        subCategory: '${_category!.toUpperCase()} CIRCUIT',
+        difficulty: _difficulty!,
         equipment: _selectedEquipment.toList(),
-        tags: ['CUSTOM', _category.toUpperCase()],
+        tags: ['CUSTOM', _category!.toUpperCase()],
         imageUrl: _selectedExercises.isNotEmpty
             ? _selectedExercises.first.imageUrl
             : 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=600&auto=format&fit=crop',
@@ -1899,7 +1954,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                             child: ChoiceChip(
                               label: Text(cat),
                               selected: selected,
-                              onSelected: (_) => setState(() => _category = cat),
+                              onSelected: (val) => setState(() => _category = val ? cat : null),
                               selectedColor: AppColors.primaryTeal,
                               backgroundColor: AppColors.surfaceMuted,
                               labelStyle: GoogleFonts.plusJakartaSans(
@@ -1936,13 +1991,17 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                         final selected = _difficulty == diff;
                         return Expanded(
                           child: GestureDetector(
-                            onTap: () => setState(() => _difficulty = diff),
+                            onTap: () => setState(() => _difficulty = (_difficulty == diff) ? null : diff),
                             child: Container(
                               margin: const EdgeInsets.symmetric(horizontal: 4),
                               padding: const EdgeInsets.symmetric(vertical: 10),
                               decoration: BoxDecoration(
                                 color: selected ? AppColors.primaryTeal : AppColors.surfaceMuted,
                                 borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: selected ? AppColors.primaryTeal : const Color(0xFFE2E8F0),
+                                  width: selected ? 1.5 : 1.0,
+                                ),
                               ),
                               child: Center(
                                 child: Text(
@@ -2130,9 +2189,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                               if (val) {
                                 _selectedEquipment.add(eq);
                               } else {
-                                if (_selectedEquipment.length > 1) {
-                                  _selectedEquipment.remove(eq);
-                                }
+                                _selectedEquipment.remove(eq);
                               }
                             });
                           },

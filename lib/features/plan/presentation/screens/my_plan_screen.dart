@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fitness_app/core/constants/app_colors.dart';
 import 'package:fitness_app/features/profile/data/services/profile_service.dart';
+import 'package:fitness_app/features/profile/presentation/screens/main_navigation_screen.dart';
 import 'package:fitness_app/features/profile/presentation/screens/profile_preferences_screen.dart';
 import 'package:fitness_app/features/workouts/presentation/screens/workout_detail_screen.dart';
+import 'package:fitness_app/features/workouts/presentation/screens/activity_screen.dart';
 import 'package:fitness_app/features/plan/data/models/plan_schedule_item.dart';
 import 'package:fitness_app/features/plan/data/services/plan_service.dart';
 import 'package:fitness_app/features/plan/presentation/widgets/my_plan_header.dart';
 import 'package:fitness_app/features/plan/presentation/widgets/plan_hero_progress_card.dart';
 import 'package:fitness_app/features/plan/presentation/widgets/plan_schedule_card.dart';
 import 'package:fitness_app/features/plan/presentation/screens/weekly_schedule_screen.dart';
+
 /// Screen 3: "My Plan"
 /// Faithfully converts the provided wireframe into a rich, connected Flutter screen:
 /// - Brand header with FitOn logo badge ("F."), "My Plan" title, notification bell, and user avatar
@@ -36,7 +39,23 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
   @override
   void initState() {
     super.initState();
+    ProfileService.profileNotifier.addListener(_onProfileOrTabChanged);
+    MainNavigationScreen.activeTabNotifier.addListener(_onProfileOrTabChanged);
     _loadPlan();
+  }
+
+  @override
+  void dispose() {
+    ProfileService.profileNotifier.removeListener(_onProfileOrTabChanged);
+    MainNavigationScreen.activeTabNotifier.removeListener(_onProfileOrTabChanged);
+    super.dispose();
+  }
+
+  void _onProfileOrTabChanged() {
+    PlanService.clearCache();
+    if (mounted) {
+      _loadPlan(forceRefresh: true);
+    }
   }
 
   Future<void> _loadPlan({bool forceRefresh = false}) async {
@@ -55,7 +74,44 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
     }
   }
 
+  void _showLockedNotice(PlanScheduleItem item) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: const Color(0xFF1E293B),
+        content: Row(
+          children: [
+            const Icon(Icons.lock_rounded, color: Color(0xFFFBBF24), size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Scheduled for ${item.dayLabel} (${item.dayNumber}). You can only start workouts on their scheduled days.',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   void _onOpenWorkout(PlanScheduleItem item) {
+    final nowWeekday = DateTime.now().weekday;
+    final isAssignedToday = item.assignedWeekday == nowWeekday;
+
+    // Users must only be able to start workouts on their scheduled days
+    if (!item.isCompleted && !isAssignedToday) {
+      _showLockedNotice(item);
+      return;
+    }
+
     Navigator.of(context)
         .push(
       MaterialPageRoute(
@@ -64,20 +120,103 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
     )
         .then((_) {
       // Reload on return to catch potential progress changes
-      _loadPlan();
+      _loadPlan(forceRefresh: true);
+    });
+  }
+
+  void _startWorkoutDirectly(PlanScheduleItem item) {
+    final nowWeekday = DateTime.now().weekday;
+    final isAssignedToday = item.assignedWeekday == nowWeekday;
+
+    // Users must only be able to start workouts on their scheduled days
+    if (!item.isCompleted && !isAssignedToday) {
+      _showLockedNotice(item);
+      return;
+    }
+
+    Navigator.of(context)
+        .push(
+      MaterialPageRoute(
+        builder: (_) => ActivityScreen(workout: item.workout),
+      ),
+    )
+        .then((_) {
+      _loadPlan(forceRefresh: true);
     });
   }
 
   void _onContinuePlan() {
-    // Find today's active workout or first pending workout
-    final activeItem = _planItems.firstWhere(
-      (it) => it.isTodayReady,
-      orElse: () => _planItems.firstWhere(
-        (it) => !it.isCompleted,
-        orElse: () => _planItems.first,
+    final nowWeekday = DateTime.now().weekday;
+
+    // Find today's ready workout
+    final todayItem = _planItems.where((it) => it.assignedWeekday == nowWeekday && !it.isCompleted).firstOrNull;
+    if (todayItem != null) {
+      _startWorkoutDirectly(todayItem);
+      return;
+    }
+
+    // Check if today's workout was already finished
+    final todayCompleted = _planItems.any((it) => it.assignedWeekday == nowWeekday && it.isCompleted);
+    if (todayCompleted) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          backgroundColor: const Color(0xFF005953),
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle_rounded, color: Color(0xFF00D18D), size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "You've already completed today's scheduled workout! Great job.",
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    // Otherwise today is a rest day
+    final nextItem = _planItems.where((it) => it.assignedWeekday > nowWeekday && !it.isCompleted).firstOrNull ??
+        _planItems.where((it) => !it.isCompleted).firstOrNull;
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: const Color(0xFF1E293B),
+        content: Row(
+          children: [
+            const Icon(Icons.nightlight_round, color: Color(0xFF60A5FA), size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                nextItem != null
+                    ? "Today is a rest day! Your next scheduled session is on ${nextItem.dayLabel}."
+                    : "All scheduled workouts for this week are completed! Great dedication!",
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+        duration: const Duration(seconds: 3),
       ),
     );
-    _onOpenWorkout(activeItem);
   }
 
   void _onViewWeeklySchedule() {
@@ -124,8 +263,12 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
     final completedCount = metrics['completed'] as int;
     final totalCount = metrics['total'] as int;
 
-    // Filter display items (matches wireframe: Monday 13, Wednesday 15, Friday 17, Sunday 19)
-    final visibleSchedule = _planItems.where((it) => it.dayLabel != 'TUE').toList();
+    // Display workouts strictly for the user's selected routine days
+    final visibleSchedule = _planItems;
+    final dateRangeLabel = _planItems.isNotEmpty ? _planItems.first.dateRangeLabel : 'Current Week';
+    final activeDaysLabel = completedCount > 0
+        ? '$completedCount of $totalCount Days Active'
+        : '$totalCount Days Active';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -149,7 +292,9 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                     PlanHeroProgressCard(
                       completedSessions: completedCount,
                       totalSessions: totalCount,
-                      motivationalSubtitle: "You're on track! Keep up the great work.",
+                      motivationalSubtitle: completedCount == totalCount && totalCount > 0
+                          ? "All done! Amazing dedication this week!"
+                          : "You're on track! Keep up the great work.",
                     ),
 
                     const SizedBox(height: 24),
@@ -171,7 +316,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            // Date Range Pill Badge: "Nov 13 – 19"
+                            // Date Range Pill Badge
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
@@ -182,7 +327,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                'Nov 13 – 19',
+                                dateRangeLabel,
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -193,9 +338,9 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                           ],
                         ),
 
-                        // Active Days count linked to profile
+                        // Active Days count linked to user profile and completed activity
                         Text(
-                          '$totalCount Days Active',
+                          activeDaysLabel,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -212,7 +357,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                       return PlanScheduleCard(
                         item: item,
                         onTap: () => _onOpenWorkout(item),
-                        onPlayTap: _onContinuePlan,
+                        onPlayTap: () => _startWorkoutDirectly(item),
                       );
                     }),
 

@@ -145,15 +145,33 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute(
         builder: (_) => WorkoutDetailScreen(workout: workout),
       ),
-    );
+    ).then((_) {
+      _loadDashboardData();
+    });
   }
 
   void _startWorkoutDirectly(WorkoutModel workout) {
+    // Open the selected individual workout (1 individual exercise, not a multi-exercise set)
+    final individualWorkout = workout.exercises.length > 1
+        ? workout.copyWith(
+            exercises: [
+              workout.exercises.firstWhere(
+                (e) => !e.phase.toLowerCase().contains('prep'),
+                orElse: () => workout.exercises.first,
+              ),
+            ],
+            durationMinutes: (workout.durationMinutes / workout.exercises.length).ceil().clamp(5, 15),
+            calories: (workout.calories / workout.exercises.length).round().clamp(40, 100),
+          )
+        : workout;
+
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => ActivityScreen(workout: workout),
+        builder: (_) => ActivityScreen(workout: individualWorkout),
       ),
-    );
+    ).then((_) {
+      _loadDashboardData();
+    });
   }
 
   @override

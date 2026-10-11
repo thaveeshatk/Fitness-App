@@ -12,6 +12,7 @@ class PlanScheduleItem {
   final String id;
   final String dayLabel; // e.g. 'MON', 'WED', 'FRI', 'SUN'
   final int dayNumber; // e.g. 13, 15, 17, 19
+  final int assignedWeekday; // 1 = Monday, ..., 7 = Sunday
   final String dateRangeLabel; // e.g. 'Nov 13 – 19'
   final PlanItemStatus status;
   final String title;
@@ -27,6 +28,7 @@ class PlanScheduleItem {
     required this.id,
     required this.dayLabel,
     required this.dayNumber,
+    this.assignedWeekday = 1,
     this.dateRangeLabel = 'Nov 13 – 19',
     required this.status,
     required this.title,
@@ -55,6 +57,7 @@ class PlanScheduleItem {
     String? id,
     String? dayLabel,
     int? dayNumber,
+    int? assignedWeekday,
     String? dateRangeLabel,
     PlanItemStatus? status,
     String? title,
@@ -70,6 +73,7 @@ class PlanScheduleItem {
       id: id ?? this.id,
       dayLabel: dayLabel ?? this.dayLabel,
       dayNumber: dayNumber ?? this.dayNumber,
+      assignedWeekday: assignedWeekday ?? this.assignedWeekday,
       dateRangeLabel: dateRangeLabel ?? this.dateRangeLabel,
       status: status ?? this.status,
       title: title ?? this.title,

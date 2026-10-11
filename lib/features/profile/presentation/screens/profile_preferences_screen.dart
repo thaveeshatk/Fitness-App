@@ -153,6 +153,12 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
         normalized.add('S1');
       } else if (clean == 's2' || clean == 'su' || clean == 'sun' || clean == 'sunday') {
         normalized.add('S2');
+      } else if (clean == 's') {
+        if (!normalized.contains('S1')) {
+          normalized.add('S1');
+        } else {
+          normalized.add('S2');
+        }
       } else {
         normalized.add(d);
       }

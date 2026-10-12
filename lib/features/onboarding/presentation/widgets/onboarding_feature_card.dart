@@ -29,9 +29,9 @@ class OnboardingFeatureCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+        color: context.cardBg,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        border: Border.all(color: context.cardBorder, width: 1.2),
         boxShadow: const [
           BoxShadow(
             color: AppColors.shadowColor,
@@ -70,7 +70,7 @@ class OnboardingFeatureCard extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 15.5,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: context.textPrimary,
                     letterSpacing: -0.2,
                   ),
                 ),
@@ -80,7 +80,7 @@ class OnboardingFeatureCard extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     fontWeight: FontWeight.w400,
-                    color: AppColors.textSecondary,
+                    color: context.textSecondary,
                     height: 1.25,
                   ),
                 ),

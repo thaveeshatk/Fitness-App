@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/widgets/primary_pill_button.dart';
-import '../../../../core/widgets/user_avatar.dart';
 import '../../../auth/data/services/auth_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -44,21 +43,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<bool> _onWillPop() async {
     if (!_hasUnsavedChanges()) return true;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final shouldDiscard = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
         title: Text(
           'Discard changes?',
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+          style: GoogleFonts.plusJakartaSans(
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
+          ),
         ),
         content: Text(
           'You have unsaved changes. Are you sure you want to discard them?',
-          style: GoogleFonts.plusJakartaSans(),
+          style: GoogleFonts.plusJakartaSans(
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              ),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
@@ -72,8 +84,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   void _showPhotoOptions() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showModalBottomSheet(
       context: context,
+      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -83,8 +98,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: Text('Change Photo', style: GoogleFonts.plusJakartaSans()),
+                leading: Icon(
+                  Icons.photo_library,
+                  color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                ),
+                title: Text(
+                  'Change Photo',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  ),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   // For demo, we just cycle through preset avatars
@@ -144,15 +167,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        backgroundColor: const Color(0xFFFAFBFD),
+        backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFFAFBFD),
         appBar: AppBar(
-          backgroundColor: const Color(0xFFFAFBFD),
+          backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFFAFBFD),
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.chevron_left_rounded, color: Color(0xFF334155), size: 28),
+            icon: Icon(
+              Icons.chevron_left_rounded,
+              color: isDark ? Colors.white : const Color(0xFF334155),
+              size: 28,
+            ),
             onPressed: () async {
               if (await _onWillPop()) {
                 Navigator.pop(context);
@@ -164,7 +193,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF0F172A),
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
             ),
           ),
           centerTitle: true,
@@ -189,10 +218,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             height: 100,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 3),
+                              border: Border.all(
+                                color: isDark ? const Color(0xFF334155) : Colors.white,
+                                width: 3,
+                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
                                   blurRadius: 10,
                                   offset: const Offset(0, 4),
                                 ),
@@ -216,7 +248,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               decoration: BoxDecoration(
                                 color: const Color(0xFF0284C7),
                                 shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 2),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                                  width: 2,
+                                ),
                               ),
                               child: const Icon(Icons.camera_alt, color: Colors.white, size: 16),
                             ),
@@ -229,6 +264,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   _buildTextField(
                     label: 'Full Name',
                     controller: _nameController,
+                    isDark: isDark,
                     validator: (val) {
                       if (val == null || val.trim().isEmpty) return 'Name is required';
                       return null;
@@ -238,6 +274,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   _buildTextField(
                     label: 'Email Address',
                     controller: _emailController,
+                    isDark: isDark,
                     keyboardType: TextInputType.emailAddress,
                     validator: (val) {
                       if (val == null || val.trim().isEmpty) return 'Email is required';
@@ -278,6 +315,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
+    required bool isDark,
     TextInputType? keyboardType,
     String? Function(String?)? validator,
   }) {
@@ -289,7 +327,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF475569),
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
           ),
         ),
         const SizedBox(height: 8),
@@ -299,11 +337,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           validator: validator,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 16,
-            color: const Color(0xFF0F172A),
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
           ),
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.white,
+            fillColor: isDark ? const Color(0xFF1E293B) : Colors.white,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -311,7 +349,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: BorderSide(
+                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),

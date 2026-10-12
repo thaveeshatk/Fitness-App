@@ -194,8 +194,10 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFBFD),
+      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFFAFBFD),
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -204,31 +206,31 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTopHeader(),
+              _buildTopHeader(isDark),
               const SizedBox(height: 16),
-              _buildSubHeader(),
+              _buildSubHeader(isDark),
               const SizedBox(height: 16),
-              _buildUserProfilePhotoCard(),
+              _buildUserProfilePhotoCard(isDark),
               const SizedBox(height: 16),
-              _buildRhythmBanner(),
+              _buildRhythmBanner(isDark),
               const SizedBox(height: 24),
-              _buildPrimaryFitnessGoalSection(),
+              _buildPrimaryFitnessGoalSection(isDark),
               const SizedBox(height: 24),
-              _buildFitnessLevelSection(),
+              _buildFitnessLevelSection(isDark),
               const SizedBox(height: 24),
-              _buildWorkoutDurationSection(),
+              _buildWorkoutDurationSection(isDark),
               const SizedBox(height: 24),
-              _buildWeeklyRoutineSection(),
+              _buildWeeklyRoutineSection(isDark),
               const SizedBox(height: 24),
-              _buildPreferredStylesSection(),
+              _buildPreferredStylesSection(isDark),
               const SizedBox(height: 24),
-              _buildAvailableEquipmentSection(),
+              _buildAvailableEquipmentSection(isDark),
               const SizedBox(height: 30),
               _buildSaveButton(),
               const SizedBox(height: 14),
-              _buildLogoutButton(),
+              _buildLogoutButton(isDark),
               const SizedBox(height: 14),
-              _buildFooterNotice(),
+              _buildFooterNotice(isDark),
               const SizedBox(height: 28),
             ],
           ),
@@ -238,7 +240,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
   }
 
   // ── 1. Top Header ──────────────────────────────────────────────────────────
-  Widget _buildTopHeader() {
+  Widget _buildTopHeader(bool isDark) {
     return Row(
       children: [
         // Brand circle logo with pulse line
@@ -259,7 +261,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF1E293B),
+            color: isDark ? Colors.white : const Color(0xFF1E293B),
             letterSpacing: -0.3,
           ),
         ),
@@ -276,9 +278,9 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
             width: 36,
             height: 36,
             alignment: Alignment.center,
-            child: const Icon(
+            child: Icon(
               Icons.settings_outlined,
-              color: Color(0xFF334155),
+              color: isDark ? Colors.white : const Color(0xFF334155),
               size: 24,
             ),
           ),
@@ -299,7 +301,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
   }
 
   // ── 2. Sub-Header Navigation Row ───────────────────────────────────────────
-  Widget _buildSubHeader() {
+  Widget _buildSubHeader(bool isDark) {
     return Row(
       children: [
         GestureDetector(
@@ -313,12 +315,13 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
           child: Container(
             width: 38,
             height: 38,
-            decoration: const BoxDecoration(
-              color: Color(0xFFEEF2F7),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEEF2F7),
               shape: BoxShape.circle,
+              border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
             ),
-            child: const Center(
-              child: Icon(Icons.chevron_left_rounded, color: Color(0xFF334155), size: 22),
+            child: Center(
+              child: Icon(Icons.chevron_left_rounded, color: isDark ? Colors.white : const Color(0xFF334155), size: 22),
             ),
           ),
         ),
@@ -332,7 +335,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF1E293B),
+                  color: isDark ? Colors.white : const Color(0xFF1E293B),
                 ),
               ),
               const SizedBox(height: 2),
@@ -341,7 +344,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFF64748B),
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                 ),
               ),
             ],
@@ -350,12 +353,12 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
         Container(
           width: 38,
           height: 38,
-          decoration: const BoxDecoration(
-            color: Color(0xFFD4EAE7),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.5) : const Color(0xFFD4EAE7),
             shape: BoxShape.circle,
           ),
-          child: const Center(
-            child: Icon(Icons.chevron_right_rounded, color: Color(0xFF006257), size: 22),
+          child: Center(
+            child: Icon(Icons.chevron_right_rounded, color: isDark ? const Color(0xFF34D399) : const Color(0xFF006257), size: 22),
           ),
         ),
       ],
@@ -363,7 +366,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
   }
 
   // ── User Profile Photo & Account Card ──────────────────────────────────────
-  Widget _buildUserProfilePhotoCard() {
+  Widget _buildUserProfilePhotoCard(bool isDark) {
     return ValueListenableBuilder<AuthUser?>(
       valueListenable: AuthService.userNotifier,
       builder: (context, user, _) {
@@ -373,14 +376,14 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFF1F5F9)),
-            boxShadow: const [
+            border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
+            boxShadow: [
               BoxShadow(
-                color: Color(0x08000000),
+                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
                 blurRadius: 10,
-                offset: Offset(0, 3),
+                offset: const Offset(0, 3),
               ),
             ],
           ),
@@ -401,7 +404,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF0F172A),
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
                         letterSpacing: -0.3,
                       ),
                     ),
@@ -411,7 +414,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w400,
-                        color: const Color(0xFF64748B),
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -421,20 +424,20 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE6F5F2),
+                          color: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.5) : const Color(0xFFE6F5F2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.add_a_photo_outlined, size: 14, color: Color(0xFF00635A)),
+                            Icon(Icons.add_a_photo_outlined, size: 14, color: isDark ? const Color(0xFF34D399) : const Color(0xFF00635A)),
                             const SizedBox(width: 5),
                             Text(
                               'Change Profile Picture',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF00635A),
+                                color: isDark ? const Color(0xFF34D399) : const Color(0xFF00635A),
                               ),
                             ),
                           ],
@@ -452,12 +455,13 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
   }
 
   // ── 3. Rhythm Highlight Banner ─────────────────────────────────────────────
-  Widget _buildRhythmBanner() {
+  Widget _buildRhythmBanner(bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFFE5F5F2),
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE5F5F2),
         borderRadius: BorderRadius.circular(16),
+        border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
       ),
       child: Row(
         children: [
@@ -482,7 +486,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0F172A),
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
                 const SizedBox(height: 3),
@@ -491,7 +495,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF475569),
+                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                     height: 1.3,
                   ),
                 ),
@@ -504,7 +508,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
   }
 
   // ── 4. Primary Fitness Goal ────────────────────────────────────────────────
-  Widget _buildPrimaryFitnessGoalSection() {
+  Widget _buildPrimaryFitnessGoalSection(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -520,7 +524,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0F172A),
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
               ],
@@ -530,7 +534,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF006D63),
+                color: isDark ? const Color(0xFF34D399) : const Color(0xFF006D63),
                 letterSpacing: 0.8,
               ),
             ),
@@ -557,10 +561,14 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFFDCF3EE) : const Color(0xFFF3F5FA),
+                  color: isSelected
+                      ? (isDark ? const Color(0xFF064E3B).withValues(alpha: 0.5) : const Color(0xFFDCF3EE))
+                      : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF3F5FA)),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: isSelected ? const Color(0xFF00635A) : Colors.transparent,
+                    color: isSelected
+                        ? (isDark ? const Color(0xFF34D399) : const Color(0xFF00635A))
+                        : (isDark ? const Color(0xFF334155) : Colors.transparent),
                     width: isSelected ? 1.5 : 1,
                   ),
                 ),
@@ -571,7 +579,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                       children: [
                         Icon(
                           item.icon,
-                          color: isSelected ? const Color(0xFF006257) : const Color(0xFF475569),
+                          color: isSelected ? const Color(0xFF006257) : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
                           size: 22,
                         ),
                         const Spacer(),
@@ -580,7 +588,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF0F172A),
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -589,7 +597,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w400,
-                            color: const Color(0xFF64748B),
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                           ),
                         ),
                       ],
@@ -619,7 +627,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
   }
 
   // ── 5. Current Fitness Level ───────────────────────────────────────────────
-  Widget _buildFitnessLevelSection() {
+  Widget _buildFitnessLevelSection(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -635,7 +643,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0F172A),
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
               ],
@@ -645,7 +653,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF006D63),
+                color: isDark ? const Color(0xFF34D399) : const Color(0xFF006D63),
               ),
             ),
           ],
@@ -655,8 +663,9 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: const Color(0xFFF1F3F9),
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F3F9),
             borderRadius: BorderRadius.circular(30),
+            border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
           ),
           child: Row(
             children: ['Beginner', 'Intermediate', 'Advanced'].map((level) {
@@ -686,7 +695,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                        color: isSelected ? Colors.white : const Color(0xFF475569),
+                        color: isSelected ? Colors.white : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
                       ),
                     ),
                   ),
@@ -700,8 +709,9 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFFEEF3FA),
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEEF3FA),
             borderRadius: BorderRadius.circular(12),
+            border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -713,13 +723,13 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                   text: TextSpan(
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
-                      color: const Color(0xFF475569),
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                       height: 1.35,
                     ),
                     children: [
                       TextSpan(
                         text: _getTipTitle(_fitnessLevel),
-                        style: const TextStyle(fontWeight: FontWeight.w700, color: Color(0xFF1E293B)),
+                        style: TextStyle(fontWeight: FontWeight.w700, color: isDark ? Colors.white : const Color(0xFF1E293B)),
                       ),
                       TextSpan(text: _getTipBody(_fitnessLevel)),
                     ],
@@ -756,7 +766,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
   }
 
   // ── 6. Target Workout Duration ─────────────────────────────────────────────
-  Widget _buildWorkoutDurationSection() {
+  Widget _buildWorkoutDurationSection(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -772,7 +782,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0F172A),
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
               ],
@@ -782,7 +792,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF64748B),
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
               ),
             ),
           ],
@@ -802,8 +812,11 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFF005953) : const Color(0xFFF1F4FA),
+                      color: isSelected
+                          ? const Color(0xFF005953)
+                          : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F4FA)),
                       borderRadius: BorderRadius.circular(12),
+                      border: isDark && !isSelected ? Border.all(color: const Color(0xFF334155)) : null,
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
@@ -822,7 +835,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
-                            color: isSelected ? Colors.white : const Color(0xFF1E293B),
+                            color: isSelected ? Colors.white : (isDark ? Colors.white : const Color(0xFF1E293B)),
                           ),
                         ),
                         Text(
@@ -830,7 +843,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
-                            color: isSelected ? Colors.white70 : const Color(0xFF64748B),
+                            color: isSelected ? Colors.white70 : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                           ),
                         ),
                       ],
@@ -846,7 +859,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
   }
 
   // ── 7. Weekly Routine Days ─────────────────────────────────────────────────
-  Widget _buildWeeklyRoutineSection() {
+  Widget _buildWeeklyRoutineSection(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -862,7 +875,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0F172A),
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
               ],
@@ -872,7 +885,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF006D63),
+                color: isDark ? const Color(0xFF34D399) : const Color(0xFF006D63),
               ),
             ),
           ],
@@ -883,7 +896,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 12,
             fontWeight: FontWeight.w400,
-            color: const Color(0xFF64748B),
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
           ),
         ),
         const SizedBox(height: 14),
@@ -909,8 +922,11 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                 width: 44,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF005953) : const Color(0xFFF1F4FA),
+                  color: isSelected
+                      ? const Color(0xFF005953)
+                      : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F4FA)),
                   shape: BoxShape.circle,
+                  border: isDark && !isSelected ? Border.all(color: const Color(0xFF334155)) : null,
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
@@ -929,7 +945,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: isSelected ? Colors.white : const Color(0xFF475569),
+                        color: isSelected ? Colors.white : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -939,8 +955,8 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                       Container(
                         width: 4,
                         height: 4,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF94A3B8),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF475569) : const Color(0xFF94A3B8),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -955,7 +971,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
   }
 
   // ── 8. Preferred Styles ────────────────────────────────────────────────────
-  Widget _buildPreferredStylesSection() {
+  Widget _buildPreferredStylesSection(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -971,7 +987,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0F172A),
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
               ],
@@ -981,7 +997,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF64748B),
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
               ),
             ),
           ],
@@ -1009,8 +1025,11 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF005953) : const Color(0xFFF1F4FA),
+                  color: isSelected
+                      ? const Color(0xFF005953)
+                      : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F4FA)),
                   borderRadius: BorderRadius.circular(20),
+                  border: isDark && !isSelected ? Border.all(color: const Color(0xFF334155)) : null,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -1018,7 +1037,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                     Icon(
                       style.icon,
                       size: 16,
-                      color: isSelected ? Colors.white : const Color(0xFF475569),
+                      color: isSelected ? Colors.white : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
                     ),
                     const SizedBox(width: 6),
                     Text(
@@ -1026,7 +1045,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                        color: isSelected ? Colors.white : const Color(0xFF1E293B),
+                        color: isSelected ? Colors.white : (isDark ? Colors.white : const Color(0xFF1E293B)),
                       ),
                     ),
                     if (isSelected) ...[
@@ -1044,7 +1063,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
   }
 
   // ── 9. Available Equipment ─────────────────────────────────────────────────
-  Widget _buildAvailableEquipmentSection() {
+  Widget _buildAvailableEquipmentSection(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1060,7 +1079,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0F172A),
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
               ],
@@ -1070,7 +1089,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF64748B),
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
               ),
             ),
           ],
@@ -1096,8 +1115,15 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFFE7F6F3) : const Color(0xFFF3F5FA),
+                    color: isSelected
+                        ? (isDark ? const Color(0xFF064E3B).withValues(alpha: 0.4) : const Color(0xFFE7F6F3))
+                        : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF3F5FA)),
                     borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isSelected
+                          ? (isDark ? const Color(0xFF34D399).withValues(alpha: 0.5) : const Color(0xFF00635A).withValues(alpha: 0.3))
+                          : (isDark ? const Color(0xFF334155) : Colors.transparent),
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -1105,13 +1131,17 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                         width: 38,
                         height: 38,
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFFCEEEE6) : const Color(0xFFE2E7F0),
+                          color: isSelected
+                              ? (isDark ? const Color(0xFF065F46) : const Color(0xFFCEEEE6))
+                              : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E7F0)),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
                           child: Icon(
                             item.icon,
-                            color: isSelected ? const Color(0xFF00635A) : const Color(0xFF475569),
+                            color: isSelected
+                                ? (isDark ? const Color(0xFF34D399) : const Color(0xFF00635A))
+                                : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
                             size: 19,
                           ),
                         ),
@@ -1126,7 +1156,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF0F172A),
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
                               ),
                             ),
                             const SizedBox(height: 1.5),
@@ -1135,7 +1165,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w400,
-                                color: const Color(0xFF64748B),
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                               ),
                             ),
                           ],
@@ -1145,7 +1175,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
                         width: 22,
                         height: 22,
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFF005953) : const Color(0xFFD9E2EC),
+                          color: isSelected ? const Color(0xFF005953) : (isDark ? const Color(0xFF334155) : const Color(0xFFD9E2EC)),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: isSelected
@@ -1207,7 +1237,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
   }
 
   // ── Logout Button & Confirmation ───────────────────────────────────────────
-  Widget _buildLogoutButton() {
+  Widget _buildLogoutButton(bool isDark) {
     return SizedBox(
       width: double.infinity,
       height: 50,
@@ -1215,11 +1245,14 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
         onPressed: _showLogoutConfirmationDialog,
         style: OutlinedButton.styleFrom(
           foregroundColor: const Color(0xFFDC2626),
-          side: const BorderSide(color: Color(0xFFFCA5A5), width: 1.2),
+          side: BorderSide(
+            color: isDark ? const Color(0xFFDC2626) : const Color(0xFFFCA5A5),
+            width: 1.2,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25),
           ),
-          backgroundColor: const Color(0xFFFEF2F2),
+          backgroundColor: isDark ? const Color(0xFF7F1D1D).withValues(alpha: 0.3) : const Color(0xFFFEF2F2),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1241,17 +1274,18 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
   }
 
   void _showLogoutConfirmationDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: Color(0xFFFEE2E2),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF7F1D1D).withValues(alpha: 0.5) : const Color(0xFFFEE2E2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.logout_rounded, color: Color(0xFFDC2626), size: 20),
@@ -1262,7 +1296,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF0F172A),
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
               ),
             ),
           ],
@@ -1272,7 +1306,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             fontWeight: FontWeight.w400,
-            color: const Color(0xFF475569),
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
           ),
         ),
         actions: [
@@ -1283,7 +1317,7 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF64748B),
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
               ),
             ),
           ),
@@ -1317,18 +1351,18 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
   }
 
   // ── 11. Footer Notice ──────────────────────────────────────────────────────
-  Widget _buildFooterNotice() {
+  Widget _buildFooterNotice(bool isDark) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(Icons.info_outline_rounded, color: Color(0xFF94A3B8), size: 14),
+        Icon(Icons.info_outline_rounded, color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8), size: 14),
         const SizedBox(width: 6),
         Text(
           'You can adjust these settings anytime',
           style: GoogleFonts.plusJakartaSans(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF64748B),
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
           ),
         ),
       ],

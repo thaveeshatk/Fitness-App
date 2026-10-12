@@ -64,13 +64,14 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const tealColor = Color(0xFF006257);
-    const bgLightColor = Color(0xFFF9F9FC);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final tealColor = isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257);
+    final bgLightColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF9F9FC);
 
     if (_isLoading) {
       return Scaffold(
         backgroundColor: bgLightColor,
-        body: const Center(child: CircularProgressIndicator(color: Color(0xFF006257))),
+        body: Center(child: CircularProgressIndicator(color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257))),
       );
     }
 
@@ -89,7 +90,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
         centerTitle: false,
         titleSpacing: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+          icon: Icon(Icons.arrow_back_ios, color: isDark ? Colors.white : Colors.black, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -97,16 +98,16 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: tealColor,
+                color: isDark ? const Color(0xFF2DD4BF) : tealColor,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.show_chart, color: Colors.white, size: 18),
+              child: Icon(Icons.show_chart, color: isDark ? const Color(0xFF0F172A) : Colors.white, size: 18),
             ),
             const SizedBox(width: 8),
             Text(
               'My Plan',
               style: GoogleFonts.plusJakartaSans(
-                color: Colors.black,
+                color: isDark ? Colors.white : Colors.black,
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
               ),
@@ -120,8 +121,8 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
             padding: const EdgeInsets.only(right: 20.0),
             child: CircleAvatar(
               radius: 16,
-              backgroundColor: tealColor,
-              child: const Icon(Icons.person, color: Colors.white, size: 18),
+              backgroundColor: isDark ? const Color(0xFF2DD4BF) : tealColor,
+              child: Icon(Icons.person, color: isDark ? const Color(0xFF0F172A) : Colors.white, size: 18),
             ),
           ),
         ],
@@ -138,19 +139,20 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEEF2FF),
+                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEEF2FF),
                     borderRadius: BorderRadius.circular(20),
+                    border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.calendar_today, color: Color(0xFF475569), size: 14),
+                      Icon(Icons.calendar_today, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569), size: 14),
                       const SizedBox(width: 6),
                       Text(
                         'Week 2 of 4 • Beginner\nFoundation',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1E293B),
+                          color: isDark ? Colors.white : const Color(0xFF1E293B),
                           height: 1.2,
                         ),
                       ),
@@ -160,8 +162,9 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                 Container(
                   padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4, right: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEEF2FF),
+                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEEF2FF),
                     borderRadius: BorderRadius.circular(30),
+                    border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
                   ),
                   child: Row(
                     children: [
@@ -170,18 +173,18 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1E293B),
+                          color: isDark ? Colors.white : const Color(0xFF1E293B),
                           height: 1.2,
                         ),
                       ),
                       const SizedBox(width: 8),
                       CircleAvatar(
                         radius: 14,
-                        backgroundColor: tealColor,
+                        backgroundColor: isDark ? const Color(0xFF2DD4BF) : tealColor,
                         child: Text(
                           'A',
                           style: GoogleFonts.plusJakartaSans(
-                            color: Colors.white,
+                            color: isDark ? const Color(0xFF0F172A) : Colors.white,
                             fontSize: 12,
                             fontWeight: FontWeight.w800,
                           ),
@@ -198,15 +201,18 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
+                boxShadow: isDark
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,7 +226,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                             width: 8,
                             height: 8,
                             decoration: BoxDecoration(
-                              color: tealColor,
+                              color: isDark ? const Color(0xFF2DD4BF) : tealColor,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -230,7 +236,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF1E293B),
+                              color: isDark ? Colors.white : const Color(0xFF1E293B),
                             ),
                           ),
                         ],
@@ -238,7 +244,9 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF86EFAC).withValues(alpha: 0.5),
+                          color: isDark
+                              ? const Color(0xFF064E3B)
+                              : const Color(0xFF86EFAC).withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -246,7 +254,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF065F46),
+                            color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF065F46),
                           ),
                         ),
                       ),
@@ -260,7 +268,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                       Container(
                         height: 8,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEEF2FF),
+                          color: isDark ? const Color(0xFF334155) : const Color(0xFFEEF2FF),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -269,7 +277,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                         child: Container(
                           height: 8,
                           decoration: BoxDecoration(
-                            color: tealColor,
+                            color: isDark ? const Color(0xFF2DD4BF) : tealColor,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -279,13 +287,13 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      const Icon(Icons.arrow_back_ios, color: Color(0xFF006257), size: 10),
+                      Icon(Icons.arrow_back_ios, color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257), size: 10),
                       const SizedBox(width: 4),
                       Text(
                         "You're ${_metrics['remaining'] ?? 0} workouts away from your weekly goal!",
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
-                          color: const Color(0xFF64748B),
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                         ),
                       ),
                     ],
@@ -296,13 +304,13 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildDayStatus('M', 'Done', Icons.check, true, false, false, false),
-                      _buildDayStatus('T', 'Rest', Icons.access_alarm, false, false, true, false),
-                      _buildDayStatus('W', 'Done', Icons.check, true, false, false, false),
-                      _buildDayStatus('T', 'Missed', Icons.error_outline, false, true, false, false),
-                      _buildDayStatus('F', 'TODAY', Icons.play_arrow, true, false, false, true),
-                      _buildDayStatus('S', 'Plan', Icons.calendar_today, false, false, true, false),
-                      _buildDayStatus('S', 'Rest', Icons.access_alarm, false, false, true, false),
+                      _buildDayStatus('M', 'Done', Icons.check, true, false, false, false, isDark),
+                      _buildDayStatus('T', 'Rest', Icons.access_alarm, false, false, true, false, isDark),
+                      _buildDayStatus('W', 'Done', Icons.check, true, false, false, false, isDark),
+                      _buildDayStatus('T', 'Missed', Icons.error_outline, false, true, false, false, isDark),
+                      _buildDayStatus('F', 'TODAY', Icons.play_arrow, true, false, false, true, isDark),
+                      _buildDayStatus('S', 'Plan', Icons.calendar_today, false, false, true, false, isDark),
+                      _buildDayStatus('S', 'Rest', Icons.access_alarm, false, false, true, false, isDark),
                     ],
                   ),
                 ],
@@ -314,15 +322,18 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
             if (todayItem.id.isNotEmpty) ...[
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
+                  boxShadow: isDark
+                      ? []
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: Column(
@@ -330,10 +341,15 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [
-                            const Color(0xFFFDE6D2).withValues(alpha: 0.5),
-                            const Color(0xFFD4F7F2).withValues(alpha: 0.5),
-                          ],
+                          colors: isDark
+                              ? [
+                                  const Color(0xFF334155).withValues(alpha: 0.6),
+                                  const Color(0xFF1E293B),
+                                ]
+                              : [
+                                  const Color(0xFFFDE6D2).withValues(alpha: 0.5),
+                                  const Color(0xFFD4F7F2).withValues(alpha: 0.5),
+                                ],
                         ),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -345,8 +361,8 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                               Container(
                                 width: 6,
                                 height: 6,
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFFF87171) : Colors.red,
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -356,7 +372,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w800,
-                                  color: Colors.red.shade800,
+                                  color: isDark ? const Color(0xFFFCA5A5) : Colors.red.shade800,
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -365,15 +381,16 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.6),
+                              color: isDark ? const Color(0xFF0F172A) : Colors.white.withValues(alpha: 0.6),
                               borderRadius: BorderRadius.circular(12),
+                              border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
                             ),
                             child: Text(
                               'Not started',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w600,
-                                color: const Color(0xFF475569),
+                                color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
                               ),
                             ),
                           ),
@@ -395,10 +412,10 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                             spacing: 8,
                             runSpacing: 8,
                             children: [
-                              _buildImageTag(Icons.access_time, '${todayItem.durationMinutes} min'),
-                              _buildImageTag(Icons.local_fire_department, todayItem.category, color: Colors.red.shade700),
+                              _buildImageTag(Icons.access_time, '${todayItem.durationMinutes} min', isDark: isDark),
+                              _buildImageTag(Icons.local_fire_department, todayItem.category, color: isDark ? const Color(0xFFF87171) : Colors.red.shade700, isDark: isDark),
                               if (todayItem.subtitleDetail != null)
-                                _buildImageTag(Icons.fitness_center, todayItem.subtitleDetail!),
+                                _buildImageTag(Icons.fitness_center, todayItem.subtitleDetail!, isDark: isDark),
                             ],
                           ),
                         ),
@@ -414,7 +431,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF1E293B),
+                              color: isDark ? Colors.white : const Color(0xFF1E293B),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -422,7 +439,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                             todayItem.adviceHighlight ?? 'Gentle joint-friendly circuits designed to build core stability, improve overall posture, and ignite stamina.',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 13,
-                              color: const Color(0xFF475569),
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                               height: 1.4,
                             ),
                           ),
@@ -432,7 +449,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                             height: 52,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: tealColor,
+                                backgroundColor: isDark ? const Color(0xFF2DD4BF) : tealColor,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(26),
                                 ),
@@ -442,14 +459,14 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.play_circle_fill, color: Colors.white, size: 22),
+                                  Icon(Icons.play_circle_fill, color: isDark ? const Color(0xFF0F172A) : Colors.white, size: 22),
                                   const SizedBox(width: 8),
                                   Text(
                                     'Continue Workout',
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w700,
-                                      color: Colors.white,
+                                      color: isDark ? const Color(0xFF0F172A) : Colors.white,
                                     ),
                                   ),
                                 ],
@@ -475,7 +492,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF1E293B),
+                      color: isDark ? Colors.white : const Color(0xFF1E293B),
                     ),
                   ),
                   Text(
@@ -483,7 +500,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: tealColor,
+                      color: isDark ? const Color(0xFF2DD4BF) : tealColor,
                     ),
                   ),
                 ],
@@ -496,8 +513,9 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
                       borderRadius: BorderRadius.circular(16),
+                      border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
                     ),
                     child: Row(
                       children: [
@@ -522,14 +540,14 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w800,
-                                      color: const Color(0xFFB45309),
+                                      color: isDark ? const Color(0xFFFDBA74) : const Color(0xFFB45309),
                                     ),
                                   ),
                                   const SizedBox(width: 6),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFEEF2FF),
+                                      color: isDark ? const Color(0xFF312E81) : const Color(0xFFEEF2FF),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
@@ -537,7 +555,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 9,
                                         fontWeight: FontWeight.w600,
-                                        color: const Color(0xFF4F46E5),
+                                        color: isDark ? const Color(0xFFA5B4FC) : const Color(0xFF4F46E5),
                                       ),
                                     ),
                                   ),
@@ -549,19 +567,19 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w800,
-                                  color: const Color(0xFF1E293B),
+                                  color: isDark ? Colors.white : const Color(0xFF1E293B),
                                 ),
                               ),
                               const SizedBox(height: 2),
                               Row(
                                 children: [
-                                  const Icon(Icons.access_time, size: 10, color: Color(0xFF64748B)),
+                                  Icon(Icons.access_time, size: 10, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                                   const SizedBox(width: 4),
                                   Text(
                                     '${item.durationMinutes} min • ${item.category}',
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 11,
-                                      color: const Color(0xFF64748B),
+                                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                     ),
                                   ),
                                 ],
@@ -570,7 +588,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.event_available, color: Color(0xFF475569), size: 20),
+                          icon: Icon(Icons.event_available, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569), size: 20),
                           onPressed: () => _onOpenWorkout(item),
                         ),
                       ],
@@ -591,14 +609,14 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF1E293B),
+                      color: isDark ? Colors.white : const Color(0xFF1E293B),
                     ),
                   ),
                   Text(
                     '${completedItems.length} sessions',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
-                      color: const Color(0xFF64748B),
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                     ),
                   ),
                 ],
@@ -611,6 +629,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                   item.title,
                   '${item.durationMinutes} min • 130 kcal burned',
                   () => _onOpenWorkout(item),
+                  isDark,
                 ),
               )),
               const SizedBox(height: 20),
@@ -622,7 +641,8 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
               height: 56,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE0E7FF),
+                  backgroundColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFE0E7FF),
+                  side: isDark ? const BorderSide(color: Color(0xFF334155)) : BorderSide.none,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -632,14 +652,14 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.play_circle_outline, color: Color(0xFF1E293B), size: 20),
+                    Icon(Icons.play_circle_outline, color: isDark ? Colors.white : const Color(0xFF1E293B), size: 20),
                     const SizedBox(width: 8),
                     Text(
                       'Continue Plan',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF1E293B),
+                        color: isDark ? Colors.white : const Color(0xFF1E293B),
                       ),
                     ),
                   ],
@@ -653,7 +673,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF475569),
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                 ),
               ),
             ),
@@ -664,8 +684,9 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1, // Plan
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: tealColor,
-        unselectedItemColor: const Color(0xFF94A3B8),
+        backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
+        selectedItemColor: isDark ? const Color(0xFF2DD4BF) : tealColor,
+        unselectedItemColor: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
         selectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w700),
         unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w600),
         items: const [
@@ -679,28 +700,28 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
     );
   }
 
-  Widget _buildDayStatus(String day, String label, IconData icon, bool isDone, bool isMissed, bool isRest, bool isToday) {
+  Widget _buildDayStatus(String day, String label, IconData icon, bool isDone, bool isMissed, bool isRest, bool isToday, bool isDark) {
     Color circleColor;
     Color iconColor;
     Color textColor;
 
     if (isDone) {
-      circleColor = const Color(0xFF006257);
-      iconColor = Colors.white;
-      textColor = const Color(0xFF006257);
+      circleColor = isDark ? const Color(0xFF064E3B) : const Color(0xFF006257);
+      iconColor = isDark ? const Color(0xFF2DD4BF) : Colors.white;
+      textColor = isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257);
     } else if (isMissed) {
-      circleColor = const Color(0xFFFDE6D2);
-      iconColor = const Color(0xFFB45309);
-      textColor = const Color(0xFFB45309);
+      circleColor = isDark ? const Color(0xFF7C2D12).withValues(alpha: 0.4) : const Color(0xFFFDE6D2);
+      iconColor = isDark ? const Color(0xFFFDBA74) : const Color(0xFFB45309);
+      textColor = isDark ? const Color(0xFFFDBA74) : const Color(0xFFB45309);
     } else if (isToday) {
-      circleColor = const Color(0xFF006257);
-      iconColor = Colors.white;
-      textColor = const Color(0xFF006257);
+      circleColor = isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257);
+      iconColor = isDark ? const Color(0xFF0F172A) : Colors.white;
+      textColor = isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257);
     } else {
       // Rest or Plan
-      circleColor = const Color(0xFFEEF2FF);
-      iconColor = const Color(0xFF64748B);
-      textColor = const Color(0xFF64748B);
+      circleColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFEEF2FF);
+      iconColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+      textColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
     }
 
     return Column(
@@ -711,6 +732,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
           decoration: BoxDecoration(
             color: circleColor,
             shape: BoxShape.circle,
+            border: isDark && !isDone && !isToday && !isMissed ? Border.all(color: const Color(0xFF334155)) : null,
           ),
           child: Icon(icon, color: iconColor, size: 18),
         ),
@@ -727,24 +749,25 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
     );
   }
 
-  Widget _buildImageTag(IconData icon, String text, {Color? color}) {
+  Widget _buildImageTag(IconData icon, String text, {Color? color, required bool isDark}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF0F172A).withValues(alpha: 0.85) : Colors.white,
         borderRadius: BorderRadius.circular(20),
+        border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color ?? const Color(0xFF006257), size: 14),
+          Icon(icon, color: color ?? (isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257)), size: 14),
           const SizedBox(width: 4),
           Text(
             text,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF1E293B),
+              color: isDark ? Colors.white : const Color(0xFF1E293B),
             ),
           ),
         ],
@@ -752,24 +775,25 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
     );
   }
 
-  Widget _buildCompletedCard(String day, String title, String subtitle, VoidCallback onTap) {
+  Widget _buildCompletedCard(String day, String title, String subtitle, VoidCallback onTap, bool isDark) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(16),
+          border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
-                color: Color(0xFFC8F3EA),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF064E3B) : const Color(0xFFC8F3EA),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.check_circle_outline, color: Color(0xFF065F46), size: 24),
+              child: Icon(Icons.check_circle_outline, color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF065F46), size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -783,14 +807,14 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF64748B),
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF006257),
+                          color: isDark ? const Color(0xFF064E3B) : const Color(0xFF006257),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(
@@ -800,11 +824,11 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.white,
+                                color: isDark ? const Color(0xFF2DD4BF) : Colors.white,
                               ),
                             ),
                             const SizedBox(width: 2),
-                            const Icon(Icons.check, color: Colors.white, size: 10),
+                            Icon(Icons.check, color: isDark ? const Color(0xFF2DD4BF) : Colors.white, size: 10),
                           ],
                         ),
                       ),
@@ -816,7 +840,7 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF1E293B),
+                      color: isDark ? Colors.white : const Color(0xFF1E293B),
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -824,14 +848,14 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
                     subtitle,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
-                      color: const Color(0xFF64748B),
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                     ),
                   ),
                 ],
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.refresh, color: Color(0xFF475569)),
+              icon: Icon(Icons.refresh, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
               onPressed: onTap,
             ),
           ],

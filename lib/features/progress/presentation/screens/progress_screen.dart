@@ -85,9 +85,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
   Widget build(BuildContext context) {
     // Refresh data in case profile was updated in another tab
     _data = ProgressService.getProgressData(_selectedTimeframe);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDark ? const Color(0xFF0F172A) : AppColors.background,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -96,21 +97,21 @@ class _ProgressScreenState extends State<ProgressScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTopHeader(),
+              _buildTopHeader(isDark),
               const SizedBox(height: 16),
-              _buildSegmentedFilter(),
+              _buildSegmentedFilter(isDark),
               const SizedBox(height: 14),
-              _buildRoutineCapsuleBadge(),
+              _buildRoutineCapsuleBadge(isDark),
               const SizedBox(height: 14),
-              _buildStatsCardsRow(),
+              _buildStatsCardsRow(isDark),
               const SizedBox(height: 12),
-              _buildEnergyExpendedCard(),
+              _buildEnergyExpendedCard(isDark),
               const SizedBox(height: 14),
-              _buildHabitHealthCard(),
+              _buildHabitHealthCard(isDark),
               const SizedBox(height: 14),
-              _buildDailyActivityCard(),
+              _buildDailyActivityCard(isDark),
               const SizedBox(height: 14),
-              _buildMilestoneJourneyCard(),
+              _buildMilestoneJourneyCard(isDark),
               const SizedBox(height: 14),
               _buildDailyReflectionCard(),
               const SizedBox(height: 24),
@@ -122,7 +123,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   // ── 1. Top Header ──────────────────────────────────────────────────────────
-  Widget _buildTopHeader() {
+  Widget _buildTopHeader(bool isDark) {
     return Row(
       children: [
         Container(
@@ -152,7 +153,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 19,
                 fontWeight: FontWeight.w800,
-                color: AppColors.textPrimary,
+                color: isDark ? Colors.white : AppColors.textPrimary,
                 letterSpacing: -0.4,
               ),
             ),
@@ -161,7 +162,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 11.5,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
+                color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
               ),
             ),
           ],
@@ -172,12 +173,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.cardBorder),
+            border: Border.all(color: isDark ? const Color(0xFF334155) : AppColors.cardBorder),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
+                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
@@ -224,25 +225,25 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   // ── 2. Segmented Filter Tabs ───────────────────────────────────────────────
-  Widget _buildSegmentedFilter() {
+  Widget _buildSegmentedFilter(bool isDark) {
     return Container(
       height: 44,
       padding: const EdgeInsets.all(4.0),
       decoration: BoxDecoration(
-        color: const Color(0xFFEFF4F5),
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF4F5),
         borderRadius: BorderRadius.circular(22),
       ),
       child: Row(
         children: [
-          _filterPill('This Week', ProgressTimeframe.thisWeek),
-          _filterPill('This Month', ProgressTimeframe.thisMonth),
-          _filterPill('All Time', ProgressTimeframe.allTime),
+          _filterPill('This Week', ProgressTimeframe.thisWeek, isDark),
+          _filterPill('This Month', ProgressTimeframe.thisMonth, isDark),
+          _filterPill('All Time', ProgressTimeframe.allTime, isDark),
         ],
       ),
     );
   }
 
-  Widget _filterPill(String title, ProgressTimeframe timeframe) {
+  Widget _filterPill(String title, ProgressTimeframe timeframe, bool isDark) {
     final isSelected = _selectedTimeframe == timeframe;
     return Expanded(
       child: GestureDetector(
@@ -251,12 +252,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOutCubic,
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
+            color: isSelected
+                ? (isDark ? const Color(0xFF334155) : Colors.white)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(18),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -269,7 +272,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+                color: isSelected
+                    ? (isDark ? Colors.white : AppColors.textPrimary)
+                    : (isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
               ),
             ),
           ),
@@ -279,13 +284,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   // ── 3. Routine Capsule Badge ───────────────────────────────────────────────
-  Widget _buildRoutineCapsuleBadge() {
+  Widget _buildRoutineCapsuleBadge(bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: _mintGreenTint,
+        color: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.5) : _mintGreenTint,
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: _mintGreen.withValues(alpha: 0.3)),
+        border: Border.all(color: _mintGreen.withValues(alpha: isDark ? 0.4 : 0.3)),
       ),
       child: Row(
         children: [
@@ -304,7 +309,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w800,
-                color: _darkTeal,
+                color: isDark ? const Color(0xFF6EE7B7) : _darkTeal,
                 letterSpacing: 0.8,
               ),
               overflow: TextOverflow.ellipsis,
@@ -313,7 +318,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF065F46) : Colors.white,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -321,7 +326,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
-                color: _primaryTeal,
+                color: isDark ? const Color(0xFFA7F3D0) : _primaryTeal,
               ),
             ),
           ),
@@ -331,15 +336,16 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   // ── 4. Stats Cards Row (Workouts & Active Movement) ────────────────────────
-  Widget _buildStatsCardsRow() {
+  Widget _buildStatsCardsRow(bool isDark) {
     return Row(
       children: [
         // Left Card: Workouts
         Expanded(
           child: _statCard(
+            isDark: isDark,
             badgeIcon: Icons.check_circle_rounded,
             badgeIconColor: _primaryTeal,
-            badgeBgColor: _mintGreenTint,
+            badgeBgColor: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.5) : _mintGreenTint,
             targetText: 'Target: ${_data.targetWorkouts}',
             bigValue: '${_data.completedWorkouts} Workouts',
             subtitle: 'Completed so far',
@@ -351,9 +357,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
         // Right Card: Active Movement
         Expanded(
           child: _statCard(
+            isDark: isDark,
             badgeIcon: Icons.timer_outlined,
             badgeIconColor: const Color(0xFFD97706),
-            badgeBgColor: const Color(0xFFFEF3C7),
+            badgeBgColor: isDark ? const Color(0xFF78350F).withValues(alpha: 0.5) : const Color(0xFFFEF3C7),
             targetText: 'Target: ${_data.targetMinutes}m',
             bigValue: '${_data.activeMinutes} mins',
             subtitle: 'Active Movement',
@@ -366,6 +373,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _statCard({
+    required bool isDark,
     required IconData badgeIcon,
     required Color badgeIconColor,
     required Color badgeBgColor,
@@ -378,12 +386,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        border: Border.all(color: isDark ? const Color(0xFF334155) : AppColors.cardBorder, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -409,7 +417,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 10.5,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textSecondary,
+                  color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                 ),
               ),
             ],
@@ -420,7 +428,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 17.5,
               fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+              color: isDark ? Colors.white : AppColors.textPrimary,
               letterSpacing: -0.4,
             ),
           ),
@@ -430,7 +438,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11.5,
               fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+              color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 12),
@@ -439,7 +447,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             child: LinearProgressIndicator(
               value: progressFraction.clamp(0.0, 1.0),
               minHeight: 5,
-              backgroundColor: const Color(0xFFF1F5F9),
+              backgroundColor: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
               valueColor: AlwaysStoppedAnimation<Color>(progressColor),
             ),
           ),
@@ -449,16 +457,16 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   // ── 5. Energy Expended Card ────────────────────────────────────────────────
-  Widget _buildEnergyExpendedCard() {
+  Widget _buildEnergyExpendedCard(bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        border: Border.all(color: isDark ? const Color(0xFF334155) : AppColors.cardBorder, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -470,8 +478,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
           Container(
             width: 40,
             height: 40,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFEE2E2),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF7F1D1D).withValues(alpha: 0.5) : const Color(0xFFFEE2E2),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -489,7 +497,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 9.5,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textMuted,
+                  color: isDark ? const Color(0xFF64748B) : AppColors.textMuted,
                   letterSpacing: 0.6,
                 ),
               ),
@@ -499,7 +507,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 18.5,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+                  color: isDark ? Colors.white : AppColors.textPrimary,
                   letterSpacing: -0.4,
                 ),
               ),
@@ -513,16 +521,16 @@ class _ProgressScreenState extends State<ProgressScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _mintGreenTint,
+                  color: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.5) : _mintGreenTint,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.arrow_outward_rounded,
                       size: 11,
-                      color: _darkTeal,
+                      color: isDark ? const Color(0xFF34D399) : _darkTeal,
                     ),
                     const SizedBox(width: 3),
                     Text(
@@ -530,7 +538,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        color: _darkTeal,
+                        color: isDark ? const Color(0xFF34D399) : _darkTeal,
                       ),
                     ),
                   ],
@@ -541,7 +549,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 'vs last week',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 10,
-                  color: AppColors.textSecondary,
+                  color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -553,7 +561,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   // ── 6. Habit Health Card (Custom Painted Circular Gauge 80%) ───────────────
-  Widget _buildHabitHealthCard() {
+  Widget _buildHabitHealthCard(bool isDark) {
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
@@ -564,161 +572,161 @@ class _ProgressScreenState extends State<ProgressScreen> {
         );
       },
       child: Container(
-      padding: const EdgeInsets.all(17),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.cardBorder, width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'HABIT HEALTH',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 9.5,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textMuted,
-                      letterSpacing: 0.6,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Workout Consistency',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 15.5,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              // On Track Consistent pill
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: _mintGreenTint,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        color: _mintGreen,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      _data.habitStatus,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w800,
-                        color: _darkTeal,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              // Custom-painted smooth circular gauge
-              SizedBox(
-                width: 68,
-                height: 68,
-                child: CustomPaint(
-                  painter: _CircularGaugePainter(
-                    progress: _data.habitConsistencyPercent / 100.0,
-                    activeColor: _primaryTeal,
-                    backgroundColor: const Color(0xFFEFF4F5),
-                    strokeWidth: 6.8,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '${_data.habitConsistencyPercent}%',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                        letterSpacing: -0.4,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
+        padding: const EdgeInsets.all(17),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E293B) : Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: isDark ? const Color(0xFF334155) : AppColors.cardBorder, width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    RichText(
-                      text: TextSpan(
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          color: AppColors.textPrimary,
-                          height: 1.4,
-                        ),
-                        children: [
-                          const TextSpan(text: 'You have worked out '),
-                          TextSpan(
-                            text: '${_data.habitCompletedDays} out of the last ${_data.habitScheduledDays} scheduled days.',
-                            style: const TextStyle(fontWeight: FontWeight.w800),
-                          ),
-                        ],
+                    Text(
+                      'HABIT HEALTH',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? const Color(0xFF64748B) : AppColors.textMuted,
+                        letterSpacing: 0.6,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
-                      'Consistency beats intensity every single time.',
+                      'Workout Consistency',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11.5,
-                        color: AppColors.textSecondary,
-                        fontStyle: FontStyle.italic,
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
+                        letterSpacing: -0.3,
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-        ],
+                const Spacer(),
+                // On Track Consistent pill
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.5) : _mintGreenTint,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: _mintGreen,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        _data.habitStatus,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? const Color(0xFF34D399) : _darkTeal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                // Custom-painted smooth circular gauge
+                SizedBox(
+                  width: 68,
+                  height: 68,
+                  child: CustomPaint(
+                    painter: _CircularGaugePainter(
+                      progress: _data.habitConsistencyPercent / 100.0,
+                      activeColor: _primaryTeal,
+                      backgroundColor: isDark ? const Color(0xFF334155) : const Color(0xFFEFF4F5),
+                      strokeWidth: 6.8,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${_data.habitConsistencyPercent}%',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? Colors.white : AppColors.textPrimary,
+                          letterSpacing: -0.4,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            color: isDark ? Colors.white : AppColors.textPrimary,
+                            height: 1.4,
+                          ),
+                          children: [
+                            const TextSpan(text: 'You have worked out '),
+                            TextSpan(
+                              text: '${_data.habitCompletedDays} out of the last ${_data.habitScheduledDays} scheduled days.',
+                              style: const TextStyle(fontWeight: FontWeight.w800),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Consistency beats intensity every single time.',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11.5,
+                          color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   // ── 7. Daily Activity Section (7-Day Bar Chart) ────────────────────────────
-  Widget _buildDailyActivityCard() {
+  Widget _buildDailyActivityCard(bool isDark) {
     return Container(
       padding: const EdgeInsets.all(17),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        border: Border.all(color: isDark ? const Color(0xFF334155) : AppColors.cardBorder, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -738,7 +746,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 9.5,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textMuted,
+                      color: isDark ? const Color(0xFF64748B) : AppColors.textMuted,
                       letterSpacing: 0.6,
                     ),
                   ),
@@ -748,7 +756,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 15.5,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
                       letterSpacing: -0.3,
                     ),
                   ),
@@ -758,9 +766,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
               // Legend
               Row(
                 children: [
-                  _legendDot(_primaryTeal, 'Workout'),
+                  _legendDot(_primaryTeal, 'Workout', isDark),
                   const SizedBox(width: 10),
-                  _legendDot(const Color(0xFFE2E8F0), 'Rest'),
+                  _legendDot(isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0), 'Rest', isDark),
                 ],
               ),
             ],
@@ -772,7 +780,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: _data.dailyActivities.map((day) => _buildDayBar(day)).toList(),
+              children: _data.dailyActivities.map((day) => _buildDayBar(day, isDark)).toList(),
             ),
           ),
           const SizedBox(height: 16),
@@ -780,9 +788,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFF1F5F9)),
+              border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
             ),
             child: Row(
               children: [
@@ -798,7 +806,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
+                      color: isDark ? const Color(0xFFCBD5E1) : AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -810,7 +818,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     );
   }
 
-  Widget _legendDot(Color color, String label) {
+  Widget _legendDot(Color color, String label, bool isDark) {
     return Row(
       children: [
         Container(
@@ -824,14 +832,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 10.5,
             fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
+            color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDayBar(DailyActivityItem day) {
+  Widget _buildDayBar(DailyActivityItem day, bool isDark) {
     const double maxBarHeight = 72.0;
     final maxMinutes = _data.dailyActivities
         .map((d) => d.minutes)
@@ -866,7 +874,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
             margin: const EdgeInsets.only(bottom: 4),
             decoration: BoxDecoration(
-              color: _mintGreenTint,
+              color: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.5) : _mintGreenTint,
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
@@ -874,7 +882,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 8.5,
                 fontWeight: FontWeight.w800,
-                color: _darkTeal,
+                color: isDark ? const Color(0xFF6EE7B7) : _darkTeal,
               ),
             ),
           )
@@ -888,8 +896,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
             fontSize: 10,
             fontWeight: day.isToday ? FontWeight.w800 : FontWeight.w600,
             color: day.isRest
-                ? AppColors.textMuted
-                : (day.isToday ? _primaryTeal : AppColors.textPrimary),
+                ? (isDark ? const Color(0xFF64748B) : AppColors.textMuted)
+                : (day.isToday ? (isDark ? const Color(0xFF34D399) : _primaryTeal) : (isDark ? Colors.white : AppColors.textPrimary)),
           ),
         ),
         const SizedBox(height: 5),
@@ -909,7 +917,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                         : [const Color(0xFF00796B), const Color(0xFF004D40)],
                   ),
             color: day.isRest
-                ? const Color(0xFFE2E8F0)
+                ? (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0))
                 : (day.isPlanned ? _mintGreen.withValues(alpha: 0.3) : null),
             borderRadius: BorderRadius.circular(day.isRest ? 3 : 7),
             border: day.isToday
@@ -934,7 +942,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 10.5,
             fontWeight: day.isToday ? FontWeight.w800 : FontWeight.w600,
-            color: day.isToday ? _primaryTeal : AppColors.textSecondary,
+            color: day.isToday
+                ? (isDark ? const Color(0xFF34D399) : _primaryTeal)
+                : (isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
           ),
         ),
       ],
@@ -942,16 +952,16 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   // ── 8. Milestone Journey Card ──────────────────────────────────────────────
-  Widget _buildMilestoneJourneyCard() {
+  Widget _buildMilestoneJourneyCard(bool isDark) {
     return Container(
       padding: const EdgeInsets.all(17),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        border: Border.all(color: isDark ? const Color(0xFF334155) : AppColors.cardBorder, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -967,7 +977,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
+                  color: isDark ? const Color(0xFF78350F).withValues(alpha: 0.5) : const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
@@ -986,7 +996,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 9.5,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textMuted,
+                        color: isDark ? const Color(0xFF64748B) : AppColors.textMuted,
                         letterSpacing: 0.6,
                       ),
                     ),
@@ -996,7 +1006,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                         letterSpacing: -0.3,
                       ),
                     ),
@@ -1004,7 +1014,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       _data.milestoneLevelText,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
-                        color: AppColors.textSecondary,
+                        color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -1026,7 +1036,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(
               value: _data.milestonePercent / 100.0,
-              backgroundColor: const Color(0xFFE2E8F0),
+              backgroundColor: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
               valueColor: const AlwaysStoppedAnimation<Color>(_mintGreen),
               minHeight: 8,
             ),
@@ -1040,7 +1050,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textSecondary,
+                  color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                 ),
               ),
               Text(
@@ -1048,7 +1058,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textSecondary,
+                  color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                 ),
               ),
             ],

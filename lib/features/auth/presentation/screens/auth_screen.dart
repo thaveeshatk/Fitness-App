@@ -177,8 +177,10 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBg,
       body: Stack(
         children: [
           // Background ambient soft glow
@@ -192,8 +194,10 @@ class _AuthScreenState extends State<AuthScreen> {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    const Color(0xFFC8F3EA).withValues(alpha: 0.6),
-                    AppColors.background.withValues(alpha: 0.0),
+                    isDark
+                        ? const Color(0xFF0F766E).withValues(alpha: 0.25)
+                        : const Color(0xFFC8F3EA).withValues(alpha: 0.6),
+                    context.scaffoldBg.withValues(alpha: 0.0),
                   ],
                 ),
               ),
@@ -214,7 +218,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       children: [
                         if (Navigator.canPop(context))
                           IconButton(
-                            icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
+                            icon: Icon(Icons.arrow_back_rounded, color: context.textPrimary),
                             onPressed: () => Navigator.pop(context),
                           )
                         else
@@ -225,7 +229,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.2,
-                            color: AppColors.textMuted,
+                            color: context.textMuted,
                           ),
                         ),
                         const SizedBox(width: 48),
@@ -249,7 +253,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 26,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: context.textPrimary,
                         letterSpacing: -0.6,
                       ),
                     ),
@@ -264,7 +268,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w400,
-                        color: AppColors.textSecondary,
+                        color: context.textSecondary,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -272,7 +276,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     const SizedBox(height: 22),
 
                     // Segmented Tab Toggle: [ Log In ]  [ Create Account ]
-                    _buildTabToggle(),
+                    _buildTabToggle(isDark),
 
                     const SizedBox(height: 22),
 
@@ -318,7 +322,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                          color: AppColors.textMuted,
+                          color: context.textMuted,
                           size: 20,
                         ),
                         onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
@@ -342,7 +346,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscureConfirmPassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                            color: AppColors.textMuted,
+                            color: context.textMuted,
                             size: 20,
                           ),
                           onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
@@ -379,7 +383,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                 'Remember me',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 13,
-                                  color: AppColors.textSecondary,
+                                  color: context.textSecondary,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -422,7 +426,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                 'I agree to the FitOn Terms of Service and Privacy Policy.',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12,
-                                  color: AppColors.textSecondary,
+                                  color: context.textSecondary,
                                   height: 1.35,
                                 ),
                               ),
@@ -480,7 +484,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     // Divider: OR
                     Row(
                       children: [
-                        const Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+                        Expanded(child: Divider(color: context.cardBorder)),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 14.0),
                           child: Text(
@@ -488,12 +492,12 @@ class _AuthScreenState extends State<AuthScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.textMuted,
+                              color: context.textMuted,
                               letterSpacing: 0.8,
                             ),
                           ),
                         ),
-                        const Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+                        Expanded(child: Divider(color: context.cardBorder)),
                       ],
                     ),
 
@@ -517,7 +521,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           child: _buildSocialButton(
                             label: 'Apple',
                             icon: Icons.apple_rounded,
-                            iconColor: AppColors.textPrimary,
+                            iconColor: context.textPrimary,
                             onTap: () => _handleSocialAuth(false),
                           ),
                         ),
@@ -536,7 +540,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               : 'Don\'t have an account? ',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 13.5,
-                            color: AppColors.textSecondary,
+                            color: context.textSecondary,
                             fontWeight: FontWeight.w500,
                           ),
                           children: [
@@ -566,12 +570,12 @@ class _AuthScreenState extends State<AuthScreen> {
 
   // ── Sub-widgets ───────────────────────────────────────────────────────────
 
-  Widget _buildTabToggle() {
+  Widget _buildTabToggle(bool isDark) {
     return Container(
       height: 48,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFFEDF2F7),
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEDF2F7),
         borderRadius: BorderRadius.circular(24),
       ),
       child: Row(
@@ -583,12 +587,14 @@ class _AuthScreenState extends State<AuthScreen> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 220),
                 decoration: BoxDecoration(
-                  color: !_isSignUp ? Colors.white : Colors.transparent,
+                  color: !_isSignUp
+                      ? (isDark ? const Color(0xFF334155) : Colors.white)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: !_isSignUp
                       ? [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.08),
+                            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.08),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -601,7 +607,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14,
                     fontWeight: !_isSignUp ? FontWeight.w700 : FontWeight.w600,
-                    color: !_isSignUp ? AppColors.textPrimary : AppColors.textMuted,
+                    color: !_isSignUp ? context.textPrimary : context.textMuted,
                   ),
                 ),
               ),
@@ -614,12 +620,14 @@ class _AuthScreenState extends State<AuthScreen> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 220),
                 decoration: BoxDecoration(
-                  color: _isSignUp ? Colors.white : Colors.transparent,
+                  color: _isSignUp
+                      ? (isDark ? const Color(0xFF334155) : Colors.white)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: _isSignUp
                       ? [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.08),
+                            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.08),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -632,7 +640,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14,
                     fontWeight: _isSignUp ? FontWeight.w700 : FontWeight.w600,
-                    color: _isSignUp ? AppColors.textPrimary : AppColors.textMuted,
+                    color: _isSignUp ? context.textPrimary : context.textMuted,
                   ),
                 ),
               ),
@@ -663,7 +671,7 @@ class _AuthScreenState extends State<AuthScreen> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: context.textPrimary,
             ),
           ),
         ),
@@ -675,26 +683,26 @@ class _AuthScreenState extends State<AuthScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 14.5,
             fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
+            color: context.textPrimary,
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: GoogleFonts.plusJakartaSans(
               fontSize: 14,
-              color: AppColors.textMuted,
+              color: context.textMuted,
             ),
-            prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 20),
+            prefixIcon: Icon(icon, color: context.textSecondary, size: 20),
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.cardBg,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: BorderSide(color: context.cardBorder),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: BorderSide(color: context.cardBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
@@ -722,9 +730,9 @@ class _AuthScreenState extends State<AuthScreen> {
       child: Container(
         height: 50,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.cardBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(color: context.cardBorder),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.03),
@@ -743,7 +751,7 @@ class _AuthScreenState extends State<AuthScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: context.textPrimary,
               ),
             ),
           ],

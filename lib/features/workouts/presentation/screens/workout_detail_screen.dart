@@ -16,14 +16,16 @@ class WorkoutDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary, size: 22),
+          icon: Icon(Icons.arrow_back_rounded, color: isDark ? Colors.white : AppColors.textPrimary, size: 22),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -31,7 +33,7 @@ class WorkoutDetailScreen extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 15,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
+            color: isDark ? Colors.white : AppColors.textPrimary,
             letterSpacing: 1.5,
           ),
         ),
@@ -55,7 +57,7 @@ class WorkoutDetailScreen extends StatelessWidget {
                   margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.featureTealBg,
+                    color: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.5) : AppColors.featureTealBg,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(
@@ -82,7 +84,7 @@ class WorkoutDetailScreen extends StatelessWidget {
                 style: GoogleFonts.playfairDisplay(
                   fontSize: 26,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+                  color: isDark ? Colors.white : AppColors.textPrimary,
                   height: 1.2,
                 ),
               ),
@@ -94,7 +96,7 @@ class WorkoutDetailScreen extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
+                  color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                   letterSpacing: -0.1,
                 ),
               ),
@@ -104,15 +106,15 @@ class WorkoutDetailScreen extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _buildDurationCard(),
+                    child: _buildDurationCard(isDark),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: _buildDifficultyCard(),
+                    child: _buildDifficultyCard(isDark),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: _buildEquipmentCard(),
+                    child: _buildEquipmentCard(isDark),
                   ),
                 ],
               ),
@@ -122,9 +124,9 @@ class WorkoutDetailScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFEDF2F7)),
+                  border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFEDF2F7)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,14 +135,14 @@ class WorkoutDetailScreen extends StatelessWidget {
                       width: 34,
                       height: 34,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFC8F3EA),
+                        color: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.5) : const Color(0xFFC8F3EA),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Icon(
                           Icons.warning_amber_rounded,
                           size: 20,
-                          color: Color(0xFF00695C),
+                          color: isDark ? const Color(0xFF34D399) : const Color(0xFF00695C),
                         ),
                       ),
                     ),
@@ -154,7 +156,7 @@ class WorkoutDetailScreen extends StatelessWidget {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.textPrimary,
+                              color: isDark ? Colors.white : AppColors.textPrimary,
                               letterSpacing: 0.8,
                             ),
                           ),
@@ -164,7 +166,7 @@ class WorkoutDetailScreen extends StatelessWidget {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11.5,
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF475569),
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                               height: 1.4,
                             ),
                           ),
@@ -185,7 +187,7 @@ class WorkoutDetailScreen extends StatelessWidget {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
                       letterSpacing: 0.6,
                     ),
                   ),
@@ -194,7 +196,7 @@ class WorkoutDetailScreen extends StatelessWidget {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 10.5,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textMuted,
+                      color: isDark ? const Color(0xFF64748B) : AppColors.textMuted,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -206,7 +208,7 @@ class WorkoutDetailScreen extends StatelessWidget {
               ...workout.exercises.asMap().entries.map((entry) {
                 final index = entry.key;
                 final exercise = entry.value;
-                return _buildExerciseCard(context, index + 1, exercise);
+                return _buildExerciseCard(context, index + 1, exercise, isDark);
               }),
 
               const SizedBox(height: 20),
@@ -218,13 +220,13 @@ class WorkoutDetailScreen extends StatelessWidget {
       // Pinned Bottom Green "Start Workout" Button matching wireframe
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
-          border: const Border(
-            top: BorderSide(color: Color(0xFFEDF2F7), width: 1),
+          color: isDark ? const Color(0xFF1E293B) : Colors.white,
+          border: Border(
+            top: BorderSide(color: isDark ? const Color(0xFF334155) : const Color(0xFFEDF2F7), width: 1),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
               blurRadius: 12,
               offset: const Offset(0, -4),
             ),
@@ -278,13 +280,13 @@ class WorkoutDetailScreen extends StatelessWidget {
 
   // ── Metric Cards ──────────────────────────────────────────────────────────
 
-  Widget _buildDurationCard() {
+  Widget _buildDurationCard(bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFEDF2F7)),
+        border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFEDF2F7)),
       ),
       child: Column(
         children: [
@@ -292,13 +294,13 @@ class WorkoutDetailScreen extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: const Color(0xFFE2E8F0).withValues(alpha: 0.6),
+              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0).withValues(alpha: 0.6),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.access_time_rounded,
               size: 16,
-              color: Color(0xFF475569),
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
             ),
           ),
           const SizedBox(height: 8),
@@ -307,7 +309,7 @@ class WorkoutDetailScreen extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 14.5,
               fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+              color: isDark ? Colors.white : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 2),
@@ -316,7 +318,7 @@ class WorkoutDetailScreen extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 9.5,
               fontWeight: FontWeight.w800,
-              color: AppColors.textMuted,
+              color: isDark ? const Color(0xFF64748B) : AppColors.textMuted,
               letterSpacing: 0.6,
             ),
           ),
@@ -325,7 +327,7 @@ class WorkoutDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDifficultyCard() {
+  Widget _buildDifficultyCard(bool isDark) {
     final diff = workout.difficulty.toLowerCase();
     int activeDots = 2; // default intermediate
     if (diff.contains('beg')) {
@@ -337,9 +339,9 @@ class WorkoutDetailScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFEDF2F7)),
+        border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFEDF2F7)),
       ),
       child: Column(
         children: [
@@ -347,13 +349,13 @@ class WorkoutDetailScreen extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: const Color(0xFFE2E8F0).withValues(alpha: 0.6),
+              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0).withValues(alpha: 0.6),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.tune_rounded,
               size: 16,
-              color: Color(0xFF475569),
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
             ),
           ),
           const SizedBox(height: 8),
@@ -362,7 +364,7 @@ class WorkoutDetailScreen extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
               fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+              color: isDark ? Colors.white : AppColors.textPrimary,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -378,7 +380,7 @@ class WorkoutDetailScreen extends StatelessWidget {
                 width: 7,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: isActive ? AppColors.primaryTeal : const Color(0xFFCBD5E1),
+                  color: isActive ? AppColors.primaryTeal : (isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1)),
                   borderRadius: BorderRadius.circular(3),
                 ),
               );
@@ -389,15 +391,15 @@ class WorkoutDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEquipmentCard() {
+  Widget _buildEquipmentCard(bool isDark) {
     final eqText = workout.equipment.join(', ');
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFEDF2F7)),
+        border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFEDF2F7)),
       ),
       child: Column(
         children: [
@@ -405,13 +407,13 @@ class WorkoutDetailScreen extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: const Color(0xFFE2E8F0).withValues(alpha: 0.6),
+              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0).withValues(alpha: 0.6),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.fitness_center_rounded,
               size: 16,
-              color: Color(0xFF475569),
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
             ),
           ),
           const SizedBox(height: 8),
@@ -420,7 +422,7 @@ class WorkoutDetailScreen extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12.5,
               fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+              color: isDark ? Colors.white : AppColors.textPrimary,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -431,7 +433,7 @@ class WorkoutDetailScreen extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 9.5,
               fontWeight: FontWeight.w800,
-              color: AppColors.textMuted,
+              color: isDark ? const Color(0xFF64748B) : AppColors.textMuted,
               letterSpacing: 0.6,
             ),
           ),
@@ -442,7 +444,7 @@ class WorkoutDetailScreen extends StatelessWidget {
 
   // ── Exercise Card ─────────────────────────────────────────────────────────
 
-  Widget _buildExerciseCard(BuildContext context, int number, ExerciseItem exercise) {
+  Widget _buildExerciseCard(BuildContext context, int number, ExerciseItem exercise, bool isDark) {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
@@ -458,128 +460,128 @@ class WorkoutDetailScreen extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFEDF2F7)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Left Image Thumbnail with number overlay badge
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  exercise.imageUrl,
-                  width: 66,
-                  height: 66,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+          color: isDark ? const Color(0xFF1E293B) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFEDF2F7)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Left Image Thumbnail with number overlay badge
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    exercise.imageUrl,
                     width: 66,
                     height: 66,
-                    color: const Color(0xFFF1F5F9),
-                    child: const Icon(Icons.fitness_center_rounded, color: Colors.grey),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 4,
-                right: 4,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.95),
-                    borderRadius: BorderRadius.circular(4),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.15),
-                        blurRadius: 3,
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    number.toString().padLeft(2, '0'),
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 9.5,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 66,
+                      height: 66,
+                      color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+                      child: const Icon(Icons.fitness_center_rounded, color: Colors.grey),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 14),
-
-          // Center: Phase, Name, Subtitle
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  exercise.phase,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.primaryTeal,
-                    letterSpacing: 0.5,
+                Positioned(
+                  bottom: 4,
+                  right: 4,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF0F172A).withValues(alpha: 0.95) : Colors.white.withValues(alpha: 0.95),
+                      borderRadius: BorderRadius.circular(4),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 3,
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      number.toString().padLeft(2, '0'),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  exercise.name,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                    height: 1.2,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  exercise.subtitle,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 8),
+            const SizedBox(width: 14),
 
-          // Right: Sets x Reps or Duration pill badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              exercise.badge,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF334155),
+            // Center: Phase, Name, Subtitle
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    exercise.phase,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primaryTeal,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    exercise.name,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
+                      height: 1.2,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    exercise.subtitle,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 8),
+
+            // Right: Sets x Reps or Duration pill badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                exercise.badge,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

@@ -51,15 +51,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   Widget _buildPlaceholderPage(String title, IconData icon) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFBFD),
+      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFFAFBFD),
       appBar: AppBar(
         title: Text(
           title,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF0F172A),
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
           ),
         ),
         backgroundColor: Colors.transparent,
@@ -70,14 +71,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 56, color: const Color(0xFF94A3B8)),
+            Icon(icon, size: 56, color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
             const SizedBox(height: 16),
             Text(
               '$title Screen',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF475569),
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
               ),
             ),
           ],
@@ -87,11 +88,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   Widget _buildBottomBar() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         border: Border(
-          top: BorderSide(color: Color(0xFFEDF2F7), width: 1),
+          top: BorderSide(
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFEDF2F7),
+            width: 1,
+          ),
         ),
       ),
       child: SafeArea(
@@ -102,11 +107,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(0, 'Home', Icons.home_outlined, Icons.home_rounded),
-              _buildNavItem(1, 'Plan', Icons.assignment_outlined, Icons.assignment_rounded),
-              _buildNavItem(2, 'Workouts', Icons.fitness_center_outlined, Icons.fitness_center_rounded),
-              _buildNavItem(3, 'Progress', Icons.bar_chart_outlined, Icons.bar_chart_rounded),
-              _buildNavItem(4, 'Profile', Icons.person_outline_rounded, Icons.person_rounded),
+              _buildNavItem(0, 'Home', Icons.home_outlined, Icons.home_rounded, isDark),
+              _buildNavItem(1, 'Plan', Icons.assignment_outlined, Icons.assignment_rounded, isDark),
+              _buildNavItem(2, 'Workouts', Icons.fitness_center_outlined, Icons.fitness_center_rounded, isDark),
+              _buildNavItem(3, 'Progress', Icons.bar_chart_outlined, Icons.bar_chart_rounded, isDark),
+              _buildNavItem(4, 'Profile', Icons.person_outline_rounded, Icons.person_rounded, isDark),
             ],
           ),
         ),
@@ -114,10 +119,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  Widget _buildNavItem(int index, String label, IconData icon, IconData activeIcon) {
+  Widget _buildNavItem(int index, String label, IconData icon, IconData activeIcon, bool isDark) {
     final isSelected = _currentIndex == index;
-    const activeColor = Color(0xFF005953);
-    const inactiveColor = Color(0xFF94A3B8);
+    final activeColor = isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953);
+    final inactiveColor = isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8);
 
     return Expanded(
       child: InkWell(

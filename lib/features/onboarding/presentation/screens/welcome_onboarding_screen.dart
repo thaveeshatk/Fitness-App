@@ -30,7 +30,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBg,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -54,7 +54,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+                  color: context.textPrimary,
                   height: 1.15,
                   letterSpacing: -0.8,
                 ),
@@ -67,7 +67,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 15,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.textSecondary,
+                  color: context.textSecondary,
                   letterSpacing: -0.2,
                 ),
               ),
@@ -127,7 +127,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                       text: 'Already have an account ',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13.5,
-                        color: AppColors.textSecondary,
+                        color: context.textSecondary,
                         fontWeight: FontWeight.w500,
                       ),
                       children: [
@@ -163,7 +163,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondary,
+                        color: context.textSecondary,
                       ),
                     ),
                   ],

@@ -143,10 +143,11 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   // ── Build ─────────────────────────────────────────────────────────────────
+  // ── Build ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBg,
       body: SafeArea(
         child: Column(
           children: [
@@ -158,30 +159,30 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildTopBar(),
+                    _buildTopBar(context),
                     const SizedBox(height: 16),
-                    _buildPageTitle(),
+                    _buildPageTitle(context),
                     const SizedBox(height: 16),
-                    _buildCoachCard(),
+                    _buildCoachCard(context),
                     const SizedBox(height: 24),
-                    _buildFitnessLevelSection(),
+                    _buildFitnessLevelSection(context),
                     const SizedBox(height: 24),
-                    _buildExperienceSection(),
+                    _buildExperienceSection(context),
                     const SizedBox(height: 24),
-                    _buildGoalsSection(),
+                    _buildGoalsSection(context),
                     const SizedBox(height: 24),
-                    _buildWorkoutTimeSection(),
+                    _buildWorkoutTimeSection(context),
                     const SizedBox(height: 24),
-                    _buildEquipmentSection(),
+                    _buildEquipmentSection(context),
                     const SizedBox(height: 20),
-                    _buildAdaptiveNote(),
+                    _buildAdaptiveNote(context),
                     const SizedBox(height: 24),
                   ],
                 ),
               ),
             ),
             // Pinned "Create My Plan" button at the bottom
-            _buildCreatePlanButton(),
+            _buildCreatePlanButton(context),
           ],
         ),
       ),
@@ -190,7 +191,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   // ── Sub-builders ──────────────────────────────────────────────────────────
 
-  Widget _buildTopBar() {
+  Widget _buildTopBar(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -199,7 +200,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: AppColors.textMuted,
+            color: context.textMuted,
             letterSpacing: 1.1,
           ),
         ),
@@ -222,7 +223,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
   }
 
-  Widget _buildPageTitle() {
+  Widget _buildPageTitle(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -241,7 +242,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 26,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
+            color: context.textPrimary,
             letterSpacing: -0.6,
             height: 1.15,
           ),
@@ -252,20 +253,20 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 13.5,
             fontWeight: FontWeight.w400,
-            color: AppColors.textSecondary,
+            color: context.textSecondary,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildCoachCard() {
+  Widget _buildCoachCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+        color: context.cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: context.cardBorder),
         boxShadow: const [
           BoxShadow(color: AppColors.shadowColor, blurRadius: 8, offset: Offset(0, 2)),
         ],
@@ -295,7 +296,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: context.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -304,7 +305,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
-                    color: AppColors.textSecondary,
+                    color: context.textSecondary,
                     height: 1.4,
                     fontStyle: FontStyle.italic,
                   ),
@@ -317,20 +318,20 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
   }
 
-  Widget _buildFitnessLevelSection() {
+  Widget _buildFitnessLevelSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _sectionLabel('Fitness Level'),
+            _sectionLabel(context, 'Fitness Level'),
             Text(
               'Tailored pacing',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textMuted,
+                color: context.textMuted,
               ),
             ),
           ],
@@ -357,11 +358,11 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
   }
 
-  Widget _buildExperienceSection() {
+  Widget _buildExperienceSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionLabel('Previous Experience'),
+        _sectionLabel(context, 'Previous Experience'),
         const SizedBox(height: 12),
         ..._experienceOptions.map((option) {
           final isSelected = _previousExperience == option.label;
@@ -378,11 +379,11 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
   }
 
-  Widget _buildGoalsSection() {
+  Widget _buildGoalsSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionLabel('Goals'),
+        _sectionLabel(context, 'Goals'),
         const SizedBox(height: 12),
         GridView.count(
           crossAxisCount: 2,
@@ -412,20 +413,20 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
   }
 
-  Widget _buildWorkoutTimeSection() {
+  Widget _buildWorkoutTimeSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _sectionLabel('Available Workout Time'),
+            _sectionLabel(context, 'Available Workout Time'),
             Text(
               'Per session',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textMuted,
+                color: context.textMuted,
               ),
             ),
           ],
@@ -453,20 +454,20 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
   }
 
-  Widget _buildEquipmentSection() {
+  Widget _buildEquipmentSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _sectionLabel('Equipment Available'),
+            _sectionLabel(context, 'Equipment Available'),
             Text(
               'Select all that apply',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textMuted,
+                color: context.textMuted,
               ),
             ),
           ],
@@ -496,16 +497,16 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
   }
 
-  Widget _buildAdaptiveNote() {
+  Widget _buildAdaptiveNote(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
+        color: context.surfaceMuted,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         children: [
-          const Icon(Icons.tune_rounded, size: 18, color: AppColors.textMuted),
+          Icon(Icons.tune_rounded, size: 18, color: context.textMuted),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -513,7 +514,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
-                color: AppColors.textSecondary,
+                color: context.textSecondary,
                 height: 1.45,
               ),
             ),
@@ -523,10 +524,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
   }
 
-  Widget _buildCreatePlanButton() {
+  Widget _buildCreatePlanButton(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: context.scaffoldBg,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.06),
@@ -563,13 +564,13 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
-  Widget _sectionLabel(String text) {
+  Widget _sectionLabel(BuildContext context, String text) {
     return Text(
       text,
       style: GoogleFonts.plusJakartaSans(
         fontSize: 16,
         fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
+        color: context.textPrimary,
         letterSpacing: -0.3,
       ),
     );
@@ -623,10 +624,10 @@ class _FitnessLevelCard extends StatelessWidget {
         curve: Curves.easeInOut,
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryTeal : AppColors.cardBackground,
+          color: isSelected ? AppColors.primaryTeal : context.cardBg,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected ? AppColors.primaryTeal : AppColors.cardBorder,
+            color: isSelected ? AppColors.primaryTeal : context.cardBorder,
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
@@ -645,7 +646,7 @@ class _FitnessLevelCard extends StatelessWidget {
             Icon(
               option.icon,
               size: 22,
-              color: isSelected ? Colors.white : AppColors.textSecondary,
+              color: isSelected ? Colors.white : context.textSecondary,
             ),
             const SizedBox(height: 6),
             Text(
@@ -653,7 +654,7 @@ class _FitnessLevelCard extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : AppColors.textPrimary,
+                color: isSelected ? Colors.white : context.textPrimary,
               ),
             ),
             if (isSelected) ...[
@@ -689,10 +690,10 @@ class _ExperienceCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primaryTeal.withValues(alpha: 0.08)
-              : AppColors.cardBackground,
+              : context.cardBg,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected ? AppColors.primaryTeal : AppColors.cardBorder,
+            color: isSelected ? AppColors.primaryTeal : context.cardBorder,
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: const [BoxShadow(color: AppColors.shadowColor, blurRadius: 4, offset: Offset(0, 1))],
@@ -705,13 +706,13 @@ class _ExperienceCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? AppColors.primaryTeal.withValues(alpha: 0.15)
-                    : AppColors.surfaceMuted,
+                    : context.surfaceMuted,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 _iconForExperience(option.label),
                 size: 18,
-                color: isSelected ? AppColors.primaryTeal : AppColors.textMuted,
+                color: isSelected ? AppColors.primaryTeal : context.textMuted,
               ),
             ),
             const SizedBox(width: 12),
@@ -724,7 +725,7 @@ class _ExperienceCard extends StatelessWidget {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13.5,
                       fontWeight: FontWeight.w600,
-                      color: isSelected ? AppColors.primaryTeal : AppColors.textPrimary,
+                      color: isSelected ? AppColors.primaryTeal : context.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -733,7 +734,7 @@ class _ExperienceCard extends StatelessWidget {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
-                      color: AppColors.textSecondary,
+                      color: context.textSecondary,
                     ),
                   ),
                 ],
@@ -748,7 +749,7 @@ class _ExperienceCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: isSelected ? AppColors.primaryTeal : Colors.transparent,
                 border: Border.all(
-                  color: isSelected ? AppColors.primaryTeal : AppColors.textMuted,
+                  color: isSelected ? AppColors.primaryTeal : context.textMuted,
                   width: 1.5,
                 ),
               ),
@@ -798,10 +799,10 @@ class _GoalCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primaryTeal.withValues(alpha: 0.1)
-              : AppColors.cardBackground,
+              : context.cardBg,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected ? AppColors.primaryTeal : AppColors.cardBorder,
+            color: isSelected ? AppColors.primaryTeal : context.cardBorder,
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: const [BoxShadow(color: AppColors.shadowColor, blurRadius: 4, offset: Offset(0, 1))],
@@ -815,7 +816,7 @@ class _GoalCard extends StatelessWidget {
                 Icon(
                   option.icon,
                   size: 20,
-                  color: isSelected ? AppColors.primaryTeal : AppColors.textSecondary,
+                  color: isSelected ? AppColors.primaryTeal : context.textSecondary,
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -823,7 +824,7 @@ class _GoalCard extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: isSelected ? AppColors.primaryTeal : AppColors.textPrimary,
+                    color: isSelected ? AppColors.primaryTeal : context.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -832,7 +833,7 @@ class _GoalCard extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     fontWeight: FontWeight.w400,
-                    color: AppColors.textSecondary,
+                    color: context.textSecondary,
                     height: 1.3,
                   ),
                 ),
@@ -878,10 +879,10 @@ class _WorkoutTimeChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryTeal : AppColors.cardBackground,
+          color: isSelected ? AppColors.primaryTeal : context.cardBg,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.primaryTeal : AppColors.cardBorder,
+            color: isSelected ? AppColors.primaryTeal : context.cardBorder,
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
@@ -896,7 +897,7 @@ class _WorkoutTimeChip extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: isSelected ? Colors.white : AppColors.textPrimary,
+                color: isSelected ? Colors.white : context.textPrimary,
               ),
             ),
             Text(
@@ -904,7 +905,7 @@ class _WorkoutTimeChip extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 11,
                 fontWeight: FontWeight.w400,
-                color: isSelected ? Colors.white70 : AppColors.textMuted,
+                color: isSelected ? Colors.white70 : context.textMuted,
               ),
             ),
           ],
@@ -935,10 +936,10 @@ class _EquipmentChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primaryTeal.withValues(alpha: 0.12)
-              : AppColors.cardBackground,
+              : context.cardBg,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isSelected ? AppColors.primaryTeal : AppColors.cardBorder,
+            color: isSelected ? AppColors.primaryTeal : context.cardBorder,
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -954,7 +955,7 @@ class _EquipmentChip extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? AppColors.primaryTeal : AppColors.textSecondary,
+                color: isSelected ? AppColors.primaryTeal : context.textSecondary,
               ),
             ),
           ],

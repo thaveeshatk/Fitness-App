@@ -12,6 +12,8 @@ class OnboardingHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -23,7 +25,7 @@ class OnboardingHeader extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
           decoration: BoxDecoration(
-            color: AppColors.badgeBgBlue,
+            color: isDark ? AppColors.darkBadgeBgBlue : AppColors.badgeBgBlue,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
@@ -44,7 +46,7 @@ class OnboardingHeader extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.badgeTextBlue,
+                  color: isDark ? AppColors.darkBadgeTextBlue : AppColors.badgeTextBlue,
                   letterSpacing: -0.1,
                 ),
               ),

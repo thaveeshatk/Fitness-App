@@ -245,12 +245,13 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final exploreMatches = _filteredExploreWorkouts;
     final customMatches = _myCustomWorkouts;
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       drawer: _buildWorkoutsDrawer(context),
       floatingActionButton: _selectedTabIndex == 0
           ? FloatingActionButton.extended(
@@ -274,13 +275,17 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary, size: 24),
+          icon: Icon(
+            Icons.menu_rounded,
+            color: isDark ? Colors.white : AppColors.textPrimary,
+            size: 24,
+          ),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
         title: Text(
           'SEARCH',
           style: GoogleFonts.plusJakartaSans(
-            color: AppColors.textPrimary,
+            color: isDark ? Colors.white : AppColors.textPrimary,
             fontWeight: FontWeight.w800,
             fontSize: 18,
             letterSpacing: 2.0,
@@ -307,11 +312,12 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               // Search Bar
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
                   borderRadius: BorderRadius.circular(30),
+                  border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -320,16 +326,24 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 child: TextField(
                   controller: _searchController,
                   onChanged: (_) => setState(() {}),
+                  style: GoogleFonts.plusJakartaSans(
+                    color: isDark ? Colors.white : AppColors.textPrimary,
+                    fontWeight: FontWeight.w500,
+                  ),
                   decoration: InputDecoration(
                     hintText: 'Search workouts, routines...',
                     hintStyle: GoogleFonts.plusJakartaSans(
-                      color: AppColors.textMuted,
+                      color: isDark ? const Color(0xFF94A3B8) : AppColors.textMuted,
                       fontWeight: FontWeight.w500,
                     ),
                     prefixIcon: const Icon(Icons.search, color: AppColors.primaryTeal),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.close, color: AppColors.textMuted, size: 18),
+                            icon: Icon(
+                              Icons.close,
+                              color: isDark ? const Color(0xFF94A3B8) : AppColors.textMuted,
+                              size: 18,
+                            ),
                             onPressed: () {
                               _searchController.clear();
                               setState(() {});
@@ -347,9 +361,9 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceMuted,
+                  color: isDark ? const Color(0xFF1E293B) : AppColors.surfaceMuted,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                 ),
                 child: Row(
                   children: [
@@ -360,12 +374,14 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
-                            color: _selectedTabIndex == 0 ? Colors.white : Colors.transparent,
+                            color: _selectedTabIndex == 0
+                                ? (isDark ? const Color(0xFF334155) : Colors.white)
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: _selectedTabIndex == 0
                                 ? [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.05),
+                                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                                       blurRadius: 4,
                                       offset: const Offset(0, 2),
                                     ),
@@ -380,7 +396,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                                 size: 16,
                                 color: _selectedTabIndex == 0
                                     ? AppColors.primaryTeal
-                                    : AppColors.textSecondary,
+                                    : (isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
                               ),
                               const SizedBox(width: 6),
                               Text(
@@ -391,8 +407,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                                       ? FontWeight.w800
                                       : FontWeight.w600,
                                   color: _selectedTabIndex == 0
-                                      ? AppColors.textPrimary
-                                      : AppColors.textSecondary,
+                                      ? (isDark ? Colors.white : AppColors.textPrimary)
+                                      : (isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
                                 ),
                               ),
                             ],
@@ -439,7 +455,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                                       : FontWeight.w600,
                                   color: _selectedTabIndex == 1
                                       ? Colors.white
-                                      : AppColors.textPrimary,
+                                      : (isDark ? Colors.white : AppColors.textPrimary),
                                 ),
                               ),
                             ],
@@ -534,7 +550,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -562,11 +578,12 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
                       borderRadius: BorderRadius.circular(16),
+                      border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.02),
+                          color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -589,7 +606,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontWeight: FontWeight.w800,
                             fontSize: 16,
-                            color: AppColors.textPrimary,
+                            color: isDark ? Colors.white : AppColors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -598,7 +615,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                           textAlign: TextAlign.center,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12.5,
-                            color: AppColors.textSecondary,
+                            color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -622,14 +639,14 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
                     ),
                   ),
                   Text(
                     '[Horizontal Pan: 6 Nodes]',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
-                      color: AppColors.textMuted,
+                      color: isDark ? const Color(0xFF94A3B8) : AppColors.textMuted,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -658,11 +675,12 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
                   borderRadius: BorderRadius.circular(20),
+                  border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -680,13 +698,13 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: isDark ? Colors.white : AppColors.textPrimary,
                           ),
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE0F2F1),
+                            color: isDark ? const Color(0xFF0F172A) : const Color(0xFFE0F2F1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Row(
@@ -729,7 +747,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: isDark ? Colors.white : AppColors.textPrimary,
                           ),
                         ),
                         Text(
@@ -737,7 +755,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textMuted,
+                            color: isDark ? const Color(0xFF94A3B8) : AppColors.textMuted,
                           ),
                         ),
                       ],
@@ -746,7 +764,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceMuted,
+                        color: isDark ? const Color(0xFF0F172A) : AppColors.surfaceMuted,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
@@ -768,7 +786,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: isDark ? Colors.white : AppColors.textPrimary,
                           ),
                         ),
                         Text(
@@ -776,7 +794,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textMuted,
+                            color: isDark ? const Color(0xFF94A3B8) : AppColors.textMuted,
                           ),
                         ),
                       ],
@@ -818,7 +836,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -865,8 +883,9 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDark ? const Color(0xFF1E293B) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
+                    border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
                   ),
                   child: Column(
                     children: [
@@ -877,7 +896,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
-                          color: AppColors.textPrimary,
+                          color: isDark ? Colors.white : AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -886,7 +905,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                         textAlign: TextAlign.center,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -920,6 +939,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   }
 
   Widget _buildCategoryChip(String label, String categoryKey) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSelected = _selectedCategory.toLowerCase() == categoryKey.toLowerCase();
     return GestureDetector(
       onTap: () {
@@ -936,13 +956,17 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
         margin: const EdgeInsets.only(right: 12),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryTeal : AppColors.surfaceMuted,
+          color: isSelected
+              ? AppColors.primaryTeal
+              : (isDark ? const Color(0xFF1E293B) : AppColors.surfaceMuted),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           label,
           style: GoogleFonts.plusJakartaSans(
-            color: isSelected ? Colors.white : AppColors.textSecondary,
+            color: isSelected
+                ? Colors.white
+                : (isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
             fontSize: 13,
           ),
@@ -952,6 +976,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   }
 
   Widget _buildDurationChip(String label) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSelected = _selectedDuration == label;
     return GestureDetector(
       onTap: () {
@@ -963,14 +988,18 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryTeal : AppColors.surfaceMuted,
+          color: isSelected
+              ? AppColors.primaryTeal
+              : (isDark ? const Color(0xFF0F172A) : AppColors.surfaceMuted),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Center(
           child: Text(
             label,
             style: GoogleFonts.plusJakartaSans(
-              color: isSelected ? Colors.white : AppColors.textSecondary,
+              color: isSelected
+                  ? Colors.white
+                  : (isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
               fontSize: 13,
             ),
@@ -981,6 +1010,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   }
 
   Widget _buildDifficultyOption(String label) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSelected = _selectedDifficulty.toLowerCase() == label.toLowerCase();
     return GestureDetector(
       onTap: () {
@@ -993,12 +1023,14 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
         margin: const EdgeInsets.all(2),
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
+          color: isSelected
+              ? (isDark ? const Color(0xFF334155) : Colors.white)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                     blurRadius: 2,
                     offset: const Offset(0, 1),
                   ),
@@ -1011,14 +1043,18 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
             Icon(
               isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
               size: 14,
-              color: isSelected ? AppColors.primaryTeal : AppColors.textMuted,
+              color: isSelected
+                  ? AppColors.primaryTeal
+                  : (isDark ? const Color(0xFF64748B) : AppColors.textMuted),
             ),
             const SizedBox(width: 4),
             Text(
               label,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
-                color: isSelected ? AppColors.primaryTeal : AppColors.textSecondary,
+                color: isSelected
+                    ? AppColors.primaryTeal
+                    : (isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
@@ -1029,6 +1065,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   }
 
   Widget _buildEquipmentCheck(String label) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isChecked = _selectedEquipment.contains(label);
     return GestureDetector(
       onTap: () {
@@ -1043,7 +1080,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: AppColors.surfaceMuted,
+          color: isDark ? const Color(0xFF0F172A) : AppColors.surfaceMuted,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -1052,8 +1089,14 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               width: 18,
               height: 18,
               decoration: BoxDecoration(
-                color: isChecked ? AppColors.primaryTeal : Colors.white,
-                border: Border.all(color: isChecked ? AppColors.primaryTeal : Colors.grey.shade300),
+                color: isChecked
+                    ? AppColors.primaryTeal
+                    : (isDark ? const Color(0xFF1E293B) : Colors.white),
+                border: Border.all(
+                  color: isChecked
+                      ? AppColors.primaryTeal
+                      : (isDark ? const Color(0xFF475569) : Colors.grey.shade300),
+                ),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: isChecked ? const Icon(Icons.check, size: 14, color: Colors.white) : null,
@@ -1063,7 +1106,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               child: Text(
                 label,
                 style: GoogleFonts.plusJakartaSans(
-                  color: AppColors.textPrimary,
+                  color: isDark ? const Color(0xFFCBD5E1) : AppColors.textPrimary,
                   fontWeight: FontWeight.w500,
                   fontSize: 11.5,
                 ),
@@ -1102,19 +1145,20 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   }
 
   Widget _buildWorkoutCard(WorkoutModel workout) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(18),
           border: workout.isCustom
               ? Border.all(color: AppColors.primaryTeal.withValues(alpha: 0.35), width: 1.5)
-              : Border.all(color: const Color(0xFFF1F5F9)),
+              : Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
           boxShadow: [
             BoxShadow(
               color: workout.isCustom
                   ? AppColors.primaryTeal.withValues(alpha: 0.08)
-                  : const Color(0xFF0F172A).withValues(alpha: 0.04),
+                  : const Color(0xFF0F172A).withValues(alpha: isDark ? 0.2 : 0.04),
               blurRadius: 14,
               offset: const Offset(0, 4),
             ),
@@ -1128,7 +1172,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 margin: const EdgeInsets.only(bottom: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.featureTealBg,
+                  color: isDark ? const Color(0xFF064E3B) : AppColors.featureTealBg,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Row(
@@ -1139,7 +1183,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     Text(
                       'CUSTOM ROUTINE',
                       style: GoogleFonts.plusJakartaSans(
-                        color: AppColors.primaryTeal,
+                        color: isDark ? const Color(0xFF6EE7B7) : AppColors.primaryTeal,
                         fontWeight: FontWeight.w800,
                         fontSize: 9,
                         letterSpacing: 0.5,
@@ -1161,7 +1205,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     errorBuilder: (_, __, ___) => Container(
                       width: 82,
                       height: 82,
-                      color: Colors.grey.shade200,
+                      color: isDark ? const Color(0xFF334155) : Colors.grey.shade200,
                       child: const Icon(Icons.fitness_center_rounded, color: Colors.grey),
                     ),
                   ),
@@ -1205,7 +1249,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                       Text(
                         workout.title,
                         style: GoogleFonts.plusJakartaSans(
-                          color: AppColors.textPrimary,
+                          color: isDark ? Colors.white : AppColors.textPrimary,
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
                           height: 1.2,
@@ -1215,7 +1259,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                       Text(
                         '${workout.coach} • ${workout.rating}★',
                         style: GoogleFonts.plusJakartaSans(
-                          color: AppColors.textSecondary,
+                          color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                           fontWeight: FontWeight.w500,
                           fontSize: 11,
                         ),
@@ -1228,7 +1272,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                           Text(
                             '${workout.durationMinutes} min',
                             style: GoogleFonts.plusJakartaSans(
-                              color: AppColors.textPrimary,
+                              color: isDark ? Colors.white : AppColors.textPrimary,
                               fontWeight: FontWeight.w700,
                               fontSize: 11,
                             ),
@@ -1239,7 +1283,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                           Text(
                             '~${workout.calories} kcal',
                             style: GoogleFonts.plusJakartaSans(
-                              color: AppColors.textPrimary,
+                              color: isDark ? Colors.white : AppColors.textPrimary,
                               fontWeight: FontWeight.w700,
                               fontSize: 11,
                             ),
@@ -1258,13 +1302,13 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                       margin: const EdgeInsets.only(right: 6),
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceMuted,
+                        color: isDark ? const Color(0xFF0F172A) : AppColors.surfaceMuted,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         tag,
                         style: GoogleFonts.plusJakartaSans(
-                          color: AppColors.textSecondary,
+                          color: isDark ? const Color(0xFFCBD5E1) : AppColors.textSecondary,
                           fontWeight: FontWeight.w700,
                           fontSize: 9,
                         ),
@@ -1277,7 +1321,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceMuted,
+                        color: isDark ? const Color(0xFF0F172A) : AppColors.surfaceMuted,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -1303,7 +1347,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(7),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFEE2E2),
+                        color: isDark ? const Color(0xFF451A1A) : const Color(0xFFFEE2E2),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(Icons.delete_outline_rounded, size: 16, color: Color(0xFFDC2626)),
@@ -1351,11 +1395,12 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   }
 
   Widget _buildWorkoutsDrawer(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final user = AuthService.currentUser;
     final level = ProfileService.currentProfile.fitnessLevel;
 
     return Drawer(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1363,9 +1408,12 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
             // Drawer Header
             Container(
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1.5),
+                  bottom: BorderSide(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+                    width: 1.5,
+                  ),
                 ),
               ),
               child: Row(
@@ -1381,7 +1429,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: isDark ? Colors.white : AppColors.textPrimary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -1403,7 +1451,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textSecondary,
+                                color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                               ),
                             ),
                           ],
@@ -1425,7 +1473,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textMuted,
+                  color: isDark ? const Color(0xFF94A3B8) : AppColors.textMuted,
                   letterSpacing: 1.0,
                 ),
               ),
@@ -1436,12 +1484,16 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: _selectedTabIndex == 0 ? AppColors.featureTealBg : AppColors.surfaceMuted,
+                  color: _selectedTabIndex == 0
+                      ? AppColors.featureTealBg
+                      : (isDark ? const Color(0xFF334155) : AppColors.surfaceMuted),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.explore_rounded,
-                  color: _selectedTabIndex == 0 ? AppColors.primaryTeal : AppColors.textSecondary,
+                  color: _selectedTabIndex == 0
+                      ? AppColors.primaryTeal
+                      : (isDark ? const Color(0xFFCBD5E1) : AppColors.textSecondary),
                   size: 20,
                 ),
               ),
@@ -1450,13 +1502,17 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontWeight: _selectedTabIndex == 0 ? FontWeight.w800 : FontWeight.w600,
                   fontSize: 14,
-                  color: _selectedTabIndex == 0 ? AppColors.primaryTeal : AppColors.textPrimary,
+                  color: _selectedTabIndex == 0
+                      ? AppColors.primaryTeal
+                      : (isDark ? Colors.white : AppColors.textPrimary),
                 ),
               ),
               trailing: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: _selectedTabIndex == 0 ? AppColors.primaryTeal : AppColors.surfaceMuted,
+                  color: _selectedTabIndex == 0
+                      ? AppColors.primaryTeal
+                      : (isDark ? const Color(0xFF334155) : AppColors.surfaceMuted),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -1464,7 +1520,9 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: _selectedTabIndex == 0 ? Colors.white : AppColors.textSecondary,
+                    color: _selectedTabIndex == 0
+                        ? Colors.white
+                        : (isDark ? const Color(0xFFCBD5E1) : AppColors.textSecondary),
                   ),
                 ),
               ),
@@ -1479,12 +1537,16 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: _selectedTabIndex == 1 ? AppColors.featureTealBg : AppColors.surfaceMuted,
+                  color: _selectedTabIndex == 1
+                      ? AppColors.featureTealBg
+                      : (isDark ? const Color(0xFF334155) : AppColors.surfaceMuted),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.star_rounded,
-                  color: _selectedTabIndex == 1 ? AppColors.primaryTeal : AppColors.textSecondary,
+                  color: _selectedTabIndex == 1
+                      ? AppColors.primaryTeal
+                      : (isDark ? const Color(0xFFCBD5E1) : AppColors.textSecondary),
                   size: 20,
                 ),
               ),
@@ -1493,13 +1555,17 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontWeight: _selectedTabIndex == 1 ? FontWeight.w800 : FontWeight.w600,
                   fontSize: 14,
-                  color: _selectedTabIndex == 1 ? AppColors.primaryTeal : AppColors.textPrimary,
+                  color: _selectedTabIndex == 1
+                      ? AppColors.primaryTeal
+                      : (isDark ? Colors.white : AppColors.textPrimary),
                 ),
               ),
               trailing: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: _selectedTabIndex == 1 ? AppColors.primaryTeal : AppColors.surfaceMuted,
+                  color: _selectedTabIndex == 1
+                      ? AppColors.primaryTeal
+                      : (isDark ? const Color(0xFF334155) : AppColors.surfaceMuted),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -1507,7 +1573,9 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: _selectedTabIndex == 1 ? Colors.white : AppColors.textSecondary,
+                    color: _selectedTabIndex == 1
+                        ? Colors.white
+                        : (isDark ? const Color(0xFFCBD5E1) : AppColors.textSecondary),
                   ),
                 ),
               ),
@@ -1522,7 +1590,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceMuted,
+                  color: isDark ? const Color(0xFF334155) : AppColors.surfaceMuted,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -1536,7 +1604,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
-                  color: AppColors.textPrimary,
+                  color: isDark ? Colors.white : AppColors.textPrimary,
                 ),
               ),
               onTap: () {
@@ -1550,12 +1618,12 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceMuted,
+                  color: isDark ? const Color(0xFF334155) : AppColors.surfaceMuted,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.refresh_rounded,
-                  color: AppColors.textSecondary,
+                  color: isDark ? const Color(0xFFCBD5E1) : AppColors.textSecondary,
                   size: 20,
                 ),
               ),
@@ -1564,7 +1632,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
-                  color: AppColors.textPrimary,
+                  color: isDark ? Colors.white : AppColors.textPrimary,
                 ),
               ),
               onTap: () {
@@ -1578,8 +1646,12 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
             // Footer
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: Color(0xFFF1F5F9))),
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+                  ),
+                ),
               ),
               child: Row(
                 children: [
@@ -1590,7 +1662,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textMuted,
+                      color: isDark ? const Color(0xFF94A3B8) : AppColors.textMuted,
                     ),
                   ),
                 ],
@@ -1754,12 +1826,13 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isEdit = widget.existing != null;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -1775,7 +1848,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
               width: 44,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: isDark ? const Color(0xFF475569) : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1790,7 +1863,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                     width: 38,
                     height: 38,
                     decoration: BoxDecoration(
-                      color: AppColors.featureTealBg,
+                      color: isDark ? const Color(0xFF064E3B) : AppColors.featureTealBg,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
@@ -1809,14 +1882,14 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: isDark ? Colors.white : AppColors.textPrimary,
                           ),
                         ),
                         Text(
                           isEdit ? 'Update specifications & movements' : 'Design circuit with custom exercises',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
-                            color: AppColors.textSecondary,
+                            color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -1824,14 +1897,20 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, color: AppColors.textMuted),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: isDark ? const Color(0xFF94A3B8) : AppColors.textMuted,
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 8),
-            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+            Divider(
+              height: 1,
+              color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+            ),
 
             // Form Body (Scrollable)
             Flexible(
@@ -1847,16 +1926,18 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                         letterSpacing: 0.5,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceMuted,
+                        color: isDark ? const Color(0xFF0F172A) : AppColors.surfaceMuted,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                        ),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       child: TextField(
@@ -1864,12 +1945,12 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
-                          color: AppColors.textPrimary,
+                          color: isDark ? Colors.white : AppColors.textPrimary,
                         ),
                         decoration: InputDecoration(
                           hintText: 'e.g. Morning High-Burn Circuit',
                           hintStyle: GoogleFonts.plusJakartaSans(
-                            color: AppColors.textMuted,
+                            color: isDark ? const Color(0xFF94A3B8) : AppColors.textMuted,
                             fontSize: 13,
                           ),
                           border: InputBorder.none,
@@ -1884,7 +1965,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -1901,16 +1982,20 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                               selected: selected,
                               onSelected: (_) => setState(() => _category = cat),
                               selectedColor: AppColors.primaryTeal,
-                              backgroundColor: AppColors.surfaceMuted,
+                              backgroundColor: isDark ? const Color(0xFF0F172A) : AppColors.surfaceMuted,
                               labelStyle: GoogleFonts.plusJakartaSans(
-                                color: selected ? Colors.white : AppColors.textPrimary,
+                                color: selected
+                                    ? Colors.white
+                                    : (isDark ? const Color(0xFFCBD5E1) : AppColors.textPrimary),
                                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                                 fontSize: 12,
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 side: BorderSide(
-                                  color: selected ? AppColors.primaryTeal : Colors.transparent,
+                                  color: selected
+                                      ? AppColors.primaryTeal
+                                      : (isDark ? const Color(0xFF334155) : Colors.transparent),
                                 ),
                               ),
                             ),
@@ -1926,7 +2011,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -1941,7 +2026,9 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                               margin: const EdgeInsets.symmetric(horizontal: 4),
                               padding: const EdgeInsets.symmetric(vertical: 10),
                               decoration: BoxDecoration(
-                                color: selected ? AppColors.primaryTeal : AppColors.surfaceMuted,
+                                color: selected
+                                    ? AppColors.primaryTeal
+                                    : (isDark ? const Color(0xFF0F172A) : AppColors.surfaceMuted),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Center(
@@ -1950,7 +2037,9 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 12,
                                     fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                                    color: selected ? Colors.white : AppColors.textSecondary,
+                                    color: selected
+                                        ? Colors.white
+                                        : (isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
                                   ),
                                 ),
                               ),
@@ -1967,7 +2056,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -1979,7 +2068,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                           child: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: AppColors.surfaceMuted,
+                              color: isDark ? const Color(0xFF0F172A) : AppColors.surfaceMuted,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Column(
@@ -1989,7 +2078,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                   'Duration',
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 11,
-                                    color: AppColors.textSecondary,
+                                    color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -2004,7 +2093,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                       child: Container(
                                         padding: const EdgeInsets.all(4),
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
+                                          color: isDark ? const Color(0xFF334155) : Colors.white,
                                           borderRadius: BorderRadius.circular(6),
                                         ),
                                         child: const Icon(Icons.remove, size: 16, color: AppColors.primaryTeal),
@@ -2015,7 +2104,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w800,
-                                        color: AppColors.textPrimary,
+                                        color: isDark ? Colors.white : AppColors.textPrimary,
                                       ),
                                     ),
                                     GestureDetector(
@@ -2025,7 +2114,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                       child: Container(
                                         padding: const EdgeInsets.all(4),
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
+                                          color: isDark ? const Color(0xFF334155) : Colors.white,
                                           borderRadius: BorderRadius.circular(6),
                                         ),
                                         child: const Icon(Icons.add, size: 16, color: AppColors.primaryTeal),
@@ -2044,7 +2133,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                           child: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: AppColors.surfaceMuted,
+                              color: isDark ? const Color(0xFF0F172A) : AppColors.surfaceMuted,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Column(
@@ -2054,7 +2143,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                   'Target Burn',
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 11,
-                                    color: AppColors.textSecondary,
+                                    color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -2069,7 +2158,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                       child: Container(
                                         padding: const EdgeInsets.all(4),
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
+                                          color: isDark ? const Color(0xFF334155) : Colors.white,
                                           borderRadius: BorderRadius.circular(6),
                                         ),
                                         child: const Icon(Icons.remove, size: 16, color: AppColors.primaryTeal),
@@ -2080,7 +2169,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w800,
-                                        color: AppColors.textPrimary,
+                                        color: isDark ? Colors.white : AppColors.textPrimary,
                                       ),
                                     ),
                                     GestureDetector(
@@ -2090,7 +2179,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                       child: Container(
                                         padding: const EdgeInsets.all(4),
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
+                                          color: isDark ? const Color(0xFF334155) : Colors.white,
                                           borderRadius: BorderRadius.circular(6),
                                         ),
                                         child: const Icon(Icons.add, size: 16, color: AppColors.primaryTeal),
@@ -2112,7 +2201,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -2136,18 +2225,22 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                               }
                             });
                           },
-                          selectedColor: AppColors.featureTealBg,
-                          checkmarkColor: AppColors.primaryTeal,
-                          backgroundColor: AppColors.surfaceMuted,
+                          selectedColor: isDark ? const Color(0xFF064E3B) : AppColors.featureTealBg,
+                          checkmarkColor: isDark ? const Color(0xFF6EE7B7) : AppColors.primaryTeal,
+                          backgroundColor: isDark ? const Color(0xFF0F172A) : AppColors.surfaceMuted,
                           labelStyle: GoogleFonts.plusJakartaSans(
-                            color: selected ? AppColors.primaryTeal : AppColors.textPrimary,
+                            color: selected
+                                ? (isDark ? const Color(0xFF6EE7B7) : AppColors.primaryTeal)
+                                : (isDark ? const Color(0xFFCBD5E1) : AppColors.textPrimary),
                             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                             fontSize: 11.5,
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                             side: BorderSide(
-                              color: selected ? AppColors.primaryTeal : Colors.transparent,
+                              color: selected
+                                  ? AppColors.primaryTeal
+                                  : (isDark ? const Color(0xFF334155) : Colors.transparent),
                             ),
                           ),
                         );
@@ -2164,14 +2257,14 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: isDark ? Colors.white : AppColors.textPrimary,
                             letterSpacing: 0.5,
                           ),
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: AppColors.featureTealBg,
+                            color: isDark ? const Color(0xFF064E3B) : AppColors.featureTealBg,
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -2179,7 +2272,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.primaryTeal,
+                              color: isDark ? const Color(0xFF6EE7B7) : AppColors.primaryTeal,
                             ),
                           ),
                         ),
@@ -2190,7 +2283,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                       'Tap exercises below to toggle inclusion in your custom routine:',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
-                        color: AppColors.textSecondary,
+                        color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -2204,10 +2297,14 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                           margin: const EdgeInsets.only(bottom: 8),
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: isSelected ? const Color(0xFFF0FDF4) : Colors.white,
+                            color: isSelected
+                                ? (isDark ? const Color(0xFF064E3B).withValues(alpha: 0.3) : const Color(0xFFF0FDF4))
+                                : (isDark ? const Color(0xFF0F172A) : Colors.white),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: isSelected ? AppColors.primaryTeal : const Color(0xFFE2E8F0),
+                              color: isSelected
+                                  ? AppColors.primaryTeal
+                                  : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                               width: isSelected ? 1.5 : 1.0,
                             ),
                           ),
@@ -2223,7 +2320,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                   errorBuilder: (_, __, ___) => Container(
                                     width: 44,
                                     height: 44,
-                                    color: Colors.grey.shade200,
+                                    color: isDark ? const Color(0xFF334155) : Colors.grey.shade200,
                                     child: const Icon(Icons.fitness_center, size: 20, color: Colors.grey),
                                   ),
                                 ),
@@ -2238,7 +2335,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w700,
-                                        color: AppColors.textPrimary,
+                                        color: isDark ? Colors.white : AppColors.textPrimary,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
@@ -2246,7 +2343,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                       '${exercise.phase} • ${exercise.badge}',
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 10.5,
-                                        color: AppColors.textSecondary,
+                                        color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
@@ -2259,7 +2356,9 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                 decoration: BoxDecoration(
                                   color: isSelected ? AppColors.primaryTeal : Colors.transparent,
                                   border: Border.all(
-                                    color: isSelected ? AppColors.primaryTeal : Colors.grey.shade300,
+                                    color: isSelected
+                                        ? AppColors.primaryTeal
+                                        : (isDark ? const Color(0xFF64748B) : Colors.grey.shade300),
                                   ),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
@@ -2282,10 +2381,15 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                border: Border(
+                  top: BorderSide(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+                  ),
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, -4),
                   ),

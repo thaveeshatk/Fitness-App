@@ -21,6 +21,8 @@ class UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ValueListenableBuilder<AuthUser?>(
       valueListenable: AuthService.userNotifier,
       builder: (context, user, _) {
@@ -32,10 +34,10 @@ class UserAvatar extends StatelessWidget {
           height: radius * 2,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: border ?? Border.all(color: Colors.white, width: 2),
+            border: border ?? Border.all(color: isDark ? const Color(0xFF334155) : Colors.white, width: 2),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
+                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.08),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
@@ -79,7 +81,7 @@ class UserAvatar extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: AppColors.primaryTeal,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                      border: Border.all(color: isDark ? const Color(0xFF1E293B) : Colors.white, width: 2),
                       boxShadow: [
                         BoxShadow(
                           color: AppColors.primaryTeal.withValues(alpha: 0.35),

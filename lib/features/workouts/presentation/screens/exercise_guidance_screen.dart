@@ -38,14 +38,16 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
       }
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFBFD),
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: context.cardBg,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary, size: 24),
+          icon: Icon(Icons.arrow_back_rounded, color: context.textPrimary, size: 24),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -53,7 +55,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 16,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
+            color: context.textPrimary,
             letterSpacing: 1.2,
           ),
         ),
@@ -82,7 +84,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFC8F3EA),
+                      color: isDark ? const Color(0xFF064E3B) : const Color(0xFFC8F3EA),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -90,7 +92,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF005953),
+                        color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF005953),
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -101,7 +103,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
+                      color: context.surfaceMuted,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -109,7 +111,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF475569),
+                        color: context.textSecondary,
                       ),
                     ),
                   ),
@@ -126,7 +128,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                 style: GoogleFonts.playfairDisplay(
                   fontSize: 28,
                   fontWeight: FontWeight.w900,
-                  color: const Color(0xFF0F172A),
+                  color: context.textPrimary,
                   letterSpacing: -0.5,
                   height: 1.2,
                 ),
@@ -139,12 +141,12 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 20.0),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: context.cardBg,
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                border: Border.all(color: context.cardBorder),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
+                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -161,13 +163,13 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                         style: GoogleFonts.playfairDisplay(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF0F172A),
+                          color: context.textPrimary,
                         ),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE2E8F0),
+                          color: context.surfaceMuted,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -175,7 +177,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 10,
                             fontWeight: FontWeight.w800,
-                            color: const Color(0xFF334155),
+                            color: context.textSecondary,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -198,8 +200,8 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                                 Container(
                                   width: 28,
                                   height: 28,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF003D37),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? const Color(0xFF0D9488) : const Color(0xFF003D37),
                                     shape: BoxShape.circle,
                                   ),
                                   alignment: Alignment.center,
@@ -217,7 +219,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                                     child: Container(
                                       width: 1.5,
                                       margin: const EdgeInsets.symmetric(vertical: 2),
-                                      color: const Color(0xFFCBD5E1),
+                                      color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
                                     ),
                                   ),
                               ],
@@ -233,7 +235,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 13.5,
                                     fontWeight: FontWeight.w500,
-                                    color: const Color(0xFF1E293B),
+                                    color: context.textPrimary,
                                     height: 1.4,
                                   ),
                                 ),
@@ -254,9 +256,12 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 20.0),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF0FDF9),
+                color: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.25) : const Color(0xFFF0FDF9),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFCCFBEF), width: 1.2),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF065F46) : const Color(0xFFCCFBEF),
+                  width: 1.2,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,7 +286,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF005953),
+                              color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF005953),
                               letterSpacing: 0.6,
                             ),
                           ),
@@ -304,7 +309,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF334155),
+                      color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
                       height: 1.45,
                     ),
                   ),
@@ -318,9 +323,9 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 20.0),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: context.cardBg,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+                border: Border.all(color: context.cardBorder, width: 1.2),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,8 +338,8 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                           Container(
                             width: 22,
                             height: 22,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF0F172A),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF334155) : const Color(0xFF0F172A),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.priority_high_rounded, size: 14, color: Colors.white),
@@ -345,7 +350,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF0F172A),
+                              color: context.textPrimary,
                               letterSpacing: 0.6,
                             ),
                           ),
@@ -356,7 +361,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF64748B),
+                          color: context.textSecondary,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -368,7 +373,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF334155),
+                      color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
                       height: 1.45,
                     ),
                   ),
@@ -391,7 +396,10 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            side: const BorderSide(color: Color(0xFF005953), width: 1.5),
+                            side: BorderSide(
+                              color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953),
+                              width: 1.5,
+                            ),
                           ),
                           onPressed: () {
                             Navigator.of(context).pushReplacement(
@@ -406,7 +414,11 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.arrow_back_rounded, size: 18, color: Color(0xFF005953)),
+                              Icon(
+                                Icons.arrow_back_rounded,
+                                size: 18,
+                                color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953),
+                              ),
                               const SizedBox(width: 6),
                               Flexible(
                                 child: Text(
@@ -414,7 +426,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF005953),
+                                    color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953),
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -476,10 +488,10 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
 
       // ── PINNED BOTTOM NAVIGATION BAR ─────────────────────────────────
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: context.cardBg,
           border: Border(
-            top: BorderSide(color: Color(0xFFEDF2F7), width: 1),
+            top: BorderSide(color: context.cardBorder, width: 1),
           ),
         ),
         child: SafeArea(
@@ -504,8 +516,10 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
   }
 
   Widget _buildNavItem(int index, String label, IconData icon, bool isSelected) {
-    const activeColor = Color(0xFF005953);
-    const inactiveColor = Color(0xFF94A3B8);
+    final activeColor = Theme.of(context).brightness == Brightness.dark
+        ? const Color(0xFF2DD4BF)
+        : const Color(0xFF005953);
+    final inactiveColor = context.textMuted;
 
     return Expanded(
       child: InkWell(

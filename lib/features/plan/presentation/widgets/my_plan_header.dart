@@ -23,9 +23,10 @@ class MyPlanHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      color: Colors.white,
+      color: isDark ? const Color(0xFF0F172A) : Colors.white,
       child: SafeArea(
         bottom: false,
         child: Row(
@@ -47,7 +48,7 @@ class MyPlanHeader extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
                     letterSpacing: -0.3,
                   ),
                 ),

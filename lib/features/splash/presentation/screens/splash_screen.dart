@@ -23,8 +23,10 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBg,
       body: Stack(
         children: [
           // Subtle radial glow behind the center brand element
@@ -38,9 +40,13 @@ class SplashScreen extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    const Color(0xFFC8F3EA).withValues(alpha: 0.55),
-                    const Color(0xFFE0F2FE).withValues(alpha: 0.35),
-                    AppColors.background.withValues(alpha: 0.0),
+                    isDark
+                        ? const Color(0xFF0F766E).withValues(alpha: 0.25)
+                        : const Color(0xFFC8F3EA).withValues(alpha: 0.55),
+                    isDark
+                        ? const Color(0xFF1E293B).withValues(alpha: 0.15)
+                        : const Color(0xFFE0F2FE).withValues(alpha: 0.35),
+                    context.scaffoldBg.withValues(alpha: 0.0),
                   ],
                   radius: 0.85,
                 ),
@@ -71,7 +77,7 @@ class SplashScreen extends StatelessWidget {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 34,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                      color: context.textPrimary,
                       letterSpacing: -0.6,
                     ),
                     textAlign: TextAlign.center,
@@ -85,7 +91,7 @@ class SplashScreen extends StatelessWidget {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: context.textPrimary,
                       letterSpacing: -0.3,
                     ),
                     textAlign: TextAlign.center,
@@ -99,7 +105,7 @@ class SplashScreen extends StatelessWidget {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 15.5,
                       fontWeight: FontWeight.w400,
-                      color: AppColors.textSecondary,
+                      color: context.textSecondary,
                       height: 1.4,
                     ),
                     textAlign: TextAlign.center,

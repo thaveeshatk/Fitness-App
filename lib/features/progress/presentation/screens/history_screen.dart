@@ -206,16 +206,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final filtered = _filteredWorkouts;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDark ? const Color(0xFF0F172A) : AppColors.background,
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-              child: _buildTopHeader(context),
+              child: _buildTopHeader(context, isDark),
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -225,18 +226,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 12),
-                    _buildBanner(context),
+                    _buildBanner(context, isDark),
                     const SizedBox(height: 24),
-                    _buildFilters(),
+                    _buildFilters(isDark),
                     const SizedBox(height: 20),
-                    _buildHistoryList(filtered),
+                    _buildHistoryList(filtered, isDark),
                     const SizedBox(height: 24),
                     Center(
                       child: Text(
                         'Consistency beats intensity. Every session counts!',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -252,7 +253,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildTopHeader(BuildContext context) {
+  Widget _buildTopHeader(BuildContext context, bool isDark) {
     return Row(
       children: [
         GestureDetector(
@@ -261,11 +262,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF1E293B) : Colors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.cardBorder),
+              border: Border.all(color: isDark ? const Color(0xFF334155) : AppColors.cardBorder),
             ),
-            child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
+            child: Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: isDark ? Colors.white : AppColors.textPrimary),
           ),
         ),
         const SizedBox(width: 12),
@@ -274,7 +275,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 19,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
+            color: isDark ? Colors.white : AppColors.textPrimary,
             letterSpacing: -0.4,
           ),
         ),
@@ -283,9 +284,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.cardBorder),
+            border: Border.all(color: isDark ? const Color(0xFF334155) : AppColors.cardBorder),
           ),
           child: const Center(
             child: NotificationBell(
@@ -317,7 +318,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildBanner(BuildContext context) {
+  Widget _buildBanner(BuildContext context, bool isDark) {
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
@@ -326,9 +327,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: _mintGreenTint,
+          color: isDark ? const Color(0xFF1E293B) : _mintGreenTint,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: _mintGreen.withOpacity(0.3)),
+          border: Border.all(color: isDark ? const Color(0xFF334155) : _mintGreen.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
@@ -339,20 +340,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.6),
+                      color: isDark ? const Color(0xFF0F172A) : Colors.white.withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.calendar_today_rounded, size: 10, color: _primaryTeal),
+                        Icon(Icons.calendar_today_rounded, size: 10, color: isDark ? const Color(0xFF34D399) : _primaryTeal),
                         const SizedBox(width: 4),
                         Text(
                           'SEPTEMBER ROUTINE',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 9,
                             fontWeight: FontWeight.w800,
-                            color: _primaryTeal,
+                            color: isDark ? const Color(0xFF34D399) : _primaryTeal,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -365,34 +366,34 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: _darkTeal,
+                      color: isDark ? Colors.white : _darkTeal,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.timer_outlined, size: 14, color: _primaryTeal),
+                      Icon(Icons.timer_outlined, size: 14, color: isDark ? const Color(0xFF6EE7B7) : _primaryTeal),
                       const SizedBox(width: 4),
                       Text(
                         '350 active mins\nlogged',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: _primaryTeal,
+                          color: isDark ? const Color(0xFF94A3B8) : _primaryTeal,
                           height: 1.2,
                         ),
                       ),
                       const SizedBox(width: 16),
-                      Container(width: 1, height: 24, color: _primaryTeal.withOpacity(0.2)),
+                      Container(width: 1, height: 24, color: isDark ? const Color(0xFF334155) : _primaryTeal.withValues(alpha: 0.2)),
                       const SizedBox(width: 16),
-                      const Icon(Icons.trending_up_rounded, size: 14, color: _primaryTeal),
+                      Icon(Icons.trending_up_rounded, size: 14, color: isDark ? const Color(0xFF6EE7B7) : _primaryTeal),
                       const SizedBox(width: 4),
                       Text(
                         'Steady\nmomentum',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: _primaryTeal,
+                          color: isDark ? const Color(0xFF94A3B8) : _primaryTeal,
                           height: 1.2,
                         ),
                       ),
@@ -405,10 +406,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF0F172A) : Colors.white,
                 shape: BoxShape.circle,
                 boxShadow: [
-                  BoxShadow(color: _mintGreen.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4)),
+                  BoxShadow(color: _mintGreen.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4)),
                 ],
               ),
               child: const Icon(Icons.check_rounded, color: _mintGreen, size: 28),
@@ -419,25 +420,25 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildFilters() {
+  Widget _buildFilters(bool isDark) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: Row(
         children: [
-          _filterPill('All', Icons.grid_view_rounded),
+          _filterPill('All', Icons.grid_view_rounded, isDark),
           const SizedBox(width: 10),
-          _filterPill('Strength', Icons.fitness_center_rounded),
+          _filterPill('Strength', Icons.fitness_center_rounded, isDark),
           const SizedBox(width: 10),
-          _filterPill('Cardio', Icons.directions_run_rounded),
+          _filterPill('Cardio', Icons.directions_run_rounded, isDark),
           const SizedBox(width: 10),
-          _filterPill('Mobility', Icons.self_improvement_rounded),
+          _filterPill('Mobility', Icons.self_improvement_rounded, isDark),
         ],
       ),
     );
   }
 
-  Widget _filterPill(String title, IconData icon) {
+  Widget _filterPill(String title, IconData icon, bool isDark) {
     final isSelected = _selectedFilter == title;
     // Count matching items for the badge
     final count = title == 'All'
@@ -453,30 +454,38 @@ class _HistoryScreenState extends State<HistoryScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? _primaryTeal : Colors.white,
+          color: isSelected
+              ? _primaryTeal
+              : (isDark ? const Color(0xFF1E293B) : Colors.white),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: isSelected ? _primaryTeal : AppColors.cardBorder),
+          border: Border.all(
+            color: isSelected
+                ? _primaryTeal
+                : (isDark ? const Color(0xFF334155) : AppColors.cardBorder),
+          ),
           boxShadow: isSelected
-              ? [BoxShadow(color: _primaryTeal.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 2))]
+              ? [BoxShadow(color: _primaryTeal.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, 2))]
               : [],
         ),
         child: Row(
           children: [
-            Icon(icon, size: 14, color: isSelected ? Colors.white : AppColors.textSecondary),
+            Icon(icon, size: 14, color: isSelected ? Colors.white : (isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary)),
             const SizedBox(width: 6),
             Text(
               title,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                color: isSelected ? Colors.white : AppColors.textSecondary,
+                color: isSelected ? Colors.white : (isDark ? Colors.white : AppColors.textSecondary),
               ),
             ),
             const SizedBox(width: 6),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.white.withOpacity(0.25) : const Color(0xFFF1F5F9),
+                color: isSelected
+                    ? Colors.white.withValues(alpha: 0.25)
+                    : (isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -484,7 +493,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
-                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                  color: isSelected ? Colors.white : (isDark ? const Color(0xFFCBD5E1) : AppColors.textSecondary),
                 ),
               ),
             ),
@@ -494,21 +503,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildHistoryList(List<WorkoutHistoryEntry> items) {
+  Widget _buildHistoryList(List<WorkoutHistoryEntry> items, bool isDark) {
     if (items.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(isDark);
     }
     return Column(
       children: items.asMap().entries.map((e) {
         return Padding(
           padding: EdgeInsets.only(bottom: e.key < items.length - 1 ? 12 : 0),
-          child: _historyCard(e.value),
+          child: _historyCard(e.value, isDark),
         );
       }).toList(),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 40),
       alignment: Alignment.center,
@@ -518,7 +527,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.search_off_rounded, size: 34, color: AppColors.textMuted),
@@ -529,7 +538,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: isDark ? Colors.white : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 6),
@@ -538,7 +547,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12,
-              color: AppColors.textSecondary,
+              color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
               fontWeight: FontWeight.w500,
               height: 1.5,
             ),
@@ -548,7 +557,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _historyCard(WorkoutHistoryEntry entry) {
+  Widget _historyCard(WorkoutHistoryEntry entry, bool isDark) {
     final accentColor = _categoryColor(entry.category);
     final accentBg = _categoryBg(entry.category);
     final icon = _categoryIcon(entry.category);
@@ -556,11 +565,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return IntrinsicHeight(
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(color: isDark ? const Color(0xFF334155) : AppColors.cardBorder),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 2)),
+            BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03), blurRadius: 8, offset: const Offset(0, 2)),
           ],
         ),
         child: Row(
@@ -586,7 +595,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ? Container(
                         width: 64,
                         height: 64,
-                        color: accentBg,
+                        color: isDark ? accentColor.withValues(alpha: 0.2) : accentBg,
                         child: Center(child: Icon(icon, color: accentColor, size: 28)),
                       )
                     : Stack(
@@ -599,7 +608,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             errorBuilder: (_, __, ___) => Container(
                               width: 64,
                               height: 64,
-                              color: accentBg,
+                              color: isDark ? accentColor.withValues(alpha: 0.2) : accentBg,
                               child: Center(child: Icon(icon, color: accentColor, size: 28)),
                             ),
                           ),
@@ -609,9 +618,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(3),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: isDark ? const Color(0xFF0F172A) : Colors.white,
                                 shape: BoxShape.circle,
-                                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4)],
+                                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4)],
                               ),
                               child: Icon(icon, size: 10, color: accentColor),
                             ),
@@ -636,7 +645,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textMuted,
+                            color: isDark ? const Color(0xFF64748B) : AppColors.textMuted,
                             letterSpacing: 0.4,
                           ),
                         ),
@@ -645,7 +654,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: entry.isRest ? accentBg : _mintGreenTint,
+                              color: entry.isRest
+                                  ? (isDark ? accentColor.withValues(alpha: 0.2) : accentBg)
+                                  : (isDark ? const Color(0xFF064E3B).withValues(alpha: 0.5) : _mintGreenTint),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
@@ -654,7 +665,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 Icon(
                                   entry.isRest ? Icons.hotel_rounded : Icons.check_circle_rounded,
                                   size: 10,
-                                  color: entry.isRest ? accentColor : _primaryTeal,
+                                  color: entry.isRest ? accentColor : (isDark ? const Color(0xFF34D399) : _primaryTeal),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
@@ -662,7 +673,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 9,
                                     fontWeight: FontWeight.w800,
-                                    color: entry.isRest ? accentColor : _primaryTeal,
+                                    color: entry.isRest ? accentColor : (isDark ? const Color(0xFF34D399) : _primaryTeal),
                                   ),
                                 ),
                               ],
@@ -677,7 +688,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                         height: 1.2,
                       ),
                     ),
@@ -690,7 +701,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                           decoration: BoxDecoration(
-                            color: accentBg,
+                            color: isDark ? accentColor.withValues(alpha: 0.2) : accentBg,
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -705,21 +716,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.timer_outlined, size: 12, color: AppColors.textSecondary),
+                            Icon(Icons.timer_outlined, size: 12, color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
                             const SizedBox(width: 3),
                             Text(entry.duration,
                                 style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+                                    fontSize: 11, color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary, fontWeight: FontWeight.w600)),
                           ],
                         ),
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.local_fire_department_outlined, size: 12, color: AppColors.textSecondary),
+                            Icon(Icons.local_fire_department_outlined, size: 12, color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
                             const SizedBox(width: 3),
                             Text(entry.kcal,
                                 style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+                                    fontSize: 11, color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary, fontWeight: FontWeight.w600)),
                           ],
                         ),
                       ],
@@ -732,7 +743,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             Center(
               child: Padding(
                 padding: const EdgeInsets.only(right: 12),
-                child: Icon(Icons.chevron_right_rounded, color: AppColors.cardBorder, size: 22),
+                child: Icon(Icons.chevron_right_rounded, color: isDark ? const Color(0xFF475569) : AppColors.cardBorder, size: 22),
               ),
             ),
           ],

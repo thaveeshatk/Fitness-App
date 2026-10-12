@@ -10,8 +10,9 @@ class AdaptiveDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     const tealColor = Color(0xFF006257);
-    const bgLightColor = Color(0xFFF9F9FC);
+    final bgLightColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF9F9FC);
 
     return Scaffold(
       backgroundColor: bgLightColor,
@@ -21,14 +22,14 @@ class AdaptiveDashboardScreen extends StatelessWidget {
         centerTitle: false,
         titleSpacing: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+          icon: Icon(Icons.arrow_back_ios, color: isDark ? Colors.white : Colors.black, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: tealColor,
                 shape: BoxShape.circle,
               ),
@@ -38,22 +39,22 @@ class AdaptiveDashboardScreen extends StatelessWidget {
             Text(
               'Adaptive',
               style: GoogleFonts.plusJakartaSans(
-                color: Colors.black,
+                color: isDark ? Colors.white : Colors.black,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ],
         ),
-        actions: [
-          const NotificationBell(),
-          const SizedBox(width: 4),
+        actions: const [
+          NotificationBell(),
+          SizedBox(width: 4),
           Padding(
-            padding: const EdgeInsets.only(right: 16.0),
+            padding: EdgeInsets.only(right: 16.0),
             child: CircleAvatar(
               radius: 16,
               backgroundColor: tealColor,
-              child: const Icon(Icons.person, color: Colors.white, size: 18),
+              child: Icon(Icons.person, color: Colors.white, size: 18),
             ),
           ),
         ],
@@ -69,14 +70,14 @@ class AdaptiveDashboardScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.arrow_back, color: Color(0xFF1E293B), size: 20),
+                    Icon(Icons.arrow_back, color: isDark ? Colors.white : const Color(0xFF1E293B), size: 20),
                     const SizedBox(width: 12),
                     Text(
                       'Adaptive\nPlan',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF1E293B),
+                        color: isDark ? Colors.white : const Color(0xFF1E293B),
                         height: 1.1,
                         letterSpacing: -0.5,
                       ),
@@ -86,19 +87,19 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF90F5E4),
+                    color: isDark ? const Color(0xFF064E3B) : const Color(0xFF90F5E4),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.auto_awesome, color: Color(0xFF0F766E), size: 14),
+                      Icon(Icons.auto_awesome, color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF0F766E), size: 14),
                       const SizedBox(width: 6),
                       Text(
                         'SMART ADJUSTMENT\nACTIVE',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF0F766E),
+                          color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF0F766E),
                           height: 1.2,
                         ),
                       ),
@@ -112,11 +113,12 @@ class AdaptiveDashboardScreen extends StatelessWidget {
             // Info Card 1
             Container(
               decoration: BoxDecoration(
-                color: const Color(0xFFFCF3E9),
+                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFFCF3E9),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(16),
                   topRight: Radius.circular(16),
                 ),
+                border: Border.all(color: isDark ? const Color(0xFF334155) : Colors.transparent),
               ),
               padding: const EdgeInsets.all(20),
               child: Row(
@@ -125,10 +127,10 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF6DABF),
+                      color: isDark ? const Color(0xFF334155) : const Color(0xFFF6DABF),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.access_time, color: Color(0xFF92400E), size: 20),
+                    child: Icon(Icons.access_time, color: isDark ? const Color(0xFFFBBF24) : const Color(0xFF92400E), size: 20),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -140,7 +142,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
-                            color: const Color(0xFF1E293B),
+                            color: isDark ? Colors.white : const Color(0xFF1E293B),
                             height: 1.2,
                           ),
                         ),
@@ -149,7 +151,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                           "You missed yesterday's workout (Thursday Low-Impact Core). No stress at all — we've automatically adjusted your weekly rhythm to protect your recovery and keep your habit strong.",
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
-                            color: const Color(0xFF475569),
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                             height: 1.5,
                           ),
                         ),
@@ -160,24 +162,29 @@ class AdaptiveDashboardScreen extends StatelessWidget {
               ),
             ),
             Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(16),
                   bottomRight: Radius.circular(16),
+                ),
+                border: Border(
+                  left: BorderSide(color: isDark ? const Color(0xFF334155) : Colors.transparent),
+                  right: BorderSide(color: isDark ? const Color(0xFF334155) : Colors.transparent),
+                  bottom: BorderSide(color: isDark ? const Color(0xFF334155) : Colors.transparent),
                 ),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Row(
                 children: [
-                  const Icon(Icons.favorite, color: Color(0xFF006257), size: 16),
+                  Icon(Icons.favorite, color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257), size: 16),
                   const SizedBox(width: 8),
                   Text(
                     'Zero guilt guarantee • Consistency over perfection',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF006257),
+                      color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257),
                     ),
                   ),
                 ],
@@ -191,14 +198,14 @@ class AdaptiveDashboardScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.sync, color: Color(0xFF006257), size: 20),
+                    Icon(Icons.sync, color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257), size: 20),
                     const SizedBox(width: 8),
                     Text(
                       'Intelligent\nRescheduling',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF1E293B),
+                        color: isDark ? Colors.white : const Color(0xFF1E293B),
                         height: 1.1,
                       ),
                     ),
@@ -207,7 +214,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE0E7FF),
+                    color: isDark ? const Color(0xFF1E1B4B) : const Color(0xFFE0E7FF),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -216,7 +223,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF3730A3),
+                      color: isDark ? const Color(0xFFA5B4FC) : const Color(0xFF3730A3),
                       height: 1.1,
                     ),
                   ),
@@ -229,8 +236,9 @@ class AdaptiveDashboardScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFEDF2F7)),
               ),
               child: Column(
                 children: [
@@ -240,7 +248,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9),
+                          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.event_busy, color: Color(0xFF94A3B8), size: 16),
@@ -257,14 +265,14 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF1E293B),
+                                    color: isDark ? Colors.white : const Color(0xFF1E293B),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFE2E8F0),
+                                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
@@ -272,7 +280,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF475569),
+                                      color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
                                     ),
                                   ),
                                 ),
@@ -289,7 +297,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const Icon(Icons.arrow_forward, color: Color(0xFFCBD5E1), size: 18),
+                      Icon(Icons.arrow_forward, color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1), size: 18),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -298,20 +306,20 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEEF2FF),
+                      color: isDark ? const Color(0xFF1E1B4B) : const Color(0xFFEEF2FF),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.bolt, color: Color(0xFF4F46E5), size: 14),
+                        Icon(Icons.bolt, color: isDark ? const Color(0xFFA5B4FC) : const Color(0xFF4F46E5), size: 14),
                         const SizedBox(width: 4),
                         Text(
                           'Shifted to prevent cumulative fatigue',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF4F46E5),
+                            color: isDark ? const Color(0xFFA5B4FC) : const Color(0xFF4F46E5),
                           ),
                         ),
                       ],
@@ -323,15 +331,15 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF0FDF8),
+                      color: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.3) : const Color(0xFFF0FDF8),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFD1FAE5)),
+                      border: Border.all(color: isDark ? const Color(0xFF047857) : const Color(0xFFD1FAE5)),
                     ),
                     child: Row(
                       children: [
                         Container(
                           padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: tealColor,
                             shape: BoxShape.circle,
                           ),
@@ -349,7 +357,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w800,
-                                      color: const Color(0xFF1E293B),
+                                      color: isDark ? Colors.white : const Color(0xFF1E293B),
                                       height: 1.1,
                                     ),
                                   ),
@@ -357,7 +365,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: tealColor,
+                                      color: isDark ? const Color(0xFF047857) : tealColor,
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
@@ -376,7 +384,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                                 'Gentle pacing • Rest day preserved\nSunday',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
-                                  color: const Color(0xFF64748B),
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                 ),
                               ),
                             ],
@@ -385,11 +393,11 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF0F172A) : Colors.white,
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.check, color: tealColor, size: 16),
+                          child: Icon(Icons.check, color: isDark ? const Color(0xFF2DD4BF) : tealColor, size: 16),
                         ),
                       ],
                     ),
@@ -400,20 +408,21 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
+                      color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: isDark ? const Color(0xFF334155) : Colors.transparent),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.psychology, color: Color(0xFF006257), size: 18),
+                        Icon(Icons.psychology, color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257), size: 18),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'Why 15 minutes? We trimmed 10 minutes from the original routine so jumping back in feels effortless, keeping recovery seamless.',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11,
-                              color: const Color(0xFF475569),
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                               height: 1.4,
                             ),
                           ),
@@ -429,8 +438,9 @@ class AdaptiveDashboardScreen extends StatelessWidget {
             // Re-Activation Flow Card
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
+                border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
               ),
               clipBehavior: Clip.antiAlias,
               child: Column(
@@ -464,7 +474,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDark ? const Color(0xFF0F172A) : Colors.white,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
@@ -472,8 +482,8 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                               Container(
                                 width: 6,
                                 height: 6,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF006257),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257),
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -483,7 +493,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w800,
-                                  color: const Color(0xFF1E293B),
+                                  color: isDark ? Colors.white : const Color(0xFF1E293B),
                                 ),
                               ),
                             ],
@@ -549,9 +559,9 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                           spacing: 8,
                           runSpacing: 8,
                           children: [
-                            _buildTag(Icons.timer, '15 min'),
-                            _buildTag(Icons.spa, 'Very Gentle'),
-                            _buildTag(Icons.fitness_center, 'No Equipment'),
+                            _buildTag(Icons.timer, '15 min', isDark),
+                            _buildTag(Icons.spa, 'Very Gentle', isDark),
+                            _buildTag(Icons.fitness_center, 'No Equipment', isDark),
                           ],
                         ),
                         const SizedBox(height: 16),
@@ -560,22 +570,27 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE2FBF5),
+                            color: isDark ? const Color(0xFF006257).withValues(alpha: 0.25) : const Color(0xFFE2FBF5),
                             borderRadius: BorderRadius.circular(12),
+                            border: isDark ? Border.all(color: const Color(0xFF006257).withValues(alpha: 0.4)) : null,
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.lightbulb_outline, color: Color(0xFF006257), size: 16),
+                                  Icon(
+                                    Icons.lightbulb_outline,
+                                    color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257),
+                                    size: 16,
+                                  ),
                                   const SizedBox(width: 8),
                                   Text(
                                     'Coach AI Rationale',
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w800,
-                                      color: const Color(0xFF006257),
+                                      color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257),
                                     ),
                                   ),
                                 ],
@@ -585,7 +600,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                                 '"A shorter, lower-intensity session designed to reactivate your muscles without overwhelming you after a missed day. Focus on breath and ease today!"',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12,
-                                  color: const Color(0xFF1E293B),
+                                  color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1E293B),
                                   fontStyle: FontStyle.italic,
                                   height: 1.4,
                                 ),
@@ -600,18 +615,18 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF64748B),
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                             letterSpacing: 0.5,
                           ),
                         ),
                         const SizedBox(height: 12),
                         Row(
                           children: [
-                            _buildFocusArea(Icons.accessibility_new, 'Gentle\nMobility'),
+                            _buildFocusArea(Icons.accessibility_new, 'Gentle\nMobility', isDark),
                             const SizedBox(width: 8),
-                            _buildFocusArea(Icons.air, 'Deep\nBreathing'),
+                            _buildFocusArea(Icons.air, 'Deep\nBreathing', isDark),
                             const SizedBox(width: 8),
-                            _buildFocusArea(Icons.self_improvement, 'Posture\nReset'),
+                            _buildFocusArea(Icons.self_improvement, 'Posture\nReset', isDark),
                           ],
                         ),
                       ],
@@ -631,7 +646,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xFF1E293B),
+                    color: isDark ? Colors.white : const Color(0xFF1E293B),
                   ),
                 ),
                 Text(
@@ -639,7 +654,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF006257),
+                    color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257),
                   ),
                 ),
               ],
@@ -648,19 +663,20 @@ class AdaptiveDashboardScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
+                border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildDayProgress('M', 'check'),
-                  _buildDayProgress('T', 'rest'),
-                  _buildDayProgress('W', 'check'),
-                  _buildDayProgress('T', 'missed'),
-                  _buildDayProgress('F', 'active_15'),
-                  _buildDayProgress('S', 'active_15_light'),
-                  _buildDayProgress('S', 'rest_text'),
+                  _buildDayProgress('M', 'check', isDark),
+                  _buildDayProgress('T', 'rest', isDark),
+                  _buildDayProgress('W', 'check', isDark),
+                  _buildDayProgress('T', 'missed', isDark),
+                  _buildDayProgress('F', 'active_15', isDark),
+                  _buildDayProgress('S', 'active_15_light', isDark),
+                  _buildDayProgress('S', 'rest_text', isDark),
                 ],
               ),
             ),
@@ -714,7 +730,8 @@ class AdaptiveDashboardScreen extends StatelessWidget {
               height: 56,
               child: TextButton(
                 style: TextButton.styleFrom(
-                  backgroundColor: const Color(0xFFEEF2FF),
+                  backgroundColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFEEF2FF),
+                  side: isDark ? const BorderSide(color: Color(0xFF334155)) : BorderSide.none,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -729,14 +746,14 @@ class AdaptiveDashboardScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.calendar_month, color: Color(0xFF1E293B), size: 20),
+                    Icon(Icons.calendar_month, color: isDark ? Colors.white : const Color(0xFF1E293B), size: 20),
                     const SizedBox(width: 8),
                     Text(
                       'Review Full Schedule',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1E293B),
+                        color: isDark ? Colors.white : const Color(0xFF1E293B),
                       ),
                     ),
                   ],
@@ -750,8 +767,9 @@ class AdaptiveDashboardScreen extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1, // Plan
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: tealColor,
-        unselectedItemColor: const Color(0xFF94A3B8),
+        backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
+        selectedItemColor: isDark ? const Color(0xFF2DD4BF) : tealColor,
+        unselectedItemColor: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
         selectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w700),
         unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w600),
         items: const [
@@ -765,24 +783,25 @@ class AdaptiveDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTag(IconData icon, String text) {
+  Widget _buildTag(IconData icon, String text, bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFEEF2FF),
+        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFEEF2FF),
         borderRadius: BorderRadius.circular(20),
+        border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: const Color(0xFF475569), size: 14),
+          Icon(icon, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569), size: 14),
           const SizedBox(width: 4),
           Text(
             text,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF475569),
+              color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
             ),
           ),
         ],
@@ -790,17 +809,18 @@ class AdaptiveDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFocusArea(IconData icon, String text) {
+  Widget _buildFocusArea(IconData icon, String text, bool isDark) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
+          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(12),
+          border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
         ),
         child: Column(
           children: [
-            Icon(icon, color: const Color(0xFF006257), size: 20),
+            Icon(icon, color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257), size: 20),
             const SizedBox(height: 8),
             Text(
               text,
@@ -808,7 +828,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF1E293B),
+                color: isDark ? Colors.white : const Color(0xFF1E293B),
                 height: 1.2,
               ),
             ),
@@ -818,35 +838,35 @@ class AdaptiveDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDayProgress(String day, String status) {
+  Widget _buildDayProgress(String day, String status, bool isDark) {
     Widget content;
     Color bgColor;
     
     switch (status) {
       case 'check':
-        bgColor = const Color(0xFFC8F3EA);
-        content = const Icon(Icons.check, color: Color(0xFF006257), size: 16);
+        bgColor = isDark ? const Color(0xFF064E3B) : const Color(0xFFC8F3EA);
+        content = Icon(Icons.check, color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257), size: 16);
         break;
       case 'missed':
-        bgColor = const Color(0xFFFDE6D2);
-        content = const Icon(Icons.block, color: Color(0xFFB45309), size: 14); // or a line/cross
+        bgColor = isDark ? const Color(0xFF7C2D12).withValues(alpha: 0.4) : const Color(0xFFFDE6D2);
+        content = Icon(Icons.block, color: isDark ? const Color(0xFFFDBA74) : const Color(0xFFB45309), size: 14);
         break;
       case 'active_15':
-        bgColor = const Color(0xFF006257);
-        content = Text('15m', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white));
+        bgColor = isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257);
+        content = Text('15m', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, color: isDark ? const Color(0xFF0F172A) : Colors.white));
         break;
       case 'active_15_light':
-        bgColor = const Color(0xFF86EFAC);
-        content = Text('15m', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFF006257)));
+        bgColor = isDark ? const Color(0xFF134E4A) : const Color(0xFF86EFAC);
+        content = Text('15m', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257)));
         break;
       case 'rest_text':
-        bgColor = const Color(0xFFF1F5F9);
-        content = Text('Rest', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w600, color: const Color(0xFF94A3B8)));
+        bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9);
+        content = Text('Rest', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF94A3B8)));
         break;
       case 'rest':
       default:
-        bgColor = const Color(0xFFEEF2FF);
-        content = const Text('-', style: TextStyle(color: Color(0xFF94A3B8), fontWeight: FontWeight.bold));
+        bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFEEF2FF);
+        content = Text('-', style: TextStyle(color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8), fontWeight: FontWeight.bold));
         break;
     }
 
@@ -857,7 +877,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF475569),
+            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
           ),
         ),
         const SizedBox(height: 8),
@@ -867,6 +887,7 @@ class AdaptiveDashboardScreen extends StatelessWidget {
           decoration: BoxDecoration(
             color: bgColor,
             shape: BoxShape.circle,
+            border: isDark && (status == 'rest' || status == 'rest_text') ? Border.all(color: const Color(0xFF334155)) : null,
           ),
           child: Center(child: content),
         ),

@@ -109,10 +109,13 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final scaffoldBg = isDark ? AppColors.darkBackground : Colors.white;
+
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(
+      return Scaffold(
+        backgroundColor: scaffoldBg,
+        body: const Center(
           child: CircularProgressIndicator(
             color: Color(0xFF005953),
           ),
@@ -128,7 +131,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
     final visibleSchedule = _planItems.where((it) => it.dayLabel != 'TUE').toList();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: scaffoldBg,
       body: SafeArea(
         child: Column(
           children: [
@@ -166,7 +169,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary,
+                                color: isDark ? Colors.white : AppColors.textPrimary,
                                 letterSpacing: -0.3,
                               ),
                             ),
@@ -178,7 +181,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFE2EBF5),
+                                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2EBF5),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
@@ -186,7 +189,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF475569),
+                                  color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF475569),
                                 ),
                               ),
                             ),
@@ -199,7 +202,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF475569),
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                           ),
                         ),
                       ],
@@ -264,8 +267,8 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                       height: 48,
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: const Color(0xFFF1EFEA),
-                          foregroundColor: const Color(0xFF1E293B),
+                          backgroundColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1EFEA),
+                          foregroundColor: isDark ? Colors.white : const Color(0xFF1E293B),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),
                           ),
@@ -274,10 +277,10 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.calendar_today_rounded,
                               size: 17,
-                              color: Color(0xFF1E293B),
+                              color: isDark ? Colors.white : const Color(0xFF1E293B),
                             ),
                             const SizedBox(width: 8),
                             Text(
@@ -285,7 +288,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 14.5,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF1E293B),
+                                color: isDark ? Colors.white : const Color(0xFF1E293B),
                               ),
                             ),
                           ],

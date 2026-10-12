@@ -95,8 +95,9 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     const tealColor = Color(0xFF006257);
-    const bgLightColor = Color(0xFFF9F9FC); 
+    final bgLightColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF9F9FC); 
 
     return Scaffold(
       backgroundColor: bgLightColor,
@@ -106,14 +107,14 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
         centerTitle: false,
         titleSpacing: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+          icon: Icon(Icons.arrow_back_ios, color: isDark ? Colors.white : Colors.black, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: tealColor,
                 shape: BoxShape.circle,
               ),
@@ -123,22 +124,22 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
             Text(
               'Schedule',
               style: GoogleFonts.plusJakartaSans(
-                color: Colors.black,
+                color: isDark ? Colors.white : Colors.black,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ],
         ),
-        actions: [
-          const NotificationBell(),
-          const SizedBox(width: 4),
+        actions: const [
+          NotificationBell(),
+          SizedBox(width: 4),
           Padding(
-            padding: const EdgeInsets.only(right: 16.0),
+            padding: EdgeInsets.only(right: 16.0),
             child: CircleAvatar(
               radius: 16,
               backgroundColor: tealColor,
-              child: const Icon(Icons.person, color: Colors.white, size: 18),
+              child: Icon(Icons.person, color: Colors.white, size: 18),
             ),
           ),
         ],
@@ -160,7 +161,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF1E293B),
+                          color: isDark ? Colors.white : const Color(0xFF1E293B),
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -169,7 +170,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                         'Build a consistent home workout routine',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14,
-                          color: const Color(0xFF64748B),
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                         ),
                       ),
                     ],
@@ -178,10 +179,10 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE2F3F0),
+                    color: isDark ? const Color(0xFF064E3B) : const Color(0xFFE2F3F0),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(Icons.calendar_today, color: Color(0xFF006257), size: 22),
+                  child: Icon(Icons.calendar_today, color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257), size: 22),
                 )
               ],
             ),
@@ -190,7 +191,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: tealColor,
+                color: isDark ? const Color(0xFF064E3B) : tealColor,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -237,8 +238,9 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFEDF2F7)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,14 +250,14 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.calendar_today, color: tealColor, size: 20),
+                          Icon(Icons.calendar_today, color: isDark ? const Color(0xFF2DD4BF) : tealColor, size: 20),
                           const SizedBox(width: 8),
                           Text(
                             'Choose your workout days',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1E293B),
+                              color: isDark ? Colors.white : const Color(0xFF1E293B),
                             ),
                           ),
                         ],
@@ -263,7 +265,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE2EBF5),
+                          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFE2EBF5),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -271,7 +273,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF234C7A),
+                            color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF234C7A),
                           ),
                         ),
                       ),
@@ -282,7 +284,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                     'We recommend 3-4 days per week for beginners.',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
-                      color: const Color(0xFF64748B),
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -291,14 +293,14 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                   Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
+                      color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Row(
                       children: [
-                        _buildOption(0, '3 Days'),
-                        _buildOption(1, '4 Days (Best)'),
-                        _buildOption(2, 'Custom'),
+                        _buildOption(0, '3 Days', isDark),
+                        _buildOption(1, '4 Days (Best)', isDark),
+                        _buildOption(2, 'Custom', isDark),
                       ],
                     ),
                   ),
@@ -315,12 +317,12 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                           children: [
                             Container(
                               width: 38,
-                              height: 44,
+                              height: 48,
                               decoration: BoxDecoration(
-                                color: isSelected ? tealColor : Colors.white,
+                                color: isSelected ? tealColor : (isDark ? const Color(0xFF0F172A) : Colors.white),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: isSelected ? tealColor : const Color(0xFFE2E8F0),
+                                  color: isSelected ? tealColor : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                                 ),
                               ),
                               child: Column(
@@ -331,7 +333,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 13,
                                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                      color: isSelected ? Colors.white : const Color(0xFF64748B),
+                                      color: isSelected ? Colors.white : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                                     ),
                                   ),
                                   if (isSelected)
@@ -358,8 +360,9 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFDFBF7),
+                      color: isDark ? const Color(0xFF0F172A) : const Color(0xFFFDFBF7),
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: isDark ? const Color(0xFF334155) : Colors.transparent),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -371,7 +374,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                             'Tuesdays, Thursdays, and Sundays are restorative rest days.',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
-                              color: const Color(0xFF64748B),
+                              color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
                             ),
                           ),
                         ),
@@ -387,8 +390,9 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFEDF2F7)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -398,14 +402,14 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.access_alarm, color: tealColor, size: 20),
+                          Icon(Icons.access_alarm, color: isDark ? const Color(0xFF2DD4BF) : tealColor, size: 20),
                           const SizedBox(width: 8),
                           Text(
                             'Daily reminder time',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1E293B),
+                              color: isDark ? Colors.white : const Color(0xFF1E293B),
                             ),
                           ),
                         ],
@@ -415,7 +419,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF64748B),
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                         ),
                       ),
                     ],
@@ -428,18 +432,18 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF5F7FA),
+                        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Row(
                         children: [
                           Container(
                             padding: const EdgeInsets.all(10),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFE2EBF5),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2EBF5),
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(Icons.nightlight_round, color: tealColor, size: 20),
+                            child: Icon(Icons.nightlight_round, color: isDark ? const Color(0xFF2DD4BF) : tealColor, size: 20),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -451,7 +455,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF64748B),
+                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                     letterSpacing: 0.5,
                                   ),
                                 ),
@@ -460,7 +464,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 32,
                                     fontWeight: FontWeight.w800,
-                                    color: const Color(0xFF1E293B),
+                                    color: isDark ? Colors.white : const Color(0xFF1E293B),
                                   ),
                                 ),
                               ],
@@ -468,7 +472,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                           ),
                           Container(
                             decoration: BoxDecoration(
-                              color: const Color(0xFFE2EBF5),
+                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2EBF5),
                               borderRadius: BorderRadius.circular(30),
                             ),
                             child: Row(
@@ -486,7 +490,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w700,
-                                        color: _isAm ? Colors.white : const Color(0xFF64748B),
+                                        color: _isAm ? Colors.white : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                                       ),
                                     ),
                                   ),
@@ -504,7 +508,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w700,
-                                        color: !_isAm ? Colors.white : const Color(0xFF64748B),
+                                        color: !_isAm ? Colors.white : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                                       ),
                                     ),
                                   ),
@@ -522,17 +526,17 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF64748B),
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      _buildQuickSuggestion('Morning', '7:30', true),
+                      _buildQuickSuggestion('Morning', '7:30', true, isDark),
                       const SizedBox(width: 8),
-                      _buildQuickSuggestion('Afternoon', '12:30', false),
+                      _buildQuickSuggestion('Afternoon', '12:30', false, isDark),
                       const SizedBox(width: 8),
-                      _buildQuickSuggestion('Evening', '07:00', false),
+                      _buildQuickSuggestion('Evening', '07:00', false, isDark),
                     ],
                   ),
                 ],
@@ -544,8 +548,9 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFEDF2F7)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -553,10 +558,10 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE2F3F0),
+                      color: isDark ? const Color(0xFF064E3B) : const Color(0xFFE2F3F0),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(Icons.notifications, color: tealColor, size: 20),
+                    child: Icon(Icons.notifications, color: isDark ? const Color(0xFF2DD4BF) : tealColor, size: 20),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -570,14 +575,14 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF1E293B),
+                                color: isDark ? Colors.white : const Color(0xFF1E293B),
                               ),
                             ),
                             const Spacer(),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFE2F3F0),
+                                color: isDark ? const Color(0xFF064E3B) : const Color(0xFFE2F3F0),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -585,7 +590,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w700,
-                                  color: tealColor,
+                                  color: isDark ? const Color(0xFF2DD4BF) : tealColor,
                                 ),
                               ),
                             ),
@@ -599,7 +604,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                                 'Receive an encouraging nudge 15 minutes before your scheduled workout time.',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 13,
-                                  color: const Color(0xFF64748B),
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                 ),
                               ),
                             ),
@@ -610,7 +615,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                               activeThumbColor: Colors.white,
                               activeTrackColor: tealColor,
                               inactiveThumbColor: Colors.white,
-                              inactiveTrackColor: const Color(0xFFCBD5E1),
+                              inactiveTrackColor: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1),
                             ),
                           ],
                         ),
@@ -626,8 +631,9 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFEEF2F9),
+                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEEF2F9),
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFEDF2F7)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -637,14 +643,14 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.checklist, color: tealColor, size: 18),
+                          Icon(Icons.checklist, color: isDark ? const Color(0xFF2DD4BF) : tealColor, size: 18),
                           const SizedBox(width: 6),
                           Text(
                             'ROUTINE RECAP',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
-                              color: tealColor,
+                              color: isDark ? const Color(0xFF2DD4BF) : tealColor,
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -654,7 +660,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                         'Ready to start',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
-                          color: const Color(0xFF64748B),
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                         ),
                       ),
                     ],
@@ -664,18 +670,21 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                     Icons.calendar_month,
                     'Selected frequency',
                     '${_selectedDays.length} workouts/week (${_selectedDays.join(", ")})',
+                    isDark,
                   ),
                   const SizedBox(height: 12),
                   _buildRecapRow(
                     Icons.access_time,
                     'Scheduled trigger',
                     '$_time ${_isAm ? "AM" : "PM"} with 15-min prep reminder',
+                    isDark,
                   ),
                   const SizedBox(height: 12),
                   _buildRecapRow(
                     Icons.pie_chart_outline,
                     'Estimated weekly commitment',
                     '1h 20m (~20 min / session)',
+                    isDark,
                   ),
                 ],
               ),
@@ -743,13 +752,13 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
             Center(
               child: TextButton.icon(
                 onPressed: () {},
-                icon: Icon(Icons.sync, color: tealColor, size: 18),
+                icon: Icon(Icons.sync, color: isDark ? const Color(0xFF2DD4BF) : tealColor, size: 18),
                 label: Text(
                   'Sync with Apple Health / Google Calendar',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: tealColor,
+                    color: isDark ? const Color(0xFF2DD4BF) : tealColor,
                   ),
                 ),
               ),
@@ -761,7 +770,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
     );
   }
 
-  Widget _buildOption(int index, String text) {
+  Widget _buildOption(int index, String text, bool isDark) {
     bool isSelected = _selectedOptionIndex == index;
     return Expanded(
       child: GestureDetector(
@@ -769,12 +778,12 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
+            color: isSelected ? (isDark ? const Color(0xFF334155) : Colors.white) : Colors.transparent,
             borderRadius: BorderRadius.circular(20),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     )
@@ -787,7 +796,9 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                color: isSelected ? const Color(0xFF006257) : const Color(0xFF64748B),
+                color: isSelected
+                    ? (isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257))
+                    : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
               ),
             ),
           ),
@@ -796,7 +807,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
     );
   }
 
-  Widget _buildQuickSuggestion(String title, String timeStr, bool am) {
+  Widget _buildQuickSuggestion(String title, String timeStr, bool am, bool isDark) {
     bool isSelected = _time == timeStr && _isAm == am;
     return Expanded(
       child: GestureDetector(
@@ -804,8 +815,15 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFFD4F7F2) : const Color(0xFFF1F5F9),
+            color: isSelected
+                ? (isDark ? const Color(0xFF064E3B) : const Color(0xFFD4F7F2))
+                : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9)),
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? (isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257))
+                  : (isDark ? const Color(0xFF334155) : Colors.transparent),
+            ),
           ),
           child: Column(
             children: [
@@ -814,7 +832,9 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: isSelected ? const Color(0xFF006257) : const Color(0xFF1E293B),
+                  color: isSelected
+                      ? (isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257))
+                      : (isDark ? Colors.white : const Color(0xFF1E293B)),
                 ),
               ),
               const SizedBox(height: 2),
@@ -822,7 +842,9 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                 '$timeStr ${am ? "AM" : "PM"}',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
-                  color: isSelected ? const Color(0xFF006257) : const Color(0xFF64748B),
+                  color: isSelected
+                      ? (isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257))
+                      : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                 ),
               ),
             ],
@@ -832,11 +854,11 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
     );
   }
 
-  Widget _buildRecapRow(IconData icon, String title, String value) {
+  Widget _buildRecapRow(IconData icon, String title, String value, bool isDark) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: const Color(0xFF006257), size: 18),
+        Icon(icon, color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257), size: 18),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -846,7 +868,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                 title,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
-                  color: const Color(0xFF64748B),
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                 ),
               ),
               Text(
@@ -854,7 +876,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF1E293B),
+                  color: isDark ? Colors.white : const Color(0xFF1E293B),
                 ),
               ),
             ],

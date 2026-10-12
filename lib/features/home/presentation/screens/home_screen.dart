@@ -150,17 +150,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final scaffoldBg = isDark ? AppColors.darkBackground : const Color(0xFFFBFDFF);
+
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: Color(0xFFFBFDFF),
-        body: Center(
+      return Scaffold(
+        backgroundColor: scaffoldBg,
+        body: const Center(
           child: CircularProgressIndicator(color: AppColors.primaryTeal),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFDFF),
+      backgroundColor: scaffoldBg,
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
@@ -173,32 +176,32 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 1. Top App Bar Header
-                _buildTopHeader(),
+                _buildTopHeader(isDark),
 
                 const SizedBox(height: 20),
 
                 // 2. Greeting Row
-                _buildGreetingRow(),
+                _buildGreetingRow(isDark),
 
                 const SizedBox(height: 24),
 
                 // 3. Section: "YOUR WORKOUT TODAY"
-                _buildYourWorkoutTodaySection(),
+                _buildYourWorkoutTodaySection(isDark),
 
                 const SizedBox(height: 28),
 
                 // 4. Section: "THIS WEEK'S PROGRESS"
-                _buildThisWeeksProgressSection(),
+                _buildThisWeeksProgressSection(isDark),
 
                 const SizedBox(height: 28),
 
                 // 5. Section: "QUICK WORKOUTS"
-                _buildQuickWorkoutsSection(),
+                _buildQuickWorkoutsSection(isDark),
 
                 const SizedBox(height: 28),
 
                 // 6. Section: "RECOMMENDED FOR YOU"
-                _buildRecommendedForYouSection(),
+                _buildRecommendedForYouSection(isDark),
 
                 const SizedBox(height: 28),
               ],
@@ -211,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── 1. Top Header Bar ──────────────────────────────────────────────────────
 
-  Widget _buildTopHeader() {
+  Widget _buildTopHeader(bool isDark) {
     return Row(
       children: [
         // App Icon "F."
@@ -227,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 22,
             fontWeight: FontWeight.w800,
-            color: const Color(0xFF0F172A),
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
             letterSpacing: -0.4,
           ),
         ),
@@ -254,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── 2. Greeting Row ────────────────────────────────────────────────────────
 
-  Widget _buildGreetingRow() {
+  Widget _buildGreetingRow(bool isDark) {
     return ValueListenableBuilder<AuthUser?>(
       valueListenable: AuthService.userNotifier,
       builder: (context, user, _) {
@@ -273,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF0F172A),
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
                       letterSpacing: -0.6,
                     ),
                   ),
@@ -283,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF64748B),
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                     ),
                   ),
                 ],
@@ -307,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return isBodyweight ? 'No Equipment' : w.equipment.join('  •  ');
   }
 
-  Widget _buildYourWorkoutTodaySection() {
+  Widget _buildYourWorkoutTodaySection(bool isDark) {
     final workout = _todaysWorkout ?? (_workouts.isNotEmpty ? _workouts.first : WorkoutRepository.getMockWorkouts().first);
 
     // Position this workout within the user's weekly target / plan
@@ -329,7 +332,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF475569),
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                 letterSpacing: 0.8,
               ),
             ),
@@ -360,20 +363,29 @@ class _HomeScreenState extends State<HomeScreen> {
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFE8FAF6),
-                Color(0xFFF3FCFA),
-                Colors.white,
-              ],
+              colors: isDark
+                  ? [
+                      const Color(0xFF0F352E),
+                      const Color(0xFF132D28),
+                      const Color(0xFF1E293B),
+                    ]
+                  : [
+                      const Color(0xFFE8FAF6),
+                      const Color(0xFFF3FCFA),
+                      Colors.white,
+                    ],
             ),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFFC8F3EA), width: 1.2),
+            border: Border.all(
+              color: isDark ? const Color(0xFF134E48) : const Color(0xFFC8F3EA),
+              width: 1.2,
+            ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF006257).withValues(alpha: 0.08),
+                color: const Color(0xFF006257).withValues(alpha: isDark ? 0.2 : 0.08),
                 blurRadius: 18,
                 offset: const Offset(0, 6),
               ),
@@ -416,7 +428,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFEE2E2),
+                      color: isDark ? const Color(0xFF451A1A) : const Color(0xFFFEE2E2),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Row(
@@ -444,7 +456,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF475569),
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                     ),
                   ),
                 ],
@@ -517,7 +529,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF0F172A),
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                   letterSpacing: -0.4,
                 ),
               ),
@@ -532,27 +544,27 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF64748B),
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                     ),
                   ),
-                  const Text('  •  ', style: TextStyle(color: Color(0xFF94A3B8))),
-                  const Icon(Icons.access_time_rounded, size: 14, color: Color(0xFF64748B)),
+                  Text('  •  ', style: TextStyle(color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8))),
+                  Icon(Icons.access_time_rounded, size: 14, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                   const SizedBox(width: 4),
                   Text(
                     '${workout.durationMinutes} min',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF64748B),
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                     ),
                   ),
-                  const Text('  •  ', style: TextStyle(color: Color(0xFF94A3B8))),
+                  Text('  •  ', style: TextStyle(color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8))),
                   Text(
                     workout.difficulty,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF006257),
+                      color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257),
                     ),
                   ),
                 ],
@@ -601,7 +613,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── 4. Section: "THIS WEEK'S PROGRESS" ──────────────────────────────────────
 
-  Widget _buildThisWeeksProgressSection() {
+  Widget _buildThisWeeksProgressSection(bool isDark) {
     final completed = (_progress['completed'] as int?) ?? 0;
     final total = (_progress['total'] as int?) ?? 3;
     final activeMinutes = (_progress['activeMinutes'] as int?) ?? 0;
@@ -623,7 +635,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF475569),
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                 letterSpacing: 0.8,
               ),
             ),
@@ -632,7 +644,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF475569),
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
               ),
             ),
           ],
@@ -644,12 +656,12 @@ class _HomeScreenState extends State<HomeScreen> {
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFF1F5F9)),
+            border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
+                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
                 blurRadius: 10,
                 offset: const Offset(0, 3),
               ),
@@ -666,7 +678,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEEF5FF),
+                        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFEEF5FF),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Column(
@@ -676,7 +688,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF0F172A),
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
                             ),
                           ),
                           const SizedBox(height: 3),
@@ -685,7 +697,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF64748B),
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                             ),
                           ),
                         ],
@@ -700,7 +712,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEEF5FF),
+                        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFEEF5FF),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Column(
@@ -710,7 +722,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF0F172A),
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
                             ),
                           ),
                           const SizedBox(height: 3),
@@ -719,7 +731,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF64748B),
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                             ),
                           ),
                         ],
@@ -734,7 +746,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFEEFEF),
+                        color: isDark ? const Color(0xFF331B1B) : const Color(0xFFFEEFEF),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Column(
@@ -785,7 +797,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF475569),
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                     ),
                   ),
                   Text(
@@ -793,7 +805,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF006257),
+                      color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257),
                     ),
                   ),
                 ],
@@ -808,8 +820,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 7,
                   child: LinearProgressIndicator(
                     value: fraction,
-                    backgroundColor: const Color(0xFFE2E8F0),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF006257)),
+                    backgroundColor: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257),
+                    ),
                   ),
                 ),
               ),
@@ -820,13 +834,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
+                    color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline_rounded, size: 16, color: Color(0xFF006257)),
+                      Icon(
+                        Icons.info_outline_rounded,
+                        size: 16,
+                        color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257),
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -834,7 +852,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF475569),
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                           ),
                         ),
                       ),
@@ -849,7 +867,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11.5,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF006257),
+                    color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257),
                   ),
                 ),
             ],
@@ -861,7 +879,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── 5. Section: "QUICK WORKOUTS" ───────────────────────────────────────────
 
-  Widget _buildQuickWorkoutsSection() {
+  Widget _buildQuickWorkoutsSection(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -874,7 +892,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF475569),
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                 letterSpacing: 0.8,
               ),
             ),
@@ -909,12 +927,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: 128,
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? const Color(0xFF1E293B) : Colors.white,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFF1F5F9)),
+                        border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
+                            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -929,7 +947,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             width: 38,
                             height: 38,
                             decoration: BoxDecoration(
-                              color: item.iconBg,
+                              color: isDark ? item.iconBg.withValues(alpha: 0.3) : item.iconBg,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Icon(item.icon, color: item.iconColor, size: 20),
@@ -943,7 +961,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF0F172A),
+                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                                   height: 1.2,
                                 ),
                                 maxLines: 2,
@@ -952,14 +970,18 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  const Icon(Icons.access_time_rounded, size: 12, color: Color(0xFF64748B)),
+                                  Icon(
+                                    Icons.access_time_rounded,
+                                    size: 12,
+                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                  ),
                                   const SizedBox(width: 3),
                                   Text(
                                     item.duration,
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 11.5,
                                       fontWeight: FontWeight.w500,
-                                      color: const Color(0xFF64748B),
+                                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                     ),
                                   ),
                                 ],
@@ -980,7 +1002,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── 6. Section: "RECOMMENDED FOR YOU" ───────────────────────────────────────
 
-  Widget _buildRecommendedForYouSection() {
+  Widget _buildRecommendedForYouSection(bool isDark) {
     final workout = _recommendedWorkout ?? (_workouts.isNotEmpty ? _workouts.first : WorkoutRepository.getMockWorkouts().first);
 
     return Column(
@@ -995,7 +1017,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF475569),
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                 letterSpacing: 0.8,
               ),
             ),
@@ -1004,7 +1026,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF006257),
+                color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF006257),
               ),
             ),
           ],
@@ -1019,12 +1041,12 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF1E293B) : Colors.white,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFFF1F5F9)),
+              border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
                   blurRadius: 10,
                   offset: const Offset(0, 3),
                 ),
@@ -1044,7 +1066,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     errorBuilder: (_, __, ___) => Container(
                       width: 72,
                       height: 72,
-                      color: const Color(0xFFF1F5F9),
+                      color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
                       child: const Icon(Icons.fitness_center_rounded, color: AppColors.primaryTeal),
                     ),
                   ),
@@ -1063,7 +1085,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF5EBE1),
+                              color: isDark ? const Color(0xFF332A24) : const Color(0xFFF5EBE1),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -1071,7 +1093,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF57534E),
+                                color: isDark ? const Color(0xFFFDBA74) : const Color(0xFF57534E),
                               ),
                             ),
                           ),
@@ -1081,7 +1103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF64748B),
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                             ),
                           ),
                         ],
@@ -1095,7 +1117,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 15.5,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF0F172A),
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                           letterSpacing: -0.2,
                         ),
                       ),
@@ -1108,7 +1130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF64748B),
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                         ),
                       ),
                     ],
@@ -1121,14 +1143,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   width: 36,
                   height: 36,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF1F5F9),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
                     shape: BoxShape.circle,
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Icon(
                       Icons.chevron_right_rounded,
-                      color: Color(0xFF64748B),
+                      color: isDark ? Colors.white : const Color(0xFF64748B),
                       size: 22,
                     ),
                   ),

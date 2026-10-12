@@ -287,22 +287,26 @@ class _ActivityScreenState extends State<ActivityScreen> {
   }
 
   void _confirmEndSession() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'End Activity?',
           style: GoogleFonts.plusJakartaSans(
             fontWeight: FontWeight.w700,
             fontSize: 18,
+            color: isDark ? Colors.white : AppColors.textPrimary,
           ),
         ),
         content: Text(
           'Are you sure you want to quit the current workout session?',
           style: GoogleFonts.plusJakartaSans(
             fontSize: 14,
-            color: AppColors.textSecondary,
+            color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
           ),
         ),
         actions: [
@@ -312,7 +316,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
               'Continue',
               style: GoogleFonts.plusJakartaSans(
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
               ),
             ),
           ),
@@ -354,10 +358,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
   void _showCompletionDialog() {
     _timer?.cancel();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -365,11 +372,15 @@ class _ActivityScreenState extends State<ActivityScreen> {
             Container(
               width: 72,
               height: 72,
-              decoration: const BoxDecoration(
-                color: Color(0xFFC8F3EA),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF064E3B) : const Color(0xFFC8F3EA),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.check_circle_rounded, size: 48, color: Color(0xFF005953)),
+              child: Icon(
+                Icons.check_circle_rounded,
+                size: 48,
+                color: isDark ? const Color(0xFF34D399) : const Color(0xFF005953),
+              ),
             ),
             const SizedBox(height: 16),
             Text(
@@ -377,7 +388,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
-                color: AppColors.textPrimary,
+                color: isDark ? Colors.white : AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -386,15 +397,15 @@ class _ActivityScreenState extends State<ActivityScreen> {
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
-                color: AppColors.textSecondary,
+                color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildStatPill('TIME', '${(_elapsedSeconds / 60).floor()}m ${(_elapsedSeconds % 60)}s'),
-                _buildStatPill('CALORIES', '~${widget.workout.calories} kcal'),
+                _buildStatPill('TIME', '${(_elapsedSeconds / 60).floor()}m ${(_elapsedSeconds % 60)}s', isDark),
+                _buildStatPill('CALORIES', '~${widget.workout.calories} kcal', isDark),
               ],
             ),
             const SizedBox(height: 24),
@@ -461,11 +472,11 @@ class _ActivityScreenState extends State<ActivityScreen> {
     );
   }
 
-  Widget _buildStatPill(String label, String value) {
+  Widget _buildStatPill(String label, String value, bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
+        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -475,7 +486,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 10,
               fontWeight: FontWeight.w700,
-              color: AppColors.textMuted,
+              color: isDark ? const Color(0xFF64748B) : AppColors.textMuted,
             ),
           ),
           const SizedBox(height: 2),
@@ -484,7 +495,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
               fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+              color: isDark ? Colors.white : AppColors.textPrimary,
             ),
           ),
         ],
@@ -530,17 +541,18 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
     final progressPercent = (((_currentExerciseIndex + 1) / exercises.length) * 100).toInt();
     final remainingCount = exercises.length - (_currentExerciseIndex + 1);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: context.scaffoldBg,
       drawer: _buildSessionDrawer(context),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: context.cardBg,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary, size: 24),
+          icon: Icon(Icons.menu_rounded, color: context.textPrimary, size: 24),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
         title: Text(
@@ -548,7 +560,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 17,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
+            color: context.textPrimary,
             letterSpacing: 2.0,
           ),
         ),
@@ -560,16 +572,16 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 margin: const EdgeInsets.symmetric(vertical: 12),
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
+                  color: context.surfaceMuted,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: context.cardBorder),
                 ),
                 child: Text(
                   '[ END ]',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
+                    color: context.textPrimary,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -594,12 +606,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.cardBg,
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFFEDF2F7)),
+                  border: Border.all(color: context.cardBorder),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -616,7 +628,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: context.textPrimary,
                             letterSpacing: 0.8,
                           ),
                         ),
@@ -625,7 +637,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF005953),
+                            color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953),
                           ),
                         ),
                       ],
@@ -644,10 +656,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
                             margin: EdgeInsets.only(right: idx < exercises.length - 1 ? 6 : 0),
                             decoration: BoxDecoration(
                               color: isCompleted
-                                  ? const Color(0xFF005953)
+                                  ? (isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953))
                                   : isCurrent
-                                      ? const Color(0xFF005953)
-                                      : const Color(0xFFE2E8F0),
+                                      ? (isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953))
+                                      : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                               borderRadius: BorderRadius.circular(3),
                             ),
                           ),
@@ -661,7 +673,11 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.arrow_forward_rounded, size: 14, color: Color(0xFF005953)),
+                            Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 14,
+                              color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953),
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               nextExercise != null
@@ -670,7 +686,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w500,
-                                color: AppColors.textSecondary,
+                                color: context.textSecondary,
                               ),
                             ),
                           ],
@@ -680,7 +696,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 10.5,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: context.textPrimary,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -696,12 +712,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.cardBg,
                     borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: const Color(0xFFEDF2F7)),
+                    border: Border.all(color: context.cardBorder),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.02),
+                        color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -718,14 +734,16 @@ class _ActivityScreenState extends State<ActivityScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF005953),
+                              color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953),
                               letterSpacing: 0.8,
                             ),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
+                              color: _isResting
+                                  ? const Color(0xFFE65100)
+                                  : (isDark ? const Color(0xFF0D9488) : const Color(0xFF005953)),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -750,7 +768,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         style: GoogleFonts.playfairDisplay(
                           fontSize: 26,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
+                          color: context.textPrimary,
                           height: 1.2,
                         ),
                       ),
@@ -761,7 +779,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFC8F3EA),
+                              color: isDark ? const Color(0xFF064E3B) : const Color(0xFFC8F3EA),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -769,7 +787,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF005953),
+                                color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF005953),
                               ),
                             ),
                           ),
@@ -779,7 +797,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.textSecondary,
+                              color: context.textSecondary,
                             ),
                           ),
                         ],
@@ -792,21 +810,27 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF0FDF4),
+                            color: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.3) : const Color(0xFFF0FDF4),
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFFBBF7D0)),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF065F46) : const Color(0xFFBBF7D0),
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.menu_book_rounded, size: 15, color: Color(0xFF005953)),
+                              Icon(
+                                Icons.menu_book_rounded,
+                                size: 15,
+                                color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953),
+                              ),
                               const SizedBox(width: 6),
                               Text(
                                 'HOW TO PERFORM GUIDE →',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w800,
-                                  color: const Color(0xFF005953),
+                                  color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953),
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -823,12 +847,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 26, horizontal: 20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.cardBg,
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFFEDF2F7)),
+                  border: Border.all(color: context.cardBorder),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -848,7 +872,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: (_isResting ? const Color(0xFFE65100) : const Color(0xFF005953))
+                                color: (_isResting
+                                        ? const Color(0xFFE65100)
+                                        : (isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953)))
                                     .withValues(alpha: 0.08),
                                 blurRadius: 36,
                                 spreadRadius: 4,
@@ -864,9 +890,11 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                 ? (_intervalSecondsRemaining / _totalIntervalSeconds)
                                 : 0.0,
                             strokeWidth: 12,
-                            backgroundColor: const Color(0xFFE2E8F0),
+                            backgroundColor: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
+                              _isResting
+                                  ? const Color(0xFFE65100)
+                                  : (isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953)),
                             ),
                             strokeCap: StrokeCap.round,
                           ),
@@ -881,7 +909,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 10.5,
                                 fontWeight: FontWeight.w700,
-                                color: _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
+                                color: _isResting
+                                    ? const Color(0xFFE65100)
+                                    : (isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953)),
                                 letterSpacing: 1.5,
                               ),
                             ),
@@ -891,7 +921,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                               style: GoogleFonts.playfairDisplay(
                                 fontSize: 44,
                                 fontWeight: FontWeight.w900,
-                                color: _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
+                                color: _isResting
+                                    ? const Color(0xFFE65100)
+                                    : (isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953)),
                                 letterSpacing: -1.0,
                               ),
                             ),
@@ -901,7 +933,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textSecondary,
+                                color: context.textSecondary,
                               ),
                             ),
                           ],
@@ -917,9 +949,11 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         value: _totalIntervalSeconds > 0
                             ? 1.0 - (_intervalSecondsRemaining / _totalIntervalSeconds)
                             : 0.0,
-                        backgroundColor: const Color(0xFFE2E8F0),
+                        backgroundColor: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
+                          _isResting
+                              ? const Color(0xFFE65100)
+                              : (isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953)),
                         ),
                         minHeight: 6,
                       ),
@@ -935,7 +969,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textMuted,
+                            color: context.textMuted,
                           ),
                         ),
                         Row(
@@ -944,7 +978,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                               width: 7,
                               height: 7,
                               decoration: BoxDecoration(
-                                color: _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
+                                color: _isResting
+                                    ? const Color(0xFFE65100)
+                                    : (isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953)),
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -956,7 +992,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
-                                color: _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
+                                color: _isResting
+                                    ? const Color(0xFFE65100)
+                                    : (isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953)),
                                 letterSpacing: 0.8,
                               ),
                             ),
@@ -967,7 +1005,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textMuted,
+                            color: context.textMuted,
                           ),
                         ),
                       ],
@@ -1024,25 +1062,25 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       height: 48,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFF1F5F9),
+                          backgroundColor: context.surfaceMuted,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(color: Color(0xFFE2E8F0)),
+                            side: BorderSide(color: context.cardBorder),
                           ),
                         ),
                         onPressed: _pauseTimer,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.pause_rounded, size: 18, color: AppColors.textPrimary),
+                            Icon(Icons.pause_rounded, size: 18, color: context.textPrimary),
                             const SizedBox(width: 6),
                             Text(
                               '[ || Pause ]',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                                color: context.textPrimary,
                               ),
                             ),
                           ],
@@ -1056,8 +1094,11 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       height: 48,
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          side: const BorderSide(color: Color(0xFF005953), width: 1.2),
+                          backgroundColor: context.cardBg,
+                          side: BorderSide(
+                            color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953),
+                            width: 1.2,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -1066,14 +1107,18 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.play_arrow_rounded, size: 20, color: Color(0xFF005953)),
+                            Icon(
+                              Icons.play_arrow_rounded,
+                              size: 20,
+                              color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953),
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               '[ Start / Resume ]',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF005953),
+                                color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953),
                               ),
                             ),
                           ],
@@ -1092,7 +1137,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.textMuted,
+                    color: context.textMuted,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -1110,9 +1155,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
     final progressPercent = exercises.isNotEmpty
         ? (((_currentExerciseIndex + 1) / exercises.length) * 100).toInt()
         : 0;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Drawer(
-      backgroundColor: Colors.white,
+      backgroundColor: context.cardBg,
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1120,10 +1166,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
             // Drawer Header
             Container(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-              decoration: const BoxDecoration(
-                color: Color(0xFFF8FAFC),
+              decoration: BoxDecoration(
+                color: context.scaffoldBg,
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                  bottom: BorderSide(color: context.cardBorder, width: 1),
                 ),
               ),
               child: Column(
@@ -1135,7 +1181,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: AppColors.featureTealBg,
+                          color: isDark ? const Color(0xFF0D3E39) : AppColors.featureTealBg,
                           borderRadius: BorderRadius.circular(5),
                         ),
                         child: Text(
@@ -1143,7 +1189,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 9.5,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.primaryTeal,
+                            color: isDark ? const Color(0xFF2DD4BF) : AppColors.primaryTeal,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -1152,7 +1198,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         visualDensity: VisualDensity.compact,
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
-                        icon: const Icon(Icons.close_rounded, size: 20, color: AppColors.textSecondary),
+                        icon: Icon(Icons.close_rounded, size: 20, color: context.textSecondary),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],
@@ -1163,7 +1209,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                      color: context.textPrimary,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -1173,7 +1219,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     '${widget.workout.category} • ${widget.workout.difficulty} • ~${widget.workout.calories} kcal',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11.5,
-                      color: AppColors.textSecondary,
+                      color: context.textSecondary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -1183,8 +1229,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: exercises.isNotEmpty ? (_currentExerciseIndex + 1) / exercises.length : 0.0,
-                      backgroundColor: const Color(0xFFE2E8F0),
-                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryTeal),
+                      backgroundColor: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        isDark ? const Color(0xFF2DD4BF) : AppColors.primaryTeal,
+                      ),
                       minHeight: 6,
                     ),
                   ),
@@ -1197,7 +1245,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
+                          color: context.textPrimary,
                         ),
                       ),
                       Text(
@@ -1205,7 +1253,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.primaryTeal,
+                          color: isDark ? const Color(0xFF2DD4BF) : AppColors.primaryTeal,
                         ),
                       ),
                     ],
@@ -1217,8 +1265,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
             // Controls Row (Pause / Resume)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: context.cardBorder)),
               ),
               child: Row(
                 children: [
@@ -1227,22 +1275,30 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         side: BorderSide(
-                          color: _isRunning ? const Color(0xFFCBD5E1) : AppColors.primaryTeal,
+                          color: _isRunning
+                              ? context.cardBorder
+                              : (isDark ? const Color(0xFF2DD4BF) : AppColors.primaryTeal),
                         ),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        backgroundColor: _isRunning ? Colors.white : AppColors.featureTealBg,
+                        backgroundColor: _isRunning
+                            ? context.cardBg
+                            : (isDark ? const Color(0xFF0D3E39) : AppColors.featureTealBg),
                       ),
                       icon: Icon(
                         _isRunning ? Icons.pause_rounded : Icons.play_arrow_rounded,
                         size: 18,
-                        color: _isRunning ? AppColors.textPrimary : AppColors.primaryTeal,
+                        color: _isRunning
+                            ? context.textPrimary
+                            : (isDark ? const Color(0xFF2DD4BF) : AppColors.primaryTeal),
                       ),
                       label: Text(
                         _isRunning ? 'Pause Timer' : 'Resume Timer',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w700,
-                          color: _isRunning ? AppColors.textPrimary : AppColors.primaryTeal,
+                          color: _isRunning
+                              ? context.textPrimary
+                              : (isDark ? const Color(0xFF2DD4BF) : AppColors.primaryTeal),
                         ),
                       ),
                       onPressed: () {
@@ -1268,7 +1324,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 10.5,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textMuted,
+                  color: context.textMuted,
                   letterSpacing: 1.0,
                 ),
               ),
@@ -1295,17 +1351,15 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       decoration: BoxDecoration(
                         color: isCurrent
-                            ? const Color(0xFFF0FDF4)
+                            ? (isDark ? const Color(0xFF064E3B).withValues(alpha: 0.3) : const Color(0xFFF0FDF4))
                             : isDone
-                                ? const Color(0xFFF8FAFC)
-                                : Colors.white,
+                                ? (isDark ? const Color(0xFF0B1120) : const Color(0xFFF8FAFC))
+                                : context.cardBg,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isCurrent
-                              ? const Color(0xFF86EFAC)
-                              : isDone
-                                  ? const Color(0xFFE2E8F0)
-                                  : const Color(0xFFF1F5F9),
+                              ? (isDark ? const Color(0xFF065F46) : const Color(0xFF86EFAC))
+                              : context.cardBorder,
                           width: isCurrent ? 1.5 : 1.0,
                         ),
                       ),
@@ -1317,10 +1371,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
                             height: 28,
                             decoration: BoxDecoration(
                               color: isCurrent
-                                  ? AppColors.primaryTeal
+                                  ? (isDark ? const Color(0xFF2DD4BF) : AppColors.primaryTeal)
                                   : isDone
                                       ? const Color(0xFF10B981)
-                                      : const Color(0xFFE2E8F0),
+                                      : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                               shape: BoxShape.circle,
                             ),
                             child: Center(
@@ -1333,7 +1387,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                           style: GoogleFonts.plusJakartaSans(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w700,
-                                            color: AppColors.textSecondary,
+                                            color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                                           ),
                                         ),
                             ),
@@ -1349,10 +1403,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                     fontSize: 13,
                                     fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
                                     color: isCurrent
-                                        ? AppColors.textPrimary
-                                        : isDone
-                                            ? AppColors.textSecondary
-                                            : AppColors.textPrimary,
+                                        ? context.textPrimary
+                                        : (isDone
+                                            ? context.textSecondary
+                                            : context.textPrimary),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -1362,7 +1416,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                   ex.badge,
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 11,
-                                    color: isCurrent ? AppColors.primaryTeal : AppColors.textMuted,
+                                    color: isCurrent
+                                        ? (isDark ? const Color(0xFF2DD4BF) : AppColors.primaryTeal)
+                                        : context.textMuted,
                                     fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
                                   ),
                                 ),
@@ -1373,7 +1429,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFDCFCE7),
+                                color: isDark ? const Color(0xFF064E3B) : const Color(0xFFDCFCE7),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -1381,7 +1437,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 9,
                                   fontWeight: FontWeight.w800,
-                                  color: const Color(0xFF16A34A),
+                                  color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF16A34A),
                                 ),
                               ),
                             )
@@ -1405,20 +1461,22 @@ class _ActivityScreenState extends State<ActivityScreen> {
             // Bottom Quit / End Session Button
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: Color(0xFFF1F5F9))),
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: context.cardBorder)),
               ),
               child: SizedBox(
                 width: double.infinity,
                 child: TextButton.icon(
                   style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFFDC2626),
+                    foregroundColor: isDark ? const Color(0xFFF87171) : const Color(0xFFDC2626),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
-                      side: const BorderSide(color: Color(0xFFFEE2E2)),
+                      side: BorderSide(
+                        color: isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFEE2E2),
+                      ),
                     ),
-                    backgroundColor: const Color(0xFFFEF2F2),
+                    backgroundColor: isDark ? const Color(0xFF450A0A) : const Color(0xFFFEF2F2),
                   ),
                   icon: const Icon(Icons.exit_to_app_rounded, size: 18),
                   label: Text(

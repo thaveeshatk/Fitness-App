@@ -30,20 +30,24 @@ class PlanScheduleCard extends StatelessWidget {
 
   // ── Today • Ready Active Card ─────────────────────────────────────────────
   Widget _buildTodayCard(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFEDF2F7), width: 1),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFEDF2F7),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF005953).withValues(alpha: 0.08),
+            color: const Color(0xFF005953).withValues(alpha: isDark ? 0.2 : 0.08),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -75,6 +79,7 @@ class PlanScheduleCard extends StatelessWidget {
                           day: item.dayLabel,
                           date: item.dayNumber.toString(),
                           isHighlight: true,
+                          isDark: isDark,
                         ),
 
                         const SizedBox(width: 12),
@@ -95,8 +100,8 @@ class PlanScheduleCard extends StatelessWidget {
                               // Status Pill
                               _buildPill(
                                 label: '• Today • Ready',
-                                bgColor: const Color(0xFFB8F3DE),
-                                textColor: const Color(0xFF005953),
+                                bgColor: isDark ? const Color(0xFF064E3B) : const Color(0xFFB8F3DE),
+                                textColor: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF005953),
                               ),
 
                               const SizedBox(height: 5),
@@ -106,7 +111,7 @@ class PlanScheduleCard extends StatelessWidget {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
+                                  color: isDark ? Colors.white : AppColors.textPrimary,
                                   height: 1.2,
                                 ),
                                 maxLines: 1,
@@ -120,7 +125,7 @@ class PlanScheduleCard extends StatelessWidget {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
-                                  color: const Color(0xFF64748B),
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -166,7 +171,7 @@ class PlanScheduleCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF3F7FD),
+                          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF3F7FD),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
@@ -183,7 +188,7 @@ class PlanScheduleCard extends StatelessWidget {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF334155),
+                                  color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -195,7 +200,7 @@ class PlanScheduleCard extends StatelessWidget {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w800,
-                                  color: const Color(0xFF005953),
+                                  color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF005953),
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -215,15 +220,19 @@ class PlanScheduleCard extends StatelessWidget {
 
   // ── Standard Card (Completed or Upcoming) ──────────────────────────────────
   Widget _buildStandardCard(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFEDF2F7), width: 1),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFEDF2F7),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.025),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.025),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -245,6 +254,7 @@ class PlanScheduleCard extends StatelessWidget {
                   day: item.dayLabel,
                   date: item.dayNumber.toString(),
                   isHighlight: false,
+                  isDark: isDark,
                 ),
 
                 const SizedBox(width: 12),
@@ -265,15 +275,15 @@ class PlanScheduleCard extends StatelessWidget {
                       if (item.isCompleted)
                         _buildPill(
                           label: 'Completed',
-                          bgColor: const Color(0xFFBAF3D9),
-                          textColor: const Color(0xFF047857),
+                          bgColor: isDark ? const Color(0xFF064E3B) : const Color(0xFFBAF3D9),
+                          textColor: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF047857),
                           icon: Icons.check_circle_rounded,
                         )
                       else
                         _buildPill(
                           label: 'Upcoming',
-                          bgColor: const Color(0xFFE2EBF8),
-                          textColor: const Color(0xFF3B679B),
+                          bgColor: isDark ? const Color(0xFF1E293B).withAlpha(180) : const Color(0xFFE2EBF8),
+                          textColor: isDark ? const Color(0xFF93C5FD) : const Color(0xFF3B679B),
                         ),
 
                       const SizedBox(height: 5),
@@ -283,7 +293,7 @@ class PlanScheduleCard extends StatelessWidget {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
+                          color: isDark ? Colors.white : AppColors.textPrimary,
                           height: 1.2,
                         ),
                         maxLines: 1,
@@ -297,7 +307,7 @@ class PlanScheduleCard extends StatelessWidget {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFF64748B),
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -313,13 +323,13 @@ class PlanScheduleCard extends StatelessWidget {
                   Container(
                     width: 34,
                     height: 34,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF1F5F9),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.chevron_right_rounded,
-                      color: Color(0xFF475569),
+                      color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
                       size: 20,
                     ),
                   )
@@ -327,13 +337,13 @@ class PlanScheduleCard extends StatelessWidget {
                   Container(
                     width: 36,
                     height: 36,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF8FAFC),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.lock_outline_rounded,
-                      color: Color(0xFF94A3B8),
+                      color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
                       size: 18,
                     ),
                   ),
@@ -351,12 +361,15 @@ class PlanScheduleCard extends StatelessWidget {
     required String day,
     required String date,
     required bool isHighlight,
+    required bool isDark,
   }) {
     return Container(
       width: 54,
       height: 58,
       decoration: BoxDecoration(
-        color: isHighlight ? const Color(0xFF005953) : const Color(0xFFEFF5FB),
+        color: isHighlight
+            ? const Color(0xFF005953)
+            : (isDark ? const Color(0xFF0F172A) : const Color(0xFFEFF5FB)),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -367,7 +380,9 @@ class PlanScheduleCard extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: isHighlight ? const Color(0xFFC4F2E4) : const Color(0xFF64748B),
+              color: isHighlight
+                  ? const Color(0xFFC4F2E4)
+                  : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
               letterSpacing: 0.5,
             ),
           ),
@@ -377,7 +392,9 @@ class PlanScheduleCard extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 19,
               fontWeight: FontWeight.w800,
-              color: isHighlight ? Colors.white : const Color(0xFF0F172A),
+              color: isHighlight
+                  ? Colors.white
+                  : (isDark ? Colors.white : const Color(0xFF0F172A)),
               height: 1.1,
             ),
           ),

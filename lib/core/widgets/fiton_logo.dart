@@ -134,7 +134,7 @@ class FitOnBrandHeader extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 22,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
+            color: context.textPrimary,
             letterSpacing: -0.4,
           ),
         ),

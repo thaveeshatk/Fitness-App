@@ -19,7 +19,8 @@ class CelebrationHeroSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const primaryGreen = Color(0xFF0D7A6B);
-    const softGreenBg = Color(0xFFE6F4F1);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final softGreenBg = isDark ? const Color(0xFF064E3B) : const Color(0xFFE6F4F1);
 
     return Column(
       children: [
@@ -33,8 +34,8 @@ class CelebrationHeroSection extends StatelessWidget {
             Container(
               width: 84,
               height: 84,
-              decoration: const BoxDecoration(
-                color: Color(0xFFFBE8D8),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF3B2418) : const Color(0xFFFBE8D8),
                 shape: BoxShape.circle,
               ),
             ),
@@ -96,8 +97,8 @@ class CelebrationHeroSection extends StatelessWidget {
               Container(
                 width: 6,
                 height: 6,
-                decoration: const BoxDecoration(
-                  color: primaryGreen,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF34D399) : primaryGreen,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -107,7 +108,7 @@ class CelebrationHeroSection extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 10.5,
                   fontWeight: FontWeight.w800,
-                  color: primaryGreen,
+                  color: isDark ? const Color(0xFF6EE7B7) : primaryGreen,
                   letterSpacing: 1.1,
                 ),
               ),
@@ -122,7 +123,7 @@ class CelebrationHeroSection extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 24,
             fontWeight: FontWeight.w800,
-            color: const Color(0xFF0F172A),
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
           ),
         ),
         const SizedBox(height: 6),
@@ -134,7 +135,7 @@ class CelebrationHeroSection extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 12.5,
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF64748B),
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
             height: 1.35,
           ),
         ),

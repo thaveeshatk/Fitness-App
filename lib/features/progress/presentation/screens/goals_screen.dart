@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/asset_paths.dart';
@@ -15,15 +14,17 @@ class GoalsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDark ? const Color(0xFF0F172A) : AppColors.background,
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-              child: _buildTopHeader(context),
+              child: _buildTopHeader(context, isDark),
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -33,41 +34,43 @@ class GoalsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 12),
-                    _buildGreeting(),
+                    _buildGreeting(isDark),
                     const SizedBox(height: 20),
                     _buildMainObjectiveCard(),
                     const SizedBox(height: 16),
-                    _buildStreakCard(),
+                    _buildStreakCard(isDark),
                     const SizedBox(height: 24),
-                    _buildSectionHeader('Active Challenges', '2 Ongoing'),
+                    _buildSectionHeader('Active Challenges', '2 Ongoing', isDark),
                     const SizedBox(height: 16),
                     _buildChallengeCard(
                       title: 'Consistency Starter',
                       subtitle: 'Work out 3 days in a row',
                       icon: Icons.repeat_rounded,
-                      iconBg: _mintGreenTint,
-                      iconColor: _primaryTeal,
+                      iconBg: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.5) : _mintGreenTint,
+                      iconColor: isDark ? const Color(0xFF34D399) : _primaryTeal,
                       status: 'In Progress',
                       progress: 0.66,
                       progressText: '2 / 3 days (66%)',
+                      isDark: isDark,
                     ),
                     const SizedBox(height: 12),
                     _buildChallengeCard(
                       title: 'Weekend Warrior',
                       subtitle: 'Complete 1 weekend mobility session',
                       icon: Icons.self_improvement_rounded,
-                      iconBg: const Color(0xFFFEF3C7),
+                      iconBg: isDark ? const Color(0xFF78350F).withValues(alpha: 0.5) : const Color(0xFFFEF3C7),
                       iconColor: const Color(0xFFD97706),
                       status: 'upcoming',
                       rewardText: 'Reward: Consistency Badge',
                       unlocksText: 'Unlocks Sat',
+                      isDark: isDark,
                     ),
                     const SizedBox(height: 24),
-                    _buildSectionHeader('Achievements & Badges', 'View All'),
+                    _buildSectionHeader('Achievements & Badges', 'View All', isDark),
                     const SizedBox(height: 16),
-                    _buildBadgesGrid(),
+                    _buildBadgesGrid(isDark),
                     const SizedBox(height: 24),
-                    _buildGentleReminder(),
+                    _buildGentleReminder(isDark),
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -79,7 +82,7 @@ class GoalsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTopHeader(BuildContext context) {
+  Widget _buildTopHeader(BuildContext context, bool isDark) {
     return Row(
       children: [
         GestureDetector(
@@ -88,11 +91,11 @@ class GoalsScreen extends StatelessWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF1E293B) : Colors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.cardBorder),
+              border: Border.all(color: isDark ? const Color(0xFF334155) : AppColors.cardBorder),
             ),
-            child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
+            child: Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: isDark ? Colors.white : AppColors.textPrimary),
           ),
         ),
         const SizedBox(width: 12),
@@ -101,7 +104,7 @@ class GoalsScreen extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 19,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
+            color: isDark ? Colors.white : AppColors.textPrimary,
             letterSpacing: -0.4,
           ),
         ),
@@ -110,9 +113,9 @@ class GoalsScreen extends StatelessWidget {
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.cardBorder),
+            border: Border.all(color: isDark ? const Color(0xFF334155) : AppColors.cardBorder),
           ),
           child: const Center(
             child: NotificationBell(
@@ -144,7 +147,7 @@ class GoalsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGreeting() {
+  Widget _buildGreeting(bool isDark) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -157,7 +160,7 @@ class GoalsScreen extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
-                color: AppColors.textMuted,
+                color: isDark ? const Color(0xFF64748B) : AppColors.textMuted,
                 letterSpacing: 0.6,
               ),
             ),
@@ -167,7 +170,7 @@ class GoalsScreen extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
-                color: AppColors.textPrimary,
+                color: isDark ? Colors.white : AppColors.textPrimary,
                 letterSpacing: -0.5,
               ),
             ),
@@ -177,9 +180,9 @@ class GoalsScreen extends StatelessWidget {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: const Color(0xFFEFF4F5),
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF4F5),
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.cardBorder),
+            border: Border.all(color: isDark ? const Color(0xFF334155) : AppColors.cardBorder),
           ),
           child: const Icon(Icons.share_outlined, size: 16, color: _primaryTeal),
         ),
@@ -195,7 +198,7 @@ class GoalsScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: _darkTeal.withOpacity(0.3),
+            color: _darkTeal.withValues(alpha: 0.3),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -214,7 +217,7 @@ class GoalsScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -262,7 +265,7 @@ class GoalsScreen extends StatelessWidget {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
@@ -303,14 +306,14 @@ class GoalsScreen extends StatelessWidget {
               ),
               Row(
                 children: [
-                  Icon(Icons.access_time_rounded, size: 14, color: Colors.white.withOpacity(0.8)),
+                  Icon(Icons.access_time_rounded, size: 14, color: Colors.white.withValues(alpha: 0.8)),
                   const SizedBox(width: 6),
                   Text(
                     '2 days left',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
@@ -330,7 +333,7 @@ class GoalsScreen extends StatelessWidget {
             height: 6,
             margin: const EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
-              color: isCompleted ? _mintGreen : Colors.white.withOpacity(0.2),
+              color: isCompleted ? _mintGreen : Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(3),
             ),
           ),
@@ -340,7 +343,7 @@ class GoalsScreen extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 10,
               fontWeight: FontWeight.w700,
-              color: isCompleted ? Colors.white : Colors.white.withOpacity(0.5),
+              color: isCompleted ? Colors.white : Colors.white.withValues(alpha: 0.5),
             ),
           ),
         ],
@@ -348,16 +351,16 @@ class GoalsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStreakCard() {
+  Widget _buildStreakCard(bool isDark) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: isDark ? const Color(0xFF334155) : AppColors.cardBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -368,8 +371,8 @@ class GoalsScreen extends StatelessWidget {
           Container(
             width: 44,
             height: 44,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFEE2E2),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF7F1D1D).withValues(alpha: 0.5) : const Color(0xFFFEE2E2),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.local_fire_department_rounded, color: Color(0xFFEF4444), size: 24),
@@ -386,14 +389,14 @@ class GoalsScreen extends StatelessWidget {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFEE2E2),
+                        color: isDark ? const Color(0xFF7F1D1D).withValues(alpha: 0.5) : const Color(0xFFFEE2E2),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -412,7 +415,7 @@ class GoalsScreen extends StatelessWidget {
                   'Personal best: 5 days. Keep the momentum!',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
-                    color: AppColors.textSecondary,
+                    color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -420,13 +423,13 @@ class GoalsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          const Icon(Icons.show_chart_rounded, color: AppColors.textSecondary, size: 20),
+          Icon(Icons.show_chart_rounded, color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary, size: 20),
         ],
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title, String subtitle) {
+  Widget _buildSectionHeader(String title, String subtitle, bool isDark) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -435,7 +438,7 @@ class GoalsScreen extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 16,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
+            color: isDark ? Colors.white : AppColors.textPrimary,
           ),
         ),
         Text(
@@ -443,7 +446,7 @@ class GoalsScreen extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
+            color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
           ),
         ),
       ],
@@ -461,16 +464,17 @@ class GoalsScreen extends StatelessWidget {
     String? progressText,
     String? rewardText,
     String? unlocksText,
+    required bool isDark,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: isDark ? const Color(0xFF334155) : AppColors.cardBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -499,7 +503,7 @@ class GoalsScreen extends StatelessWidget {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -507,7 +511,7 @@ class GoalsScreen extends StatelessWidget {
                       subtitle,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
-                        color: AppColors.textSecondary,
+                        color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -517,7 +521,9 @@ class GoalsScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: status == 'In Progress' ? _mintGreenTint : const Color(0xFFF1F5F9),
+                  color: status == 'In Progress'
+                      ? (isDark ? const Color(0xFF064E3B).withValues(alpha: 0.5) : _mintGreenTint)
+                      : (isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -525,7 +531,9 @@ class GoalsScreen extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
-                    color: status == 'In Progress' ? _primaryTeal : AppColors.textSecondary,
+                    color: status == 'In Progress'
+                        ? (isDark ? const Color(0xFF34D399) : _primaryTeal)
+                        : (isDark ? const Color(0xFFCBD5E1) : AppColors.textSecondary),
                   ),
                 ),
               ),
@@ -540,7 +548,7 @@ class GoalsScreen extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
+                    color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                   ),
                 ),
                 const Spacer(),
@@ -549,7 +557,7 @@ class GoalsScreen extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -560,7 +568,7 @@ class GoalsScreen extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 6,
-                backgroundColor: const Color(0xFFF1F5F9),
+                backgroundColor: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
                 valueColor: const AlwaysStoppedAnimation<Color>(_primaryTeal),
               ),
             ),
@@ -570,7 +578,7 @@ class GoalsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFFFEF3C7).withOpacity(0.5),
+                color: isDark ? const Color(0xFF78350F).withValues(alpha: 0.3) : const Color(0xFFFEF3C7).withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -591,7 +599,7 @@ class GoalsScreen extends StatelessWidget {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textSecondary,
+                      color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -603,28 +611,28 @@ class GoalsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBadgesGrid() {
+  Widget _buildBadgesGrid(bool isDark) {
     return Row(
       children: [
-        Expanded(child: _badgeItem('First\nMilestone', Icons.stars_rounded, _mintGreen, true)),
+        Expanded(child: _badgeItem('First\nMilestone', Icons.stars_rounded, _mintGreen, true, isDark)),
         const SizedBox(width: 12),
-        Expanded(child: _badgeItem('Streak\nMaster', Icons.local_fire_department_rounded, const Color(0xFFD97706), true)),
+        Expanded(child: _badgeItem('Streak\nMaster', Icons.local_fire_department_rounded, const Color(0xFFD97706), true, isDark)),
         const SizedBox(width: 12),
-        Expanded(child: _badgeItem('Core\nExplorer', Icons.fitness_center_rounded, AppColors.textMuted, false)),
+        Expanded(child: _badgeItem('Core\nExplorer', Icons.fitness_center_rounded, isDark ? const Color(0xFF64748B) : AppColors.textMuted, false, isDark)),
       ],
     );
   }
 
-  Widget _badgeItem(String title, IconData icon, Color color, bool unlocked) {
+  Widget _badgeItem(String title, IconData icon, Color color, bool unlocked, bool isDark) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: unlocked ? color.withOpacity(0.5) : AppColors.cardBorder),
+        border: Border.all(color: unlocked ? color.withValues(alpha: 0.5) : (isDark ? const Color(0xFF334155) : AppColors.cardBorder)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -636,7 +644,7 @@ class GoalsScreen extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: unlocked ? color.withOpacity(0.1) : const Color(0xFFF1F5F9),
+              color: unlocked ? color.withValues(alpha: isDark ? 0.2 : 0.1) : (isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 24),
@@ -648,7 +656,7 @@ class GoalsScreen extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11,
               fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+              color: isDark ? Colors.white : AppColors.textPrimary,
               height: 1.2,
             ),
           ),
@@ -656,14 +664,14 @@ class GoalsScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (unlocked) const Icon(Icons.check_rounded, size: 10, color: _primaryTeal),
+              if (unlocked) Icon(Icons.check_rounded, size: 10, color: isDark ? const Color(0xFF34D399) : _primaryTeal),
               if (unlocked) const SizedBox(width: 2),
               Text(
                 unlocked ? 'Unlocked' : '1 session left',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 9,
                   fontWeight: FontWeight.w700,
-                  color: unlocked ? _primaryTeal : AppColors.textSecondary,
+                  color: unlocked ? (isDark ? const Color(0xFF34D399) : _primaryTeal) : (isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
                 ),
               ),
             ],
@@ -673,13 +681,13 @@ class GoalsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGentleReminder() {
+  Widget _buildGentleReminder(bool isDark) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F9FF),
+        color: isDark ? const Color(0xFF0C4A6E).withValues(alpha: 0.3) : const Color(0xFFF0F9FF),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFBAE6FD)),
+        border: Border.all(color: isDark ? const Color(0xFF0284C7).withValues(alpha: 0.5) : const Color(0xFFBAE6FD)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -695,7 +703,7 @@ class GoalsScreen extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xFF0369A1),
+                    color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0369A1),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -704,7 +712,7 @@ class GoalsScreen extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF0C4A6E),
+                    color: isDark ? const Color(0xFFBAE6FD) : const Color(0xFF0C4A6E),
                     height: 1.4,
                   ),
                 ),
@@ -716,3 +724,4 @@ class GoalsScreen extends StatelessWidget {
     );
   }
 }
+

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/asset_paths.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../../profile/presentation/screens/main_navigation_screen.dart';
@@ -37,11 +38,13 @@ class WorkoutCompleteScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Progress data fallback/integration
     final progressData = ProgressService.getProgressData(ProgressTimeframe.thisWeek);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final softGreen = isDark ? const Color(0xFF064E3B) : softGreenBg;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF8FAFC),
+        backgroundColor: context.scaffoldBg,
         elevation: 0,
         automaticallyImplyLeading: false,
         titleSpacing: 20,
@@ -50,15 +53,15 @@ class WorkoutCompleteScreen extends StatelessWidget {
             Container(
               width: 36,
               height: 36,
-              decoration: const BoxDecoration(
-                color: softGreenBg,
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E293B) : softGreen,
                 shape: BoxShape.circle,
               ),
               child: IconButton(
                 padding: EdgeInsets.zero,
-                icon: const Icon(
+                icon: Icon(
                   Icons.arrow_back_rounded,
-                  color: primaryGreen,
+                  color: isDark ? const Color(0xFF34D399) : primaryGreen,
                   size: 18,
                 ),
                 onPressed: () {
@@ -77,7 +80,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF0F172A),
+                color: context.textPrimary,
               ),
             ),
           ],
@@ -99,72 +102,76 @@ class WorkoutCompleteScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           child: Column(
             children: [
-                  // 1. Hero Celebration Header
-                  const CelebrationHeroSection(
-                    title: 'Workout Complete!',
+              // 1. Hero Celebration Header
+              const CelebrationHeroSection(
+                title: 'Workout Complete!',
+              ),
+              const SizedBox(height: 20),
+
+              // 2. 4 Stat Cards Grid (2x2)
+              GridView(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 2,
+                  mainAxisSpacing: 14,
+                  crossAxisSpacing: 14,
+                  childAspectRatio: MediaQuery.of(context).size.width > 600 ? 1.2 : 1.65,
+                ),
+                children: [
+                  _buildStatCard(
+                    context: context,
+                    title: 'DURATION',
+                    value: '$durationMinutes min',
+                    subtitle: 'Total recorded',
+                    icon: Icons.access_time_rounded,
+                    iconBgColor: isDark ? const Color(0xFF0C4A6E) : const Color(0xFFE0F2FE),
+                    iconColor: const Color(0xFF0284C7),
                   ),
-                  const SizedBox(height: 20),
-
-                  // 2. 4 Stat Cards Grid (2x2)
-                  GridView(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 2,
-                      mainAxisSpacing: 14,
-                      crossAxisSpacing: 14,
-                      childAspectRatio: MediaQuery.of(context).size.width > 600 ? 1.2 : 1.65,
-                    ),
-                    children: [
-                      _buildStatCard(
-                        title: 'DURATION',
-                        value: '$durationMinutes min',
-                        subtitle: 'Total recorded',
-                        icon: Icons.access_time_rounded,
-                        iconBgColor: const Color(0xFFE0F2FE),
-                        iconColor: const Color(0xFF0284C7),
-                      ),
-                      _buildStatCard(
-                        title: 'ACTIVE TIME',
-                        value: '$activeMinutes active min',
-                        subtitle: 'In target zones',
-                        icon: Icons.bolt_rounded,
-                        iconBgColor: const Color(0xFFDCFCE7),
-                        iconColor: const Color(0xFF16A34A),
-                      ),
-                      _buildStatCard(
-                        title: 'ENERGY',
-                        value: '$caloriesBurned kcal',
-                        subtitle: 'Burn estimated',
-                        icon: Icons.local_fire_department_rounded,
-                        iconBgColor: const Color(0xFFFFEDD5),
-                        iconColor: const Color(0xFFEA580C),
-                      ),
-                      _buildStatCard(
-                        title: 'HEART RATE',
-                        value: '$averageHeartRate bpm',
-                        subtitle: 'Moderate intensity',
-                        icon: Icons.favorite_border_rounded,
-                        iconBgColor: const Color(0xFFFFE4E6),
-                        iconColor: const Color(0xFFE11D48),
-                      ),
-                    ],
+                  _buildStatCard(
+                    context: context,
+                    title: 'ACTIVE TIME',
+                    value: '$activeMinutes active min',
+                    subtitle: 'In target zones',
+                    icon: Icons.bolt_rounded,
+                    iconBgColor: isDark ? const Color(0xFF064E3B) : const Color(0xFFDCFCE7),
+                    iconColor: const Color(0xFF16A34A),
                   ),
-                  const SizedBox(height: 16),
-
-                  // 3. Weekly Goal Card
-                  _buildWeeklyGoalCard(progressData),
-                  const SizedBox(height: 16),
-
-                  // 4. Coach Maya Quote Card
-                  _buildCoachMayaCard(),
-                  const SizedBox(height: 22),
-
-                  _buildActionButtons(context),
-                  const SizedBox(height: 16),
+                  _buildStatCard(
+                    context: context,
+                    title: 'ENERGY',
+                    value: '$caloriesBurned kcal',
+                    subtitle: 'Burn estimated',
+                    icon: Icons.local_fire_department_rounded,
+                    iconBgColor: isDark ? const Color(0xFF7C2D12) : const Color(0xFFFFEDD5),
+                    iconColor: const Color(0xFFEA580C),
+                  ),
+                  _buildStatCard(
+                    context: context,
+                    title: 'HEART RATE',
+                    value: '$averageHeartRate bpm',
+                    subtitle: 'Moderate intensity',
+                    icon: Icons.favorite_border_rounded,
+                    iconBgColor: isDark ? const Color(0xFF881337) : const Color(0xFFFFE4E6),
+                    iconColor: const Color(0xFFE11D48),
+                  ),
                 ],
               ),
-            ),
+              const SizedBox(height: 16),
+
+              // 3. Weekly Goal Card
+              _buildWeeklyGoalCard(context, progressData),
+              const SizedBox(height: 16),
+
+              // 4. Coach Maya Quote Card
+              _buildCoachMayaCard(context),
+              const SizedBox(height: 22),
+
+              _buildActionButtons(context),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
       ),
       bottomNavigationBar: _buildBottomBar(context),
     );
@@ -172,6 +179,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
 
   /// Compact Stat Card matching Coach Maya app design
   Widget _buildStatCard({
+    required BuildContext context,
     required String title,
     required String value,
     required String subtitle,
@@ -179,15 +187,17 @@ class WorkoutCompleteScreen extends StatelessWidget {
     required Color iconBgColor,
     required Color iconColor,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+        border: Border.all(color: context.cardBorder, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -206,7 +216,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF64748B),
+                  color: context.textSecondary,
                   letterSpacing: 0.6,
                 ),
               ),
@@ -233,7 +243,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF0F172A),
+                  color: context.textPrimary,
                   letterSpacing: -0.3,
                 ),
               ),
@@ -243,7 +253,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF94A3B8),
+                  color: context.textMuted,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -256,19 +266,20 @@ class WorkoutCompleteScreen extends StatelessWidget {
   }
 
   /// Weekly Goal Card matching Figma design
-  Widget _buildWeeklyGoalCard(ProgressData progressData) {
+  Widget _buildWeeklyGoalCard(BuildContext context, ProgressData progressData) {
     // Dynamic progress values with defaults matching Figma 60% (3/5)
     final completed = progressData.habitCompletedDays > 0 ? progressData.habitCompletedDays : 3;
     final total = progressData.habitScheduledDays > 0 ? progressData.habitScheduledDays : 5;
     final percent = ((completed / total) * 100).toInt();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cardBorderColor),
+        border: Border.all(color: context.cardBorder),
         boxShadow: const [
           BoxShadow(
             color: Color(0x04000000),
@@ -288,13 +299,13 @@ class WorkoutCompleteScreen extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF0F172A),
+                  color: context.textPrimary,
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: softGreenBg,
+                  color: isDark ? const Color(0xFF064E3B) : softGreenBg,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -302,7 +313,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: primaryGreen,
+                    color: isDark ? const Color(0xFF6EE7B7) : primaryGreen,
                   ),
                 ),
               ),
@@ -314,7 +325,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11.5,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF64748B),
+              color: context.textSecondary,
             ),
           ),
           const SizedBox(height: 14),
@@ -322,15 +333,15 @@ class WorkoutCompleteScreen extends StatelessWidget {
           const SizedBox(height: 16),
           Row(
             children: [
-              _buildDaySegment('Mon', true),
+              _buildDaySegment(context, 'Mon', true),
               const SizedBox(width: 6),
-              _buildDaySegment('Tue', true),
+              _buildDaySegment(context, 'Tue', true),
               const SizedBox(width: 6),
-              _buildDaySegment('Today', true, isToday: true),
+              _buildDaySegment(context, 'Today', true, isToday: true),
               const SizedBox(width: 6),
-              _buildDaySegment('Fri', false),
+              _buildDaySegment(context, 'Fri', false),
               const SizedBox(width: 6),
-              _buildDaySegment('Sun', false),
+              _buildDaySegment(context, 'Sun', false),
             ],
           ),
         ],
@@ -339,7 +350,9 @@ class WorkoutCompleteScreen extends StatelessWidget {
   }
 
   /// Day status segment indicator
-  Widget _buildDaySegment(String dayLabel, bool isCompleted, {bool isToday = false}) {
+  Widget _buildDaySegment(BuildContext context, String dayLabel, bool isCompleted, {bool isToday = false}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Expanded(
       child: Column(
         children: [
@@ -347,7 +360,9 @@ class WorkoutCompleteScreen extends StatelessWidget {
             width: double.infinity,
             height: 4,
             decoration: BoxDecoration(
-              color: isCompleted ? primaryGreen : const Color(0xFFE2E8F0),
+              color: isCompleted
+                  ? (isDark ? const Color(0xFF2DD4BF) : primaryGreen)
+                  : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -358,8 +373,8 @@ class WorkoutCompleteScreen extends StatelessWidget {
               fontSize: 11,
               fontWeight: isToday ? FontWeight.w800 : FontWeight.w600,
               color: isToday
-                  ? primaryGreen
-                  : (isCompleted ? const Color(0xFF334155) : const Color(0xFF94A3B8)),
+                  ? (isDark ? const Color(0xFF2DD4BF) : primaryGreen)
+                  : (isCompleted ? context.textPrimary : context.textMuted),
             ),
           ),
         ],
@@ -368,14 +383,16 @@ class WorkoutCompleteScreen extends StatelessWidget {
   }
 
   /// Coach Maya Card matching image design
-  Widget _buildCoachMayaCard() {
+  Widget _buildCoachMayaCard(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cardBorderColor),
+        border: Border.all(color: context.cardBorder),
         boxShadow: const [
           BoxShadow(
             color: Color(0x04000000),
@@ -427,7 +444,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        color: primaryGreen,
+                        color: isDark ? const Color(0xFF2DD4BF) : primaryGreen,
                         letterSpacing: 0.8,
                       ),
                     ),
@@ -445,7 +462,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF475569),
+                    color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
                     height: 1.35,
                   ),
                 ),
@@ -509,7 +526,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                 height: 42,
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF1F5F9),
+                    backgroundColor: context.surfaceMuted,
                     side: BorderSide.none,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -523,17 +540,17 @@ class WorkoutCompleteScreen extends StatelessWidget {
                       ),
                     );
                   },
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.insert_chart_outlined_rounded,
                     size: 16,
-                    color: Color(0xFF334155),
+                    color: context.textPrimary,
                   ),
                   label: Text(
                     'View Details',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF334155),
+                      color: context.textPrimary,
                     ),
                   ),
                 ),
@@ -545,7 +562,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                 height: 42,
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF1F5F9),
+                    backgroundColor: context.surfaceMuted,
                     side: BorderSide.none,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -559,17 +576,17 @@ class WorkoutCompleteScreen extends StatelessWidget {
                       ),
                     );
                   },
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.share_outlined,
                     size: 16,
-                    color: Color(0xFF334155),
+                    color: context.textPrimary,
                   ),
                   label: Text(
                     'Share Workout',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF334155),
+                      color: context.textPrimary,
                     ),
                   ),
                 ),
@@ -584,10 +601,10 @@ class WorkoutCompleteScreen extends StatelessWidget {
   /// Persistent bottom navigation bar matching Figma layout
   Widget _buildBottomBar(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: context.cardBg,
         border: Border(
-          top: BorderSide(color: Color(0xFFEDF2F7), width: 1),
+          top: BorderSide(color: context.cardBorder, width: 1),
         ),
       ),
       child: SafeArea(
@@ -611,8 +628,9 @@ class WorkoutCompleteScreen extends StatelessWidget {
   }
 
   Widget _buildNavItem(BuildContext context, int index, String label, IconData icon, {bool isActive = false}) {
-    const activeColor = primaryGreen;
-    const inactiveColor = Color(0xFF94A3B8);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final activeColor = isDark ? const Color(0xFF2DD4BF) : primaryGreen;
+    final inactiveColor = context.textMuted;
 
     return Expanded(
       child: InkWell(

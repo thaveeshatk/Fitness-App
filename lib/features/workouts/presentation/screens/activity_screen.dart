@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../data/models/workout_model.dart';
+import '../../data/services/workout_audio_service.dart';
 import 'exercise_guidance_screen.dart';
 import 'workout_complete_screen.dart';
 import '../../../progress/data/services/user_activity_service.dart';
@@ -167,12 +168,19 @@ class _ActivityScreenState extends State<ActivityScreen> {
         _elapsedSeconds++;
         if (_intervalSecondsRemaining > 0) {
           _intervalSecondsRemaining--;
+          // Preparatory countdown beeps at 00:03, 00:02, 00:01
+          if (_intervalSecondsRemaining == 3 ||
+              _intervalSecondsRemaining == 2 ||
+              _intervalSecondsRemaining == 1) {
+            WorkoutAudioService.playCountdownBeep();
+          }
         } else {
           final exercises = widget.workout.exercises;
           final hasMoreExercises = _currentExerciseIndex < exercises.length - 1;
 
           if (!_isResting) {
             // Active Interval ended:
+            WorkoutAudioService.playFinishChime();
             if (_currentSet < _totalSets) {
               // Transition into REST INTERVAL before the next set of this exercise
               _isResting = true;
@@ -193,6 +201,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
             }
           } else {
             // Rest Interval ended:
+            WorkoutAudioService.playStartWhistle();
             _isResting = false;
             if (_isTransitionToNextExercise) {
               // Advance to next exercise automatically!
@@ -219,6 +228,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
   }
 
   void _skipRest() {
+    WorkoutAudioService.playStartWhistle();
     setState(() {
       _isResting = false;
       final exercises = widget.workout.exercises;
@@ -533,6 +543,155 @@ class _ActivityScreenState extends State<ActivityScreen> {
     return '$mins:$secs';
   }
 
+  void _showAudioSettingsSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (sheetContext, setModalState) {
+            final isMuted = WorkoutAudioService.isMuted;
+            final currentTheme = WorkoutAudioService.currentTheme;
+
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE2E8F0),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFC8F3EA),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.volume_up_rounded, color: Color(0xFF005953), size: 20),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Workout Sound Cues',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Switch(
+                        value: !isMuted,
+                        activeThumbColor: const Color(0xFF005953),
+                        activeTrackColor: const Color(0xFFC8F3EA),
+                        onChanged: (val) {
+                          WorkoutAudioService.setMuted(!val);
+                          setModalState(() {});
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'CHOOSE SOUND STYLE',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textMuted,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  ...WorkoutAudioTheme.values.map((theme) {
+                    final isSelected = currentTheme == theme;
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      decoration: BoxDecoration(
+                        color: isSelected ? const Color(0xFFF0FDF4) : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isSelected ? const Color(0xFF005953) : const Color(0xFFE2E8F0),
+                          width: isSelected ? 1.5 : 1.0,
+                        ),
+                      ),
+                      child: ListTile(
+                        dense: true,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+                        leading: Icon(
+                          isSelected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
+                          color: isSelected ? const Color(0xFF005953) : AppColors.textMuted,
+                          size: 20,
+                        ),
+                        title: Text(
+                          theme.title,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13.5,
+                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        subtitle: Text(
+                          theme.subtitle,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        trailing: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            side: const BorderSide(color: Color(0xFF005953), width: 1.0),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          onPressed: () {
+                            WorkoutAudioService.playFinishChime(themeOverride: theme);
+                          },
+                          icon: const Icon(Icons.play_arrow_rounded, size: 16, color: Color(0xFF005953)),
+                          label: Text(
+                            'Preview',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF005953),
+                            ),
+                          ),
+                        ),
+                        onTap: () {
+                          WorkoutAudioService.setTheme(theme);
+                          WorkoutAudioService.playFinishChime(themeOverride: theme);
+                          setModalState(() {});
+                        },
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final exercises = widget.workout.exercises;
@@ -566,6 +725,20 @@ class _ActivityScreenState extends State<ActivityScreen> {
           ),
         ),
         actions: [
+          ValueListenableBuilder<bool>(
+            valueListenable: WorkoutAudioService.isMutedNotifier,
+            builder: (context, isMuted, _) {
+              return IconButton(
+                icon: Icon(
+                  isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                  color: isMuted ? AppColors.textMuted : const Color(0xFF005953),
+                  size: 22,
+                ),
+                tooltip: 'Sound Cue Settings',
+                onPressed: _showAudioSettingsSheet,
+              );
+            },
+          ),
           Center(
             child: GestureDetector(
               onTap: _confirmEndSession,

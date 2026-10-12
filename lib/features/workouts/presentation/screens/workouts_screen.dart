@@ -115,6 +115,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.cardBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Delete Workout',
@@ -268,10 +269,15 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     final exploreMatches = _filteredExploreWorkouts;
     final customMatches = _myCustomWorkouts;
 
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: const Color(0xFFF8FAFC),
-      drawer: _buildWorkoutsDrawer(context),
+    return AnimatedBuilder(
+      animation: ThemeController.instance,
+      builder: (context, _) {
+        final isDark = ThemeController.instance.isDarkMode;
+
+        return Scaffold(
+          key: _scaffoldKey,
+          backgroundColor: AppColors.background,
+          drawer: _buildWorkoutsDrawer(context),
       floatingActionButton: _selectedTabIndex == 0
           ? FloatingActionButton.extended(
               onPressed: () => _openWorkoutFormModal(),
@@ -335,7 +341,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                   border: Border.all(color: AppColors.cardBorder),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -590,11 +596,12 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.cardBackground,
                       borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.cardBorder),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.02),
+                          color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -688,9 +695,10 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.cardBackground,
                   borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.cardBorder),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -714,7 +722,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE0F2F1),
+                            color: AppColors.featureTealBg,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Row(
@@ -893,8 +901,9 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.cardBackground,
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.cardBorder),
                   ),
                   child: Column(
                     children: [
@@ -944,6 +953,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           ),
         ),
       ),
+    );
+      },
     );
   }
 
@@ -1021,12 +1032,15 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
         margin: const EdgeInsets.all(2),
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
+          color: isSelected
+              ? (ThemeController.instance.isDarkMode ? AppColors.surfaceMuted : Colors.white)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
+          border: isSelected ? Border.all(color: AppColors.cardBorder) : null,
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: Colors.black.withValues(alpha: ThemeController.instance.isDarkMode ? 0.2 : 0.05),
                     blurRadius: 2,
                     offset: const Offset(0, 1),
                   ),
@@ -1080,8 +1094,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               width: 18,
               height: 18,
               decoration: BoxDecoration(
-                color: isChecked ? AppColors.primaryTeal : Colors.white,
-                border: Border.all(color: isChecked ? AppColors.primaryTeal : Colors.grey.shade300),
+                color: isChecked ? AppColors.primaryTeal : AppColors.cardBackground,
+                border: Border.all(color: isChecked ? AppColors.primaryTeal : AppColors.cardBorder),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: isChecked ? const Icon(Icons.check, size: 14, color: Colors.white) : null,
@@ -1106,26 +1120,28 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   }
 
   Color _getDifficultyBgColor(String difficulty) {
+    final isDark = ThemeController.instance.isDarkMode;
     switch (difficulty.toLowerCase()) {
       case 'beginner':
-        return const Color(0xFFE8F5E9);
+        return isDark ? const Color(0xFF143324) : const Color(0xFFE8F5E9);
       case 'advanced':
-        return const Color(0xFFFBE9E7);
+        return isDark ? const Color(0xFF381F1A) : const Color(0xFFFBE9E7);
       case 'intermediate':
       default:
-        return const Color(0xFFE0F2F1);
+        return isDark ? const Color(0xFF0F3934) : const Color(0xFFE0F2F1);
     }
   }
 
   Color _getDifficultyTextColor(String difficulty) {
+    final isDark = ThemeController.instance.isDarkMode;
     switch (difficulty.toLowerCase()) {
       case 'beginner':
-        return const Color(0xFF2E7D32);
+        return isDark ? const Color(0xFF6EE7B7) : const Color(0xFF2E7D32);
       case 'advanced':
-        return const Color(0xFFD84315);
+        return isDark ? const Color(0xFFFDBA74) : const Color(0xFFD84315);
       case 'intermediate':
       default:
-        return AppColors.primaryTeal;
+        return isDark ? const Color(0xFF5EEAD4) : AppColors.primaryTeal;
     }
   }
 
@@ -1189,8 +1205,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     errorBuilder: (_, __, ___) => Container(
                       width: 82,
                       height: 82,
-                      color: Colors.grey.shade200,
-                      child: const Icon(Icons.fitness_center_rounded, color: Colors.grey),
+                      color: AppColors.surfaceMuted,
+                      child: Icon(Icons.fitness_center_rounded, color: AppColors.textMuted),
                     ),
                   ),
                 ),
@@ -1331,7 +1347,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(7),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFEE2E2),
+                        color: ThemeController.instance.isDarkMode ? const Color(0xFF381A1A) : const Color(0xFFFEE2E2),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(Icons.delete_outline_rounded, size: 16, color: Color(0xFFDC2626)),
@@ -1609,8 +1625,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
             // Footer
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: Color(0xFFF1F5F9))),
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: AppColors.border)),
               ),
               child: Row(
                 children: [
@@ -1817,29 +1833,34 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
   Widget build(BuildContext context) {
     final isEdit = widget.existing != null;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            // Drag Indicator
-            Container(
-              width: 44,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+    return AnimatedBuilder(
+      animation: ThemeController.instance,
+      builder: (context, _) {
+        final isDark = ThemeController.instance.isDarkMode;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 12),
+                // Drag Indicator
+                Container(
+                  width: 44,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.cardBorder : Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
             const SizedBox(height: 14),
 
             // Header Row
@@ -1892,7 +1913,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
               ),
             ),
             const SizedBox(height: 8),
-            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+            Divider(height: 1, color: AppColors.border),
 
             // Form Body (Scrollable)
             Flexible(
@@ -1917,7 +1938,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                       decoration: BoxDecoration(
                         color: AppColors.surfaceMuted,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        border: Border.all(color: AppColors.border),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       child: TextField(
@@ -2005,7 +2026,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                 color: selected ? AppColors.primaryTeal : AppColors.surfaceMuted,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: selected ? AppColors.primaryTeal : const Color(0xFFE2E8F0),
+                                  color: selected ? AppColors.primaryTeal : AppColors.border,
                                   width: selected ? 1.5 : 1.0,
                                 ),
                               ),
@@ -2069,8 +2090,9 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                       child: Container(
                                         padding: const EdgeInsets.all(4),
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
+                                          color: AppColors.cardBackground,
                                           borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(color: AppColors.border),
                                         ),
                                         child: const Icon(Icons.remove, size: 16, color: AppColors.primaryTeal),
                                       ),
@@ -2090,8 +2112,9 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                       child: Container(
                                         padding: const EdgeInsets.all(4),
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
+                                          color: AppColors.cardBackground,
                                           borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(color: AppColors.border),
                                         ),
                                         child: const Icon(Icons.add, size: 16, color: AppColors.primaryTeal),
                                       ),
@@ -2134,8 +2157,9 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                       child: Container(
                                         padding: const EdgeInsets.all(4),
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
+                                          color: AppColors.cardBackground,
                                           borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(color: AppColors.border),
                                         ),
                                         child: const Icon(Icons.remove, size: 16, color: AppColors.primaryTeal),
                                       ),
@@ -2155,8 +2179,9 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                       child: Container(
                                         padding: const EdgeInsets.all(4),
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
+                                          color: AppColors.cardBackground,
                                           borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(color: AppColors.border),
                                         ),
                                         child: const Icon(Icons.add, size: 16, color: AppColors.primaryTeal),
                                       ),
@@ -2288,8 +2313,8 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                   errorBuilder: (_, __, ___) => Container(
                                     width: 44,
                                     height: 44,
-                                    color: Colors.grey.shade200,
-                                    child: const Icon(Icons.fitness_center, size: 20, color: Colors.grey),
+                                    color: AppColors.surfaceMuted,
+                                    child: Icon(Icons.fitness_center, size: 20, color: AppColors.textMuted),
                                   ),
                                 ),
                               ),
@@ -2324,7 +2349,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                                 decoration: BoxDecoration(
                                   color: isSelected ? AppColors.primaryTeal : Colors.transparent,
                                   border: Border.all(
-                                    color: isSelected ? AppColors.primaryTeal : Colors.grey.shade300,
+                                    color: isSelected ? AppColors.primaryTeal : AppColors.border,
                                   ),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
@@ -2398,6 +2423,8 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
           ],
         ),
       ),
+    );
+      },
     );
   }
 }

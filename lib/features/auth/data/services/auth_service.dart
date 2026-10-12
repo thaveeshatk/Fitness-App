@@ -3,6 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/services/firebase_service.dart';
 import '../models/auth_user.dart';
+import '../../../profile/data/services/profile_service.dart';
+import '../../../progress/data/services/user_activity_service.dart';
+import '../../../progress/data/services/progress_service.dart';
+import '../../../plan/data/services/plan_service.dart';
+import '../../../workouts/data/services/workout_service.dart';
+import '../../../notifications/data/services/notification_service.dart';
 
 import 'package:flutter/foundation.dart';
 
@@ -16,6 +22,16 @@ class AuthService {
   static final ValueNotifier<AuthUser?> userNotifier = ValueNotifier<AuthUser?>(_currentUser);
 
   static bool get isLoggedIn => _currentUser != null;
+
+  /// Returns true if the current user uses email/password authentication
+  static bool get isPasswordAuthUser {
+    if (!FirebaseService.isInitialized) return true;
+    final fbUser = FirebaseAuth.instance.currentUser;
+    if (fbUser == null) return true;
+    // Check if provider data contains 'password'
+    final hasPasswordProvider = fbUser.providerData.any((p) => p.providerId == 'password');
+    return hasPasswordProvider || (fbUser.email != null && fbUser.email!.isNotEmpty);
+  }
 
   static AuthUser get currentUser {
     if (FirebaseService.isInitialized && FirebaseAuth.instance.currentUser != null) {
@@ -298,6 +314,157 @@ class AuthService {
     }
     _currentUser = null;
     userNotifier.value = null;
+  }
+
+  /// Permanently deletes the user's account and all associated personal data from Firestore & Auth.
+  /// Handles Firebase re-authentication if required.
+  static Future<void> deleteAccount({String? password}) async {
+    final user = _currentUser ?? (FirebaseService.isInitialized && FirebaseAuth.instance.currentUser != null
+        ? _mapFirebaseUser(FirebaseAuth.instance.currentUser!)
+        : null);
+
+    if (user == null) {
+      developer.log('No user currently logged in to delete', name: 'AuthService');
+      return;
+    }
+
+    final uid = user.uid;
+    developer.log('Initiating permanent deletion for user: $uid', name: 'AuthService');
+
+    if (FirebaseService.isInitialized) {
+      final fbUser = FirebaseAuth.instance.currentUser;
+      if (fbUser != null) {
+        // If password is supplied and user has an email, re-authenticate first to ensure valid credentials
+        if (password != null && password.isNotEmpty && fbUser.email != null) {
+          try {
+            final cred = EmailAuthProvider.credential(
+              email: fbUser.email!,
+              password: password.trim(),
+            );
+            await fbUser.reauthenticateWithCredential(cred);
+            developer.log('Re-authenticated successfully prior to deletion', name: 'AuthService');
+          } on FirebaseAuthException catch (e) {
+            developer.log('Re-authentication failed: ${e.code} - ${e.message}', name: 'AuthService');
+            rethrow;
+          }
+        }
+
+        // Delete all Firestore documents and user collections strictly owned by this user
+        await _deleteUserDataFromFirestore(uid);
+
+        // Delete Firebase Authentication account
+        try {
+          await fbUser.delete();
+          developer.log('Firebase Auth user record successfully deleted', name: 'AuthService');
+        } on FirebaseAuthException catch (e) {
+          developer.log('Failed deleting Firebase Auth user: ${e.code} - ${e.message}', name: 'AuthService');
+          if (e.code == 'requires-recent-login') {
+            rethrow;
+          }
+          rethrow;
+        }
+      } else {
+        // No active fbUser session, purge firestore data for uid if any exists
+        await _deleteUserDataFromFirestore(uid);
+      }
+    }
+
+    // Purge local in-memory states and caches
+    ProfileService.clearCache();
+    UserActivityService.clearCache();
+    ProgressService.clearCache();
+    PlanService.clearCache();
+    WorkoutService.clearUserWorkouts(uid);
+    NotificationService.clearUserCache(uid);
+
+    _currentUser = null;
+    userNotifier.value = null;
+
+    if (FirebaseService.isInitialized) {
+      try {
+        await FirebaseAuth.instance.signOut();
+      } catch (_) {}
+    }
+
+    developer.log('Account deletion finished successfully for user: $uid', name: 'AuthService');
+  }
+
+  /// Removes all user-specific Firestore documents without affecting other users
+  static Future<void> _deleteUserDataFromFirestore(String uid) async {
+    final firestore = FirebaseFirestore.instance;
+
+    try {
+      // 1. User root record in 'users'
+      await firestore.collection('users').doc(uid).delete().catchError((e) {
+        developer.log('Error deleting users doc: $e', name: 'AuthService');
+      });
+
+      // 2. Profile record in 'user_profiles'
+      await firestore.collection('user_profiles').doc(uid).delete().catchError((e) {
+        developer.log('Error deleting user_profiles doc: $e', name: 'AuthService');
+      });
+
+      // 3. Notification preferences in 'notification_preferences'
+      await firestore.collection('notification_preferences').doc(uid).delete().catchError((e) {
+        developer.log('Error deleting notification_preferences doc: $e', name: 'AuthService');
+      });
+
+      // 4. Workout history logs where 'uid' == uid
+      await _deleteBatchByQuery(
+        firestore.collection('workout_history').where('uid', isEqualTo: uid),
+      );
+
+      // 5. Custom workouts where 'userId' == uid
+      await _deleteBatchByQuery(
+        firestore.collection('custom_workouts').where('userId', isEqualTo: uid),
+      );
+
+      // 6. Plan completions where 'uid' == uid
+      await _deleteBatchByQuery(
+        firestore.collection('plan_completions').where('uid', isEqualTo: uid),
+      );
+
+      // 7. User notifications where 'userId' == uid
+      await _deleteBatchByQuery(
+        firestore.collection('user_notifications').where('userId', isEqualTo: uid),
+      );
+
+      developer.log('Cleaned up all Firestore data for $uid', name: 'AuthService');
+    } catch (e, stack) {
+      developer.log(
+        'Encountered error during Firestore cleanup: $e',
+        name: 'AuthService',
+        error: e,
+        stackTrace: stack,
+      );
+    }
+  }
+
+  /// Safely deletes all documents matching the specified query in batches
+  static Future<void> _deleteBatchByQuery(Query query) async {
+    try {
+      final snapshot = await query.get();
+      if (snapshot.docs.isEmpty) return;
+
+      WriteBatch batch = FirebaseFirestore.instance.batch();
+      int count = 0;
+
+      for (final doc in snapshot.docs) {
+        batch.delete(doc.reference);
+        count++;
+        if (count >= 400) {
+          await batch.commit();
+          batch = FirebaseFirestore.instance.batch();
+          count = 0;
+        }
+      }
+
+      if (count > 0) {
+        await batch.commit();
+      }
+    } catch (e) {
+      developer.log('Batch deletion failed for query: $e', name: 'AuthService');
+    }
   }
 }
 

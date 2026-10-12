@@ -9,6 +9,7 @@ import '../../../auth/data/services/auth_service.dart';
 import '../../data/models/profile_model.dart';
 import '../../data/services/profile_service.dart';
 import '../widgets/profile_photo_picker_dialog.dart';
+import '../widgets/delete_account_dialog.dart';
 import 'settings_screen.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
 
@@ -270,7 +271,9 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
               _buildSaveButton(),
               const SizedBox(height: 14),
               _buildLogoutButton(),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
+              _buildDeleteAccountButton(),
+              const SizedBox(height: 16),
               _buildFooterNotice(),
               const SizedBox(height: 28),
             ],
@@ -1489,6 +1492,48 @@ class _ProfilePreferencesScreenState extends State<ProfilePreferencesScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ── Delete Account Button ──────────────────────────────────────────────────
+  Widget _buildDeleteAccountButton() {
+    final isDark = ThemeController.instance.isDarkMode;
+
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: TextButton(
+        onPressed: () => DeleteAccountDialog.show(context),
+        style: TextButton.styleFrom(
+          foregroundColor: const Color(0xFFEF4444),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+            side: BorderSide(
+              color: isDark
+                  ? const Color(0xFF7F1D1D).withValues(alpha: 0.6)
+                  : const Color(0xFFFCA5A5).withValues(alpha: 0.7),
+              width: 1,
+            ),
+          ),
+          backgroundColor: isDark ? const Color(0xFF1E0E0E) : const Color(0xFFFFF5F5),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.delete_forever_rounded, color: Color(0xFFDC2626), size: 18),
+            const SizedBox(width: 8),
+            Text(
+              'Delete Account',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFFDC2626),
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

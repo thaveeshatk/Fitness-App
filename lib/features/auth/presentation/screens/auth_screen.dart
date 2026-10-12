@@ -115,34 +115,6 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  Future<void> _handleSocialAuth(bool isGoogle) async {
-    setState(() => _isLoading = true);
-    try {
-      if (isGoogle) {
-        await AuthService.signInWithGoogle();
-      } else {
-        await AuthService.signInWithApple();
-      }
-
-      if (!mounted) return;
-      _showSuccessSnackBar('Signed in successfully!');
-
-      if (_isSignUp) {
-        Navigator.pushReplacementNamed(context, AppRoutes.profileSetup);
-      } else {
-        Navigator.pushReplacementNamed(
-          context,
-          AppRoutes.mainNav,
-          arguments: 0,
-        );
-      }
-    } catch (e) {
-      if (mounted) _showErrorSnackBar('Sign in failed: $e');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -475,55 +447,6 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 20),
-
-                    // Divider: OR
-                    Row(
-                      children: [
-                        const Expanded(child: Divider(color: Color(0xFFE2E8F0))),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 14.0),
-                          child: Text(
-                            'OR CONTINUE WITH',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textMuted,
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                        ),
-                        const Expanded(child: Divider(color: Color(0xFFE2E8F0))),
-                      ],
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    // Social Buttons Row
-                    Row(
-                      children: [
-                        // Google
-                        Expanded(
-                          child: _buildSocialButton(
-                            label: 'Google',
-                            icon: Icons.g_mobiledata_rounded,
-                            iconColor: const Color(0xFFEA4335),
-                            onTap: () => _handleSocialAuth(true),
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        // Apple
-                        Expanded(
-                          child: _buildSocialButton(
-                            label: 'Apple',
-                            icon: Icons.apple_rounded,
-                            iconColor: AppColors.textPrimary,
-                            onTap: () => _handleSocialAuth(false),
-                          ),
-                        ),
-                      ],
-                    ),
-
                     const SizedBox(height: 24),
 
                     // Footer Switch Link
@@ -707,48 +630,6 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildSocialButton({
-    required String label,
-    required IconData icon,
-    required Color iconColor,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        height: 50,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: iconColor, size: 24),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

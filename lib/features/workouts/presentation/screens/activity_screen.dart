@@ -7,11 +7,17 @@ import '../../data/models/workout_model.dart';
 import 'exercise_guidance_screen.dart';
 import 'workout_complete_screen.dart';
 import '../../../progress/data/services/user_activity_service.dart';
+import '../../../plan/data/services/plan_service.dart';
 
 class ActivityScreen extends StatefulWidget {
   final WorkoutModel workout;
+  final String? planItemId;
 
-  const ActivityScreen({super.key, required this.workout});
+  const ActivityScreen({
+    super.key,
+    required this.workout,
+    this.planItemId,
+  });
 
   @override
   State<ActivityScreen> createState() => _ActivityScreenState();
@@ -425,6 +431,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     difficulty: widget.workout.difficulty,
                     imageUrl: widget.workout.imageUrl,
                   );
+
+                  if (widget.planItemId != null) {
+                    PlanService.markWorkoutCompleted(widget.planItemId!);
+                  }
 
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(

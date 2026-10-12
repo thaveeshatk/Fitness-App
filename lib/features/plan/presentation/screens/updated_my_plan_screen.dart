@@ -42,7 +42,10 @@ class _UpdatedMyPlanScreenState extends State<UpdatedMyPlanScreen> {
     Navigator.of(context)
         .push(
       MaterialPageRoute(
-        builder: (_) => WorkoutDetailScreen(workout: item.workout),
+        builder: (_) => WorkoutDetailScreen(
+          workout: item.workout,
+          planItemId: item.id,
+        ),
       ),
     )
         .then((_) {

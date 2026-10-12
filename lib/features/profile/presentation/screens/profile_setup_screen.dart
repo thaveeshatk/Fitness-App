@@ -266,8 +266,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder),
-        boxShadow: const [
-          BoxShadow(color: AppColors.shadowColor, blurRadius: 8, offset: Offset(0, 2)),
+        boxShadow: [
+          BoxShadow(color: AppColors.shadowColor, blurRadius: 8, offset: const Offset(0, 2)),
         ],
       ),
       child: Row(
@@ -505,7 +505,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.tune_rounded, size: 18, color: AppColors.textMuted),
+          Icon(Icons.tune_rounded, size: 18, color: AppColors.textMuted),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -637,7 +637,7 @@ class _FitnessLevelCard extends StatelessWidget {
                     offset: const Offset(0, 4),
                   )
                 ]
-              : const [BoxShadow(color: AppColors.shadowColor, blurRadius: 6, offset: Offset(0, 2))],
+              : [BoxShadow(color: AppColors.shadowColor, blurRadius: 6, offset: const Offset(0, 2))],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -695,7 +695,7 @@ class _ExperienceCard extends StatelessWidget {
             color: isSelected ? AppColors.primaryTeal : AppColors.cardBorder,
             width: isSelected ? 1.5 : 1,
           ),
-          boxShadow: const [BoxShadow(color: AppColors.shadowColor, blurRadius: 4, offset: Offset(0, 1))],
+          boxShadow: [BoxShadow(color: AppColors.shadowColor, blurRadius: 4, offset: const Offset(0, 1))],
         ),
         child: Row(
           children: [
@@ -804,7 +804,7 @@ class _GoalCard extends StatelessWidget {
             color: isSelected ? AppColors.primaryTeal : AppColors.cardBorder,
             width: isSelected ? 1.5 : 1,
           ),
-          boxShadow: const [BoxShadow(color: AppColors.shadowColor, blurRadius: 4, offset: Offset(0, 1))],
+          boxShadow: [BoxShadow(color: AppColors.shadowColor, blurRadius: 4, offset: const Offset(0, 1))],
         ),
         child: Stack(
           children: [
@@ -886,7 +886,7 @@ class _WorkoutTimeChip extends StatelessWidget {
           ),
           boxShadow: isSelected
               ? [BoxShadow(color: AppColors.primaryTeal.withValues(alpha: 0.22), blurRadius: 8, offset: const Offset(0, 3))]
-              : const [BoxShadow(color: AppColors.shadowColor, blurRadius: 4, offset: Offset(0, 1))],
+              : [BoxShadow(color: AppColors.shadowColor, blurRadius: 4, offset: const Offset(0, 1))],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

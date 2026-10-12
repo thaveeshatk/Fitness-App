@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fitness_app/core/constants/app_colors.dart';
+import 'package:fitness_app/core/theme/theme_controller.dart';
 import 'package:fitness_app/features/home/presentation/screens/home_screen.dart';
 import 'package:fitness_app/features/plan/presentation/screens/my_plan_screen.dart';
 import 'package:fitness_app/features/workouts/presentation/screens/workouts_screen.dart';
@@ -42,35 +44,41 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: [
-          HomeScreen(
-            onNavigateToTab: _switchTab,
+    return AnimatedBuilder(
+      animation: ThemeController.instance,
+      builder: (context, _) {
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: IndexedStack(
+            index: _currentIndex,
+            children: [
+              HomeScreen(
+                onNavigateToTab: _switchTab,
+              ),
+              MyPlanScreen(
+                onNavigateToTab: _switchTab,
+              ),
+              WorkoutsScreen(
+                onNavigateToTab: _switchTab,
+              ),
+              ProgressScreen(
+                onNavigateToTab: _switchTab,
+              ),
+              const ProfilePreferencesScreen(),
+            ],
           ),
-          MyPlanScreen(
-            onNavigateToTab: _switchTab,
-          ),
-          WorkoutsScreen(
-            onNavigateToTab: _switchTab,
-          ),
-          ProgressScreen(
-            onNavigateToTab: _switchTab,
-          ),
-          const ProfilePreferencesScreen(),
-        ],
-      ),
-      bottomNavigationBar: _buildBottomBar(),
+          bottomNavigationBar: _buildBottomBar(),
+        );
+      },
     );
   }
 
   Widget _buildBottomBar() {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: AppColors.navBarBackground,
         border: Border(
-          top: BorderSide(color: Color(0xFFEDF2F7), width: 1),
+          top: BorderSide(color: AppColors.navBarBorder, width: 1),
         ),
       ),
       child: SafeArea(
@@ -95,8 +103,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   Widget _buildNavItem(int index, String label, IconData icon, IconData activeIcon) {
     final isSelected = _currentIndex == index;
-    const activeColor = Color(0xFF005953);
-    const inactiveColor = Color(0xFF94A3B8);
+    final isDark = ThemeController.instance.isDarkMode;
+    final activeColor = isDark ? const Color(0xFF14B8A6) : const Color(0xFF005953);
+    final inactiveColor = AppColors.textMuted;
 
     return Expanded(
       child: InkWell(

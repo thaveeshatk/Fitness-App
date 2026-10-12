@@ -25,7 +25,7 @@ class MyPlanHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      color: Colors.white,
+      color: AppColors.background,
       child: SafeArea(
         bottom: false,
         child: Row(

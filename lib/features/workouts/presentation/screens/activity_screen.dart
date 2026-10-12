@@ -712,7 +712,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary, size: 24),
+          icon: Icon(Icons.menu_rounded, color: AppColors.textPrimary, size: 24),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
         title: Text(
@@ -1221,7 +1221,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.pause_rounded, size: 18, color: AppColors.textPrimary),
+                            Icon(Icons.pause_rounded, size: 18, color: AppColors.textPrimary),
                             const SizedBox(width: 6),
                             Text(
                               '[ || Pause ]',
@@ -1338,7 +1338,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         visualDensity: VisualDensity.compact,
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
-                        icon: const Icon(Icons.close_rounded, size: 20, color: AppColors.textSecondary),
+                        icon: Icon(Icons.close_rounded, size: 20, color: AppColors.textSecondary),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],

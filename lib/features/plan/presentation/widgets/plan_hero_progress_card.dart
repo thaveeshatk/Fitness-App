@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fitness_app/core/constants/app_colors.dart';
+import 'package:fitness_app/core/theme/theme_controller.dart';
 
 /// Hero Progress Card: "YOUR WEEKLY PLAN"
 /// Replicates the wireframe hero card with progress bar, streak flame chip,
@@ -18,6 +20,7 @@ class PlanHeroProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = ThemeController.instance.isDarkMode;
     final fraction = totalSessions > 0
         ? (completedSessions / totalSessions).clamp(0.0, 1.0)
         : 0.0;
@@ -28,8 +31,12 @@ class PlanHeroProgressCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFFEEF4FA),
+        color: isDark ? AppColors.cardBackground : const Color(0xFFEEF4FA),
         borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: isDark ? AppColors.border : Colors.transparent,
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,20 +51,20 @@ class PlanHeroProgressCard extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF64748B),
+                  color: AppColors.textMuted,
                   letterSpacing: 1.0,
                 ),
               ),
               Container(
                 width: 40,
                 height: 40,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFC4F2E4),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF133630) : const Color(0xFFC4F2E4),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.local_fire_department_rounded,
-                  color: Color(0xFF005953),
+                  color: isDark ? AppColors.primaryLight : const Color(0xFF005953),
                   size: 22,
                 ),
               ),
@@ -72,7 +79,7 @@ class PlanHeroProgressCard extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 26,
               fontWeight: FontWeight.w800,
-              color: const Color(0xFF0F172A),
+              color: AppColors.textPrimary,
               letterSpacing: -0.5,
               height: 1.2,
             ),
@@ -86,7 +93,7 @@ class PlanHeroProgressCard extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF475569),
+              color: AppColors.textSecondary,
             ),
           ),
 
@@ -98,13 +105,13 @@ class PlanHeroProgressCard extends StatelessWidget {
             child: Container(
               height: 9,
               width: double.infinity,
-              color: const Color(0xFFE2E8F0),
+              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
               child: FractionallySizedBox(
                 alignment: Alignment.centerLeft,
                 widthFactor: fraction,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF005953),
+                    color: isDark ? AppColors.primaryLight : const Color(0xFF005953),
                     borderRadius: BorderRadius.circular(6),
                   ),
                 ),
@@ -123,7 +130,7 @@ class PlanHeroProgressCard extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF475569),
+                  color: AppColors.textSecondary,
                 ),
               ),
               Text(
@@ -131,7 +138,7 @@ class PlanHeroProgressCard extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF005953),
+                  color: isDark ? AppColors.primaryLight : const Color(0xFF005953),
                 ),
               ),
             ],

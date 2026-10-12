@@ -252,11 +252,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBackground,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppColors.cardBorder),
             ),
-            child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
+            child: Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
           ),
         ),
         const SizedBox(width: 12),
@@ -274,7 +274,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.cardBackground,
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.cardBorder),
           ),
@@ -411,7 +411,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.cardBackground,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(color: _mintGreen.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4)),
@@ -459,7 +459,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? _primaryTeal : Colors.white,
+          color: isSelected ? _primaryTeal : AppColors.cardBackground,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: isSelected ? _primaryTeal : AppColors.cardBorder),
           boxShadow: isSelected
@@ -482,7 +482,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.white.withValues(alpha: 0.25) : const Color(0xFFF1F5F9),
+                color: isSelected ? Colors.white.withValues(alpha: 0.25) : AppColors.surfaceMuted,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -527,7 +527,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               color: Color(0xFFF1F5F9),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.search_off_rounded, size: 34, color: AppColors.textMuted),
+            child: Icon(Icons.search_off_rounded, size: 34, color: AppColors.textMuted),
           ),
           const SizedBox(height: 16),
           Text(
@@ -566,7 +566,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return IntrinsicHeight(
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.cardBackground,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.cardBorder),
           boxShadow: [
@@ -608,7 +608,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(3),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: AppColors.cardBackground,
                                 shape: BoxShape.circle,
                                 boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4)],
                               ),
@@ -704,7 +704,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.timer_outlined, size: 12, color: AppColors.textSecondary),
+                            Icon(Icons.timer_outlined, size: 12, color: AppColors.textSecondary),
                             const SizedBox(width: 3),
                             Text(entry.duration,
                                 style: GoogleFonts.plusJakartaSans(
@@ -714,7 +714,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.local_fire_department_outlined, size: 12, color: AppColors.textSecondary),
+                            Icon(Icons.local_fire_department_outlined, size: 12, color: AppColors.textSecondary),
                             const SizedBox(width: 3),
                             Text(entry.kcal,
                                 style: GoogleFonts.plusJakartaSans(
@@ -728,9 +728,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ),
             // Chevron
-            const Center(
+            Center(
               child: Padding(
-                padding: EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.only(right: 12),
                 child: Icon(Icons.chevron_right_rounded, color: AppColors.cardBorder, size: 22),
               ),
             ),

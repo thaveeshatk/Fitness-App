@@ -45,7 +45,7 @@ class _ExerciseGuidanceScreenState extends State<ExerciseGuidanceScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary, size: 24),
+          icon: Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary, size: 24),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(

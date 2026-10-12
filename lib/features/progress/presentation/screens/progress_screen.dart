@@ -226,7 +226,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.cardBackground,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: AppColors.cardBorder, width: 1.2),
                 boxShadow: [
@@ -272,7 +272,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.cardBackground,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: AppColors.cardBorder, width: 1.2),
                 boxShadow: [
@@ -356,7 +356,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.cardBackground,
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.cardBorder),
             boxShadow: [
@@ -391,7 +391,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
       height: 44,
       padding: const EdgeInsets.all(4.0),
       decoration: BoxDecoration(
-        color: const Color(0xFFEFF4F5),
+        color: AppColors.surfaceMuted,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Row(
@@ -413,7 +413,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOutCubic,
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
+            color: isSelected ? AppColors.cardBackground : Colors.transparent,
             borderRadius: BorderRadius.circular(18),
             boxShadow: isSelected
                 ? [
@@ -475,7 +475,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBackground,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -540,7 +540,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -601,7 +601,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             child: LinearProgressIndicator(
               value: progressFraction.clamp(0.0, 1.0),
               minHeight: 5,
-              backgroundColor: const Color(0xFFF1F5F9),
+              backgroundColor: AppColors.surfaceMuted,
               valueColor: AlwaysStoppedAnimation<Color>(progressColor),
             ),
           ),
@@ -615,7 +615,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -728,7 +728,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
       child: Container(
       padding: const EdgeInsets.all(17),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -826,7 +826,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   painter: _CircularGaugePainter(
                     progress: _data.habitConsistencyPercent / 100.0,
                     activeColor: _primaryTeal,
-                    backgroundColor: const Color(0xFFEFF4F5),
+                    backgroundColor: AppColors.surfaceMuted,
                     strokeWidth: 6.8,
                   ),
                   child: Center(
@@ -888,7 +888,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return Container(
       padding: const EdgeInsets.all(17),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -935,7 +935,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 children: [
                   _legendDot(_primaryTeal, 'Workout'),
                   const SizedBox(width: 10),
-                  _legendDot(const Color(0xFFE2E8F0), 'Rest'),
+                  _legendDot(AppColors.surfaceMuted, 'Rest'),
                 ],
               ),
             ],
@@ -1084,7 +1084,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                         : [const Color(0xFF00796B), const Color(0xFF004D40)],
                   ),
             color: day.isRest
-                ? const Color(0xFFE2E8F0)
+                ? AppColors.surfaceMuted
                 : (day.isPlanned ? _mintGreen.withValues(alpha: 0.3) : null),
             borderRadius: BorderRadius.circular(day.isRest ? 3 : 7),
             border: day.isToday
@@ -1128,7 +1128,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
       child: Container(
       padding: const EdgeInsets.all(17),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -1221,7 +1221,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(
               value: _data.milestonePercent / 100.0,
-              backgroundColor: const Color(0xFFE2E8F0),
+              backgroundColor: AppColors.surfaceMuted,
               valueColor: const AlwaysStoppedAnimation<Color>(_mintGreen),
               minHeight: 8,
             ),

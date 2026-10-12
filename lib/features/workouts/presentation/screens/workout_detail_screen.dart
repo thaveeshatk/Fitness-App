@@ -26,7 +26,7 @@ class WorkoutDetailScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary, size: 22),
+          icon: Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary, size: 22),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(

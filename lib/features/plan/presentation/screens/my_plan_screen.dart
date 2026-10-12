@@ -12,6 +12,7 @@ import 'package:fitness_app/features/plan/presentation/widgets/my_plan_header.da
 import 'package:fitness_app/features/plan/presentation/widgets/plan_hero_progress_card.dart';
 import 'package:fitness_app/features/plan/presentation/widgets/plan_schedule_card.dart';
 import 'package:fitness_app/features/plan/presentation/screens/weekly_schedule_screen.dart';
+import 'package:fitness_app/core/theme/theme_controller.dart';
 
 /// Screen 3: "My Plan"
 /// Faithfully converts the provided wireframe into a rich, connected Flutter screen:
@@ -255,9 +256,9 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: const Center(
           child: CircularProgressIndicator(
             color: Color(0xFF005953),
           ),
@@ -265,6 +266,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
       );
     }
 
+    final isDark = ThemeController.instance.isDarkMode;
     final metrics = PlanService.calculateMetrics(_planItems);
     final completedCount = metrics['completed'] as int;
     final totalCount = metrics['total'] as int;
@@ -277,7 +279,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
         : '$totalCount Days Active';
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -329,7 +331,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFE2EBF5),
+                                color: isDark ? const Color(0xFF1E3A5F) : const Color(0xFFE2EBF5),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
@@ -337,7 +339,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF475569),
+                                  color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF475569),
                                 ),
                               ),
                             ),
@@ -350,7 +352,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF475569),
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -415,20 +417,23 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                       height: 48,
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: const Color(0xFFF1EFEA),
-                          foregroundColor: const Color(0xFF1E293B),
+                          backgroundColor: isDark ? AppColors.cardBackground : const Color(0xFFF1EFEA),
+                          foregroundColor: AppColors.textPrimary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),
+                            side: BorderSide(
+                              color: isDark ? AppColors.border : Colors.transparent,
+                            ),
                           ),
                         ),
                         onPressed: _onViewWeeklySchedule,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.calendar_today_rounded,
                               size: 17,
-                              color: Color(0xFF1E293B),
+                              color: AppColors.textPrimary,
                             ),
                             const SizedBox(width: 8),
                             Text(
@@ -436,7 +441,7 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 14.5,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF1E293B),
+                                color: AppColors.textPrimary,
                               ),
                             ),
                           ],

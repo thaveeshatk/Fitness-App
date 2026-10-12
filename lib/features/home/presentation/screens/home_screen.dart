@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/theme/theme_controller.dart';
 import '../../../../core/widgets/fiton_logo.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../../auth/data/models/auth_user.dart';
@@ -180,16 +181,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: Color(0xFFFBFDFF),
-        body: Center(
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: const Center(
           child: CircularProgressIndicator(color: AppColors.primaryTeal),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFDFF),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
@@ -256,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 22,
             fontWeight: FontWeight.w800,
-            color: const Color(0xFF0F172A),
+            color: AppColors.textPrimary,
             letterSpacing: -0.4,
           ),
         ),
@@ -302,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF0F172A),
+                      color: AppColors.textPrimary,
                       letterSpacing: -0.6,
                     ),
                   ),
@@ -312,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF64748B),
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -667,12 +668,12 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.cardBackground,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFF1F5F9)),
+            border: Border.all(color: AppColors.border),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
+                color: Colors.black.withValues(alpha: ThemeController.instance.isDarkMode ? 0.2 : 0.04),
                 blurRadius: 10,
                 offset: const Offset(0, 3),
               ),
@@ -689,7 +690,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEEF5FF),
+                        color: ThemeController.instance.isDarkMode ? AppColors.surfaceMuted : const Color(0xFFEEF5FF),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Column(
@@ -699,7 +700,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF0F172A),
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 3),
@@ -708,7 +709,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF64748B),
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -723,7 +724,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEEF5FF),
+                        color: ThemeController.instance.isDarkMode ? AppColors.surfaceMuted : const Color(0xFFEEF5FF),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Column(
@@ -733,7 +734,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF0F172A),
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 3),
@@ -742,7 +743,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF64748B),
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -757,7 +758,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFEEFEF),
+                        color: ThemeController.instance.isDarkMode ? const Color(0xFF2E1010) : const Color(0xFFFEEFEF),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Column(
@@ -808,7 +809,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF475569),
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   Text(
@@ -816,7 +817,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF006257),
+                      color: ThemeController.instance.isDarkMode ? AppColors.primaryLight : const Color(0xFF006257),
                     ),
                   ),
                 ],
@@ -831,8 +832,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 7,
                   child: LinearProgressIndicator(
                     value: fraction,
-                    backgroundColor: const Color(0xFFE2E8F0),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF006257)),
+                    backgroundColor: ThemeController.instance.isDarkMode ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    valueColor: AlwaysStoppedAnimation<Color>(ThemeController.instance.isDarkMode ? AppColors.primaryLight : const Color(0xFF006257)),
                   ),
                 ),
               ),
@@ -843,13 +844,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
+                    color: ThemeController.instance.isDarkMode ? AppColors.surfaceMuted : const Color(0xFFF8FAFC),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    border: Border.all(color: AppColors.border),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline_rounded, size: 16, color: Color(0xFF006257)),
+                      Icon(Icons.info_outline_rounded, size: 16, color: ThemeController.instance.isDarkMode ? AppColors.primaryLight : const Color(0xFF006257)),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -857,7 +858,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF475569),
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ),
@@ -933,12 +934,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: 128,
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.cardBackground,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFF1F5F9)),
+                        border: Border.all(color: AppColors.border),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
+                            color: Colors.black.withValues(alpha: ThemeController.instance.isDarkMode ? 0.15 : 0.03),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -967,7 +968,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF0F172A),
+                                  color: AppColors.textPrimary,
                                   height: 1.2,
                                 ),
                                 maxLines: 2,
@@ -976,14 +977,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  const Icon(Icons.access_time_rounded, size: 12, color: Color(0xFF64748B)),
+                                  Icon(Icons.access_time_rounded, size: 12, color: AppColors.textSecondary),
                                   const SizedBox(width: 3),
                                   Text(
                                     item.duration,
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 11.5,
                                       fontWeight: FontWeight.w500,
-                                      color: const Color(0xFF64748B),
+                                      color: AppColors.textSecondary,
                                     ),
                                   ),
                                 ],
@@ -1019,7 +1020,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF475569),
+                color: AppColors.textSecondary,
                 letterSpacing: 0.8,
               ),
             ),
@@ -1028,7 +1029,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF006257),
+                color: ThemeController.instance.isDarkMode ? AppColors.primaryLight : const Color(0xFF006257),
               ),
             ),
           ],
@@ -1043,12 +1044,12 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBackground,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFFF1F5F9)),
+              border: Border.all(color: AppColors.border),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
+                  color: Colors.black.withValues(alpha: ThemeController.instance.isDarkMode ? 0.2 : 0.04),
                   blurRadius: 10,
                   offset: const Offset(0, 3),
                 ),
@@ -1068,7 +1069,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     errorBuilder: (_, __, ___) => Container(
                       width: 72,
                       height: 72,
-                      color: const Color(0xFFF1F5F9),
+                      color: AppColors.surfaceMuted,
                       child: const Icon(Icons.fitness_center_rounded, color: AppColors.primaryTeal),
                     ),
                   ),
@@ -1087,7 +1088,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF5EBE1),
+                              color: ThemeController.instance.isDarkMode ? AppColors.surfaceMuted : const Color(0xFFF5EBE1),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -1095,7 +1096,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF57534E),
+                                color: ThemeController.instance.isDarkMode ? AppColors.textPrimary : const Color(0xFF57534E),
                               ),
                             ),
                           ),
@@ -1105,7 +1106,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF64748B),
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -1119,7 +1120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 15.5,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF0F172A),
+                          color: AppColors.textPrimary,
                           letterSpacing: -0.2,
                         ),
                       ),
@@ -1132,7 +1133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF64748B),
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ],

@@ -32,11 +32,11 @@ class OnboardingFeatureCard extends StatelessWidget {
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.shadowColor,
             blurRadius: 10,
-            offset: Offset(0, 3),
+            offset: const Offset(0, 3),
           ),
         ],
       ),

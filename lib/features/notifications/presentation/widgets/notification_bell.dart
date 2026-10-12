@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/theme_controller.dart';
 import '../../data/services/notification_service.dart';
 import '../screens/notification_center_screen.dart';
 
@@ -29,8 +30,9 @@ class NotificationBell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final darkModeActive = isDark || ThemeController.instance.isDarkMode;
     final effectiveIconColor = iconColor ??
-        (isDark ? Colors.white : const Color(0xFF334155));
+        (darkModeActive ? Colors.white : const Color(0xFF334155));
     final effectiveBadgeColor = badgeColor ?? const Color(0xFFFF3B30);
 
     return ValueListenableBuilder<int>(
@@ -78,7 +80,7 @@ class NotificationBell extends StatelessWidget {
                         color: effectiveBadgeColor,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: isDark ? const Color(0xFF0F172A) : Colors.white,
+                          color: darkModeActive ? const Color(0xFF0F172A) : Colors.white,
                           width: 1.5,
                         ),
                         boxShadow: [

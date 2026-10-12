@@ -208,11 +208,11 @@ class _GoalsScreenState extends State<GoalsScreen> {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBackground,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppColors.cardBorder),
             ),
-            child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
+            child: Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
           ),
         ),
         const SizedBox(width: 12),
@@ -230,7 +230,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.cardBackground,
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.cardBorder),
           ),
@@ -474,7 +474,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.cardBorder),
         boxShadow: [
@@ -544,7 +544,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          const Icon(Icons.show_chart_rounded, color: AppColors.textSecondary, size: 20),
+          Icon(Icons.show_chart_rounded, color: AppColors.textSecondary, size: 20),
         ],
       ),
     );
@@ -589,7 +589,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder),
         boxShadow: [
@@ -831,7 +831,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
     return Container(
       padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: unlocked ? accentColor.withValues(alpha: 0.45) : AppColors.cardBorder,

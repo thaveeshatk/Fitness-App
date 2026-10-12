@@ -214,7 +214,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       children: [
                         if (Navigator.canPop(context))
                           IconButton(
-                            icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
+                            icon: Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
                             onPressed: () => Navigator.pop(context),
                           )
                         else

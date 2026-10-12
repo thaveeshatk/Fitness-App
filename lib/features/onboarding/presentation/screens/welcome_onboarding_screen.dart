@@ -75,7 +75,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               // Feature Card 1: Personalized workouts
-              const OnboardingFeatureCard(
+              OnboardingFeatureCard(
                 icon: Icons.tune_rounded,
                 iconBgColor: AppColors.featureTealBg,
                 iconColor: AppColors.featureTealIcon,
@@ -86,7 +86,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
               const SizedBox(height: 12),
 
               // Feature Card 2: Beginner-friendly exercises
-              const OnboardingFeatureCard(
+              OnboardingFeatureCard(
                 icon: Icons.self_improvement_rounded,
                 iconBgColor: AppColors.featureGreenBg,
                 iconColor: AppColors.featureGreenIcon,
@@ -97,7 +97,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
               const SizedBox(height: 12),
 
               // Feature Card 3: Simple fitness planning
-              const OnboardingFeatureCard(
+              OnboardingFeatureCard(
                 icon: Icons.calendar_month_rounded,
                 iconBgColor: AppColors.featurePeachBg,
                 iconColor: AppColors.featurePeachIcon,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/theme/theme_controller.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
 import '../../../auth/data/services/auth_service.dart';
@@ -293,7 +294,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary, size: 24),
+          icon: Icon(Icons.menu_rounded, color: AppColors.textPrimary, size: 24),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
         title: Text(
@@ -329,8 +330,9 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               // Search Bar
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.cardBackground,
                   borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: AppColors.cardBorder),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.02),
@@ -341,6 +343,10 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 ),
                 child: TextField(
                   controller: _searchController,
+                  style: GoogleFonts.plusJakartaSans(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
                     hintText: 'Search workouts, routines...',
@@ -351,7 +357,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     prefixIcon: const Icon(Icons.search, color: AppColors.primaryTeal),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.close, color: AppColors.textMuted, size: 18),
+                            icon: Icon(Icons.close, color: AppColors.textMuted, size: 18),
                             onPressed: () {
                               _searchController.clear();
                               setState(() {});
@@ -371,7 +377,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.surfaceMuted,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: AppColors.cardBorder),
                 ),
                 child: Row(
                   children: [
@@ -382,7 +388,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
-                            color: _selectedTabIndex == 0 ? Colors.white : Colors.transparent,
+                            color: _selectedTabIndex == 0 ? AppColors.cardBackground : Colors.transparent,
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: _selectedTabIndex == 0
                                 ? [
@@ -599,7 +605,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                         Container(
                           width: 56,
                           height: 56,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             color: AppColors.featureTealBg,
                             shape: BoxShape.circle,
                           ),
@@ -680,7 +686,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.cardBackground,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
@@ -892,7 +898,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                   ),
                   child: Column(
                     children: [
-                      const Icon(Icons.search_off_rounded, size: 48, color: AppColors.textMuted),
+                      Icon(Icons.search_off_rounded, size: 48, color: AppColors.textMuted),
                       const SizedBox(height: 12),
                       Text(
                         'No matching workouts found',
@@ -1127,16 +1133,16 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     return Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.cardBackground,
           borderRadius: BorderRadius.circular(18),
           border: workout.isCustom
               ? Border.all(color: AppColors.primaryTeal.withValues(alpha: 0.35), width: 1.5)
-              : Border.all(color: const Color(0xFFF1F5F9)),
+              : Border.all(color: AppColors.border),
           boxShadow: [
             BoxShadow(
               color: workout.isCustom
                   ? AppColors.primaryTeal.withValues(alpha: 0.08)
-                  : const Color(0xFF0F172A).withValues(alpha: 0.04),
+                  : (ThemeController.instance.isDarkMode ? Colors.black.withValues(alpha: 0.15) : const Color(0xFF0F172A).withValues(alpha: 0.04)),
               blurRadius: 14,
               offset: const Offset(0, 4),
             ),
@@ -1377,7 +1383,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     final level = ProfileService.currentProfile.fitnessLevel;
 
     return Drawer(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.cardBackground,
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1385,9 +1391,9 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
             // Drawer Header
             Container(
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1.5),
+                  bottom: BorderSide(color: AppColors.border, width: 1.5),
                 ),
               ),
               child: Row(
@@ -1578,7 +1584,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                   color: AppColors.surfaceMuted,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.refresh_rounded,
                   color: AppColors.textSecondary,
                   size: 20,
@@ -1812,9 +1818,9 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
     final isEdit = widget.existing != null;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -1879,7 +1885,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, color: AppColors.textMuted),
+                    icon: Icon(Icons.close_rounded, color: AppColors.textMuted),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -2261,10 +2267,12 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                           margin: const EdgeInsets.only(bottom: 8),
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: isSelected ? const Color(0xFFF0FDF4) : Colors.white,
+                            color: isSelected
+                                ? (ThemeController.instance.isDarkMode ? const Color(0xFF133630) : const Color(0xFFF0FDF4))
+                                : AppColors.cardBackground,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: isSelected ? AppColors.primaryTeal : const Color(0xFFE2E8F0),
+                              color: isSelected ? AppColors.primaryTeal : AppColors.border,
                               width: isSelected ? 1.5 : 1.0,
                             ),
                           ),
@@ -2339,7 +2347,7 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.cardBackground,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.05),

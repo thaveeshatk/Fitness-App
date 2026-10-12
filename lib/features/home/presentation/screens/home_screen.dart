@@ -17,6 +17,7 @@ import '../../../workouts/presentation/screens/activity_screen.dart';
 import '../../data/services/recommendation_service.dart';
 import 'package:fitness_app/features/profile/presentation/widgets/profile_photo_picker_dialog.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
+import '../../../profile/presentation/screens/main_navigation_screen.dart';
 
 /// Screen: Home Dashboard
 /// Real dynamic, personalized data for each logged-in user using Firebase
@@ -60,12 +61,14 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadDashboardData();
     AuthService.userNotifier.addListener(_onAuthUserChanged);
     ProfileService.profileNotifier.addListener(_onProfileChanged);
+    MainNavigationScreen.activeTabNotifier.addListener(_onTabChanged);
   }
 
   @override
   void dispose() {
     AuthService.userNotifier.removeListener(_onAuthUserChanged);
     ProfileService.profileNotifier.removeListener(_onProfileChanged);
+    MainNavigationScreen.activeTabNotifier.removeListener(_onTabChanged);
     super.dispose();
   }
 
@@ -77,6 +80,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onProfileChanged() {
     if (mounted) {
+      _loadDashboardData();
+    }
+  }
+
+  void _onTabChanged() {
+    if (mounted && MainNavigationScreen.activeTabNotifier.value == 0) {
       _loadDashboardData();
     }
   }

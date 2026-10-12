@@ -430,6 +430,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     calories: widget.workout.calories,
                     difficulty: widget.workout.difficulty,
                     imageUrl: widget.workout.imageUrl,
+                    planItemId: widget.planItemId,
+                    isPlanWorkout: widget.planItemId != null,
                   );
 
                   if (widget.planItemId != null) {

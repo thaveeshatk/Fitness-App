@@ -34,6 +34,8 @@ class UserActivityService {
     String? difficulty,
     String? imageUrl,
     String? uid,
+    String? planItemId,
+    bool isPlanWorkout = true,
   }) async {
     final currentUid = uid ?? AuthService.currentUser.uid;
     final now = DateTime.now();
@@ -49,6 +51,8 @@ class UserActivityService {
       'durationMinutes': durationMinutes,
       'calories': calories,
       if (imageUrl != null) 'imageUrl': imageUrl,
+      if (planItemId != null) 'planItemId': planItemId,
+      'isPlanWorkout': isPlanWorkout,
       'completedAt': now.toIso8601String(),
     };
 
@@ -229,10 +233,11 @@ class UserActivityService {
     final thisWeeksActivities = await getThisWeeksActivities(uid: currentUid);
     final planCompletedCount = await PlanService.getCompletedItemCount(uid: currentUid);
 
-    // Number of completed sessions this week
-    final completedCount = thisWeeksActivities.length > planCompletedCount
-        ? thisWeeksActivities.length
-        : (thisWeeksActivities.isNotEmpty ? thisWeeksActivities.length : planCompletedCount);
+    // Number of completed plan sessions this week (strictly only workouts from weekly plan)
+    final planActivitiesCount = thisWeeksActivities
+        .where((a) => a['isPlanWorkout'] == true || a['planItemId'] != null)
+        .length;
+    final completedCount = planCompletedCount > 0 ? planCompletedCount : planActivitiesCount;
 
     final activeMinutes = thisWeeksActivities.fold<int>(
       0,
@@ -253,7 +258,7 @@ class UserActivityService {
       'streak': streak,
       'fraction': fraction,
       'percent': percent,
-      'hasActivity': completedCount > 0,
+      'hasActivity': completedCount > 0 || thisWeeksActivities.isNotEmpty,
     };
   }
 

@@ -13,8 +13,7 @@ import '../../../workouts/data/repositories/workout_repository.dart';
 import '../../../workouts/data/services/workout_service.dart';
 import '../../../workouts/presentation/screens/workout_detail_screen.dart';
 import '../../../workouts/presentation/screens/activity_screen.dart';
-import '../../../plan/data/services/plan_service.dart';
-import '../../../plan/data/models/plan_schedule_item.dart';
+
 import '../../data/services/recommendation_service.dart';
 import 'package:fitness_app/features/profile/presentation/widgets/profile_photo_picker_dialog.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
@@ -43,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   WorkoutModel? _recommendedWorkout;
   String _recommendedReason = 'Based on activity';
   List<QuickWorkoutItem> _quickWorkouts = [];
-  List<PlanScheduleItem> _planItems = [];
+
   Map<String, dynamic> _progress = {
     'completed': 0,
     'total': 3,
@@ -96,12 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final progressData = await UserActivityService.getWeeklyProgress(uid: currentUid);
       final recentHistory = await UserActivityService.getRecentActivities(uid: currentUid);
 
-      // 4. Fetch user's weekly plan from Firestore
-      try {
-        _planItems = await PlanService.getWeeklyPlan(uid: currentUid, forceRefresh: true);
-      } catch (_) {
-        _planItems = [];
-      }
+
 
       // 5. Personalize recommendations
       _todaysWorkout = RecommendationService.getTodaysRecommendedWorkout(
@@ -336,12 +330,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildYourWorkoutTodaySection() {
     final workout = _todaysWorkout ?? (_workouts.isNotEmpty ? _workouts.first : WorkoutRepository.getMockWorkouts().first);
 
-    // Position this workout within the user's weekly target / plan
-    final todayIndex = _planItems.indexWhere((it) => it.isTodayReady);
-    final targetTotal = (_progress['total'] as int?) ?? 3;
-    final completed = (_progress['completed'] as int?) ?? 0;
-    final dayPosition = todayIndex != -1 ? (todayIndex + 1) : (completed < targetTotal ? completed + 1 : targetTotal);
-    final totalDays = _planItems.isNotEmpty ? _planItems.length : targetTotal;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -462,17 +450,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
-                  const Spacer(),
-
-                  // Day X of N (position within the real weekly plan)
-                  Text(
-                    'Day $dayPosition of $totalDays',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF475569),
-                    ),
-                  ),
                 ],
               ),
 

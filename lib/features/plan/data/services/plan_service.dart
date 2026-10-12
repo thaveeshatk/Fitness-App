@@ -8,7 +8,6 @@ import 'package:fitness_app/features/workouts/data/models/workout_model.dart';
 import 'package:fitness_app/features/workouts/data/repositories/workout_repository.dart';
 import 'package:fitness_app/features/plan/data/models/plan_schedule_item.dart';
 import 'package:fitness_app/features/notifications/data/services/notification_service.dart';
-import 'package:fitness_app/features/progress/data/services/user_activity_service.dart';
 
 /// Service responsible for managing the user's weekly workout plan.
 /// Dynamically connects user's profile preferences with workouts from [WorkoutRepository].
@@ -118,25 +117,13 @@ class PlanService {
       }
     }
 
-    // Also check if any workouts were completed this week in UserActivityService
-    try {
-      final thisWeeksActs = await UserActivityService.getThisWeeksActivities(uid: uid);
-      final completedWorkoutIds = thisWeeksActs.map((a) => a['workoutId']?.toString()).toSet();
-      return plan.map((item) {
-        if (completedIds.contains(item.id) || completedWorkoutIds.contains(item.workout.id)) {
-          return item.copyWith(status: PlanItemStatus.completed);
-        }
-        return item;
-      }).toList();
-    } catch (_) {
-      if (completedIds.isEmpty) return plan;
-      return plan.map((item) {
-        if (completedIds.contains(item.id)) {
-          return item.copyWith(status: PlanItemStatus.completed);
-        }
-        return item;
-      }).toList();
-    }
+    if (completedIds.isEmpty) return plan;
+    return plan.map((item) {
+      if (completedIds.contains(item.id)) {
+        return item.copyWith(status: PlanItemStatus.completed);
+      }
+      return item;
+    }).toList();
   }
 
   /// Calculates the current progress metrics:

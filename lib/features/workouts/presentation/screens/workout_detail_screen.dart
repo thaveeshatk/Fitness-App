@@ -9,10 +9,12 @@ import 'exercise_guidance_screen.dart';
 
 class WorkoutDetailScreen extends StatelessWidget {
   final WorkoutModel workout;
+  final String? planItemId;
 
   const WorkoutDetailScreen({
     super.key,
     required this.workout,
+    this.planItemId,
   });
 
   @override
@@ -261,7 +263,10 @@ class WorkoutDetailScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => ActivityScreen(workout: workout),
+                    builder: (_) => ActivityScreen(
+                      workout: workout,
+                      planItemId: planItemId,
+                    ),
                   ),
                 );
               },

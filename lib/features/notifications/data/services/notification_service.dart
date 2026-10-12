@@ -556,4 +556,13 @@ class NotificationService {
       ),
     ];
   }
+
+  /// Clears notifications and preferences cache for a specific user upon deletion or reset
+  static void clearUserCache(String uid) {
+    _notificationsCache.remove(uid);
+    _preferencesCache.remove(uid);
+    notificationsNotifier.value = [];
+    unreadCountNotifier.value = 0;
+    preferencesNotifier.value = NotificationPreferences.defaults();
+  }
 }

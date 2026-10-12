@@ -230,4 +230,10 @@ class WorkoutService {
 
     return true;
   }
+
+  /// Removes all in-memory custom workouts created by the specified user
+  static void clearUserWorkouts(String uid) {
+    _inMemoryCustomWorkouts.removeWhere((w) => w.userId == uid);
+    workoutsRevisionNotifier.value++;
+  }
 }

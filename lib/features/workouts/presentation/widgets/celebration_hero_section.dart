@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/constants/app_colors.dart';
 
 /// Reusable celebration hero header for workout completion screen.
 /// Matches Figma design with peach background glow, teal check badge,
@@ -18,9 +19,6 @@ class CelebrationHeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primaryGreen = Color(0xFF0D7A6B);
-    const softGreenBg = Color(0xFFE6F4F1);
-
     return Column(
       children: [
         const SizedBox(height: 6),
@@ -33,8 +31,8 @@ class CelebrationHeroSection extends StatelessWidget {
             Container(
               width: 84,
               height: 84,
-              decoration: const BoxDecoration(
-                color: Color(0xFFFBE8D8),
+              decoration: BoxDecoration(
+                color: AppColors.isDark ? const Color(0xFF382A24) : const Color(0xFFFBE8D8),
                 shape: BoxShape.circle,
               ),
             ),
@@ -43,11 +41,11 @@ class CelebrationHeroSection extends StatelessWidget {
               width: 68,
               height: 68,
               decoration: BoxDecoration(
-                color: primaryGreen,
+                color: AppColors.primaryTeal,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: primaryGreen.withValues(alpha: 0.25),
+                    color: AppColors.primaryTeal.withValues(alpha: 0.25),
                     blurRadius: 16,
                     offset: const Offset(0, 6),
                   ),
@@ -87,7 +85,7 @@ class CelebrationHeroSection extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
           decoration: BoxDecoration(
-            color: softGreenBg,
+            color: AppColors.featureTealBg,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
@@ -97,7 +95,7 @@ class CelebrationHeroSection extends StatelessWidget {
                 width: 6,
                 height: 6,
                 decoration: const BoxDecoration(
-                  color: primaryGreen,
+                  color: AppColors.primaryTeal,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -107,7 +105,7 @@ class CelebrationHeroSection extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 10.5,
                   fontWeight: FontWeight.w800,
-                  color: primaryGreen,
+                  color: AppColors.primaryTeal,
                   letterSpacing: 1.1,
                 ),
               ),
@@ -122,7 +120,7 @@ class CelebrationHeroSection extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 24,
             fontWeight: FontWeight.w800,
-            color: const Color(0xFF0F172A),
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 6),
@@ -134,7 +132,7 @@ class CelebrationHeroSection extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 12.5,
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF64748B),
+            color: AppColors.textSecondary,
             height: 1.35,
           ),
         ),

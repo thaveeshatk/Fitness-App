@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/theme/theme_controller.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../data/models/workout_model.dart';
 import '../../data/services/workout_audio_service.dart';
@@ -306,12 +307,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.cardBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'End Activity?',
           style: GoogleFonts.plusJakartaSans(
             fontWeight: FontWeight.w700,
             fontSize: 18,
+            color: AppColors.textPrimary,
           ),
         ),
         content: Text(
@@ -374,6 +377,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.cardBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -381,11 +385,11 @@ class _ActivityScreenState extends State<ActivityScreen> {
             Container(
               width: 72,
               height: 72,
-              decoration: const BoxDecoration(
-                color: Color(0xFFC8F3EA),
+              decoration: BoxDecoration(
+                color: AppColors.featureTealBg,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.check_circle_rounded, size: 48, color: Color(0xFF005953)),
+              child: const Icon(Icons.check_circle_rounded, size: 48, color: AppColors.primaryTeal),
             ),
             const SizedBox(height: 16),
             Text(
@@ -488,7 +492,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
+        color: AppColors.surfaceMuted,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -555,9 +559,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              decoration: BoxDecoration(
+                color: AppColors.cardBackground,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -568,7 +572,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE2E8F0),
+                        color: AppColors.border,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -582,10 +586,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFC8F3EA),
+                              color: AppColors.featureTealBg,
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.volume_up_rounded, color: Color(0xFF005953), size: 20),
+                            child: const Icon(Icons.volume_up_rounded, color: AppColors.primaryTeal, size: 20),
                           ),
                           const SizedBox(width: 10),
                           Text(
@@ -600,8 +604,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       ),
                       Switch(
                         value: !isMuted,
-                        activeThumbColor: const Color(0xFF005953),
-                        activeTrackColor: const Color(0xFFC8F3EA),
+                        activeThumbColor: AppColors.primaryTeal,
+                        activeTrackColor: AppColors.featureTealBg,
                         onChanged: (val) {
                           WorkoutAudioService.setMuted(!val);
                           setModalState(() {});
@@ -625,10 +629,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFFF0FDF4) : const Color(0xFFF8FAFC),
+                        color: isSelected
+                            ? (AppColors.isDark ? const Color(0xFF0F3934) : const Color(0xFFF0FDF4))
+                            : AppColors.surfaceMuted,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: isSelected ? const Color(0xFF005953) : const Color(0xFFE2E8F0),
+                          color: isSelected ? AppColors.primaryTeal : AppColors.border,
                           width: isSelected ? 1.5 : 1.0,
                         ),
                       ),
@@ -637,7 +643,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
                         leading: Icon(
                           isSelected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
-                          color: isSelected ? const Color(0xFF005953) : AppColors.textMuted,
+                          color: isSelected ? AppColors.primaryTeal : AppColors.textMuted,
                           size: 20,
                         ),
                         title: Text(
@@ -658,19 +664,19 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         trailing: OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            side: const BorderSide(color: Color(0xFF005953), width: 1.0),
+                            side: const BorderSide(color: AppColors.primaryTeal, width: 1.0),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
                           onPressed: () {
                             WorkoutAudioService.playFinishChime(themeOverride: theme);
                           },
-                          icon: const Icon(Icons.play_arrow_rounded, size: 16, color: Color(0xFF005953)),
+                          icon: const Icon(Icons.play_arrow_rounded, size: 16, color: AppColors.primaryTeal),
                           label: Text(
                             'Preview',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF005953),
+                              color: AppColors.primaryTeal,
                             ),
                           ),
                         ),
@@ -700,594 +706,603 @@ class _ActivityScreenState extends State<ActivityScreen> {
         ? exercises[_currentExerciseIndex + 1]
         : null;
 
-    final progressPercent = (((_currentExerciseIndex + 1) / exercises.length) * 100).toInt();
+    final progressPercent = exercises.isNotEmpty
+        ? (((_currentExerciseIndex + 1) / exercises.length) * 100).toInt()
+        : 0;
     final remainingCount = exercises.length - (_currentExerciseIndex + 1);
 
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: const Color(0xFFF8FAFC),
-      drawer: _buildSessionDrawer(context),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.menu_rounded, color: AppColors.textPrimary, size: 24),
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-        ),
-        title: Text(
-          'ACTIVITY',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
-            letterSpacing: 2.0,
-          ),
-        ),
-        actions: [
-          ValueListenableBuilder<bool>(
-            valueListenable: WorkoutAudioService.isMutedNotifier,
-            builder: (context, isMuted, _) {
-              return IconButton(
-                icon: Icon(
-                  isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
-                  color: isMuted ? AppColors.textMuted : const Color(0xFF005953),
-                  size: 22,
-                ),
-                tooltip: 'Sound Cue Settings',
-                onPressed: _showAudioSettingsSheet,
-              );
-            },
-          ),
-          Center(
-            child: GestureDetector(
-              onTap: _confirmEndSession,
-              child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 12),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                ),
-                child: Text(
-                  '[ END ]',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                    letterSpacing: 0.5,
+    return AnimatedBuilder(
+      animation: ThemeController.instance,
+      builder: (context, _) {
+        return Scaffold(
+          key: _scaffoldKey,
+          backgroundColor: AppColors.background,
+          drawer: _buildSessionDrawer(context),
+          appBar: AppBar(
+            backgroundColor: AppColors.background,
+            elevation: 0,
+            centerTitle: true,
+            leading: IconButton(
+              icon: Icon(Icons.menu_rounded, color: AppColors.textPrimary, size: 24),
+              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+            ),
+            title: Text(
+              'ACTIVITY',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+                letterSpacing: 2.0,
+              ),
+            ),
+            actions: [
+              ValueListenableBuilder<bool>(
+                valueListenable: WorkoutAudioService.isMutedNotifier,
+                builder: (context, isMuted, _) {
+                  return IconButton(
+                    icon: Icon(
+                      isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                      color: isMuted ? AppColors.textMuted : AppColors.primaryTeal,
+                      size: 22,
+                    ),
+                    tooltip: 'Sound Cue Settings',
+                    onPressed: _showAudioSettingsSheet,
+                  );
+                },
+              ),
+              Center(
+                child: GestureDetector(
+                  onTap: _confirmEndSession,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceMuted,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Text(
+                      '[ END ]',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+              const SizedBox(width: 10),
+              const Padding(
+                padding: EdgeInsets.only(right: 16.0),
+                child: UserAvatar(radius: 17),
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          const Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: UserAvatar(radius: 17),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── CARD 1: EXERCISE PROGRESS ────────────────────────────────
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFFEDF2F7)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'EXERCISE PROGRESS',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                        Text(
-                          'Exercise ${_currentExerciseIndex + 1} of ${exercises.length} Completed ($progressPercent%)',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF005953),
-                          ),
+          body: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── CARD 1: EXERCISE PROGRESS ────────────────────────────────
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.cardBackground,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: AppColors.cardBorder),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.shadowColor,
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-
-                    // 6 Horizontal Segmented Bars
-                    Row(
-                      children: List.generate(exercises.length, (idx) {
-                        final isCompleted = idx < _currentExerciseIndex;
-                        final isCurrent = idx == _currentExerciseIndex;
-
-                        return Expanded(
-                          child: Container(
-                            height: 6,
-                            margin: EdgeInsets.only(right: idx < exercises.length - 1 ? 6 : 0),
-                            decoration: BoxDecoration(
-                              color: isCompleted
-                                  ? const Color(0xFF005953)
-                                  : isCurrent
-                                      ? const Color(0xFF005953)
-                                      : const Color(0xFFE2E8F0),
-                              borderRadius: BorderRadius.circular(3),
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                    const SizedBox(height: 12),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Icon(Icons.arrow_forward_rounded, size: 14, color: Color(0xFF005953)),
-                            const SizedBox(width: 4),
                             Text(
-                              nextExercise != null
-                                  ? 'Up next: ${nextExercise.name}'
-                                  : 'Final exercise in routine!',
+                              'EXERCISE PROGRESS',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textSecondary,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textPrimary,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                            Text(
+                              'Exercise ${_currentExerciseIndex + 1} of ${exercises.length} Completed ($progressPercent%)',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primaryTeal,
                               ),
                             ),
                           ],
                         ),
-                        Text(
-                          '$remainingCount REMAINING',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
-                            letterSpacing: 0.5,
-                          ),
+                        const SizedBox(height: 12),
+
+                        // 6 Horizontal Segmented Bars
+                        Row(
+                          children: List.generate(exercises.length, (idx) {
+                            final isCompleted = idx < _currentExerciseIndex;
+                            final isCurrent = idx == _currentExerciseIndex;
+
+                            return Expanded(
+                              child: Container(
+                                height: 6,
+                                margin: EdgeInsets.only(right: idx < exercises.length - 1 ? 6 : 0),
+                                decoration: BoxDecoration(
+                                  color: isCompleted
+                                      ? AppColors.primaryTeal
+                                      : isCurrent
+                                          ? AppColors.primaryTeal
+                                          : (AppColors.isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                                  borderRadius: BorderRadius.circular(3),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                        const SizedBox(height: 12),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.arrow_forward_rounded, size: 14, color: AppColors.primaryTeal),
+                                const SizedBox(width: 4),
+                                Text(
+                                  nextExercise != null
+                                      ? 'Up next: ${nextExercise.name}'
+                                      : 'Final exercise in routine!',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              '$remainingCount REMAINING',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textPrimary,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // ── CARD 2: CURRENT EXERCISE ─────────────────────────────────
-              if (currentExercise != null)
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: const Color(0xFFEDF2F7)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.02),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'CURRENT EXERCISE',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFF005953),
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              _isResting
-                                  ? (_isTransitionToNextExercise ? 'REST BEFORE NEXT EXERCISE' : 'SET REST')
-                                  : 'SET $_currentSet OF $_totalSets',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
+                  const SizedBox(height: 16),
+
+                  // ── CARD 2: CURRENT EXERCISE ─────────────────────────────────
+                  if (currentExercise != null)
+                    Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBackground,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: AppColors.cardBorder),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.shadowColor,
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-
-                      // Exercise Title
-                      Text(
-                        currentExercise.name,
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                          height: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFC8F3EA),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              currentExercise.badge,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF005953),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Target rest: ${_restDurationSeconds}s',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // [ HOW TO PERFORM -> ] Button
-                      GestureDetector(
-                        onTap: () => _openExerciseGuidance(currentExercise),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF0FDF4),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFFBBF7D0)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Icon(Icons.menu_book_rounded, size: 15, color: Color(0xFF005953)),
-                              const SizedBox(width: 6),
                               Text(
-                                'HOW TO PERFORM GUIDE →',
+                                'CURRENT EXERCISE',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w800,
-                                  color: const Color(0xFF005953),
-                                  letterSpacing: 0.5,
+                                  color: AppColors.primaryTeal,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: _isResting ? const Color(0xFFE65100) : AppColors.primaryTeal,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  _isResting
+                                      ? (_isTransitionToNextExercise ? 'REST BEFORE NEXT EXERCISE' : 'SET REST')
+                                      : 'SET $_currentSet OF $_totalSets',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                    letterSpacing: 0.8,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 16),
+                          const SizedBox(height: 10),
 
-              // ── CARD 3: CIRCULAR INTERVAL TIMER DIAL ─────────────────────
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 26, horizontal: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFFEDF2F7)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    // Dial Stack
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Soft Ambient Glow Aura behind timer dial
-                        Container(
-                          width: 175,
-                          height: 175,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: (_isResting ? const Color(0xFFE65100) : const Color(0xFF005953))
-                                    .withValues(alpha: 0.08),
-                                blurRadius: 36,
-                                spreadRadius: 4,
+                          // Exercise Title
+                          Text(
+                            currentExercise.name,
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                              height: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: AppColors.featureTealBg,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  currentExercise.badge,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.primaryTeal,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Target rest: ${_restDurationSeconds}s',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                        SizedBox(
-                          width: 190,
-                          height: 190,
-                          child: CircularProgressIndicator(
-                            value: _totalIntervalSeconds > 0
-                                ? (_intervalSecondsRemaining / _totalIntervalSeconds)
-                                : 0.0,
-                            strokeWidth: 12,
-                            backgroundColor: const Color(0xFFE2E8F0),
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
+                          const SizedBox(height: 16),
+
+                          // [ HOW TO PERFORM -> ] Button
+                          GestureDetector(
+                            onTap: () => _openExerciseGuidance(currentExercise),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                              decoration: BoxDecoration(
+                                color: AppColors.isDark ? const Color(0xFF0F3934) : const Color(0xFFF0FDF4),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: AppColors.isDark ? const Color(0xFF134E48) : const Color(0xFFBBF7D0),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.menu_book_rounded, size: 15, color: AppColors.primaryTeal),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'HOW TO PERFORM GUIDE →',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.primaryTeal,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            strokeCap: StrokeCap.round,
                           ),
-                        ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              _isResting
-                                  ? (_isTransitionToNextExercise ? 'TRANSITION REST' : 'REST INTERVAL')
-                                  : 'ACTIVE INTERVAL',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w700,
-                                color: _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
-                                letterSpacing: 1.5,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              _formatElapsed(_intervalSecondsRemaining),
-                              style: GoogleFonts.playfairDisplay(
-                                fontSize: 44,
-                                fontWeight: FontWeight.w900,
-                                color: _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
-                                letterSpacing: -1.0,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Elapsed: ${_formatElapsed(_elapsedSeconds)}',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: 16),
+
+                  // ── CARD 3: CIRCULAR INTERVAL TIMER DIAL ─────────────────────
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 26, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: AppColors.cardBackground,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: AppColors.cardBorder),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.shadowColor,
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 22),
-
-                    // Active Linear Progress Timeline Bar
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: _totalIntervalSeconds > 0
-                            ? 1.0 - (_intervalSecondsRemaining / _totalIntervalSeconds)
-                            : 0.0,
-                        backgroundColor: const Color(0xFFE2E8F0),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
-                        ),
-                        minHeight: 6,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // 00:00  ACTIVE INTERVAL / REST INTERVAL  MM:SS
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
                       children: [
-                        Text(
-                          '00:00',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                        Row(
+                        // Dial Stack
+                        Stack(
+                          alignment: Alignment.center,
                           children: [
+                            // Soft Ambient Glow Aura behind timer dial
                             Container(
-                              width: 7,
-                              height: 7,
+                              width: 175,
+                              height: 175,
                               decoration: BoxDecoration(
-                                color: _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
                                 shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: (_isResting ? const Color(0xFFE65100) : AppColors.primaryTeal)
+                                        .withValues(alpha: 0.12),
+                                    blurRadius: 36,
+                                    spreadRadius: 4,
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(width: 6),
+                            SizedBox(
+                              width: 190,
+                              height: 190,
+                              child: CircularProgressIndicator(
+                                value: _totalIntervalSeconds > 0
+                                    ? (_intervalSecondsRemaining / _totalIntervalSeconds)
+                                    : 0.0,
+                                strokeWidth: 12,
+                                backgroundColor: AppColors.isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  _isResting ? const Color(0xFFE65100) : AppColors.primaryTeal,
+                                ),
+                                strokeCap: StrokeCap.round,
+                              ),
+                            ),
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _isResting
+                                      ? (_isTransitionToNextExercise ? 'TRANSITION REST' : 'REST INTERVAL')
+                                      : 'ACTIVE INTERVAL',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: _isResting ? const Color(0xFFE65100) : AppColors.primaryTeal,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _formatElapsed(_intervalSecondsRemaining),
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 44,
+                                    fontWeight: FontWeight.w900,
+                                    color: _isResting ? const Color(0xFFE65100) : AppColors.primaryTeal,
+                                    letterSpacing: -1.0,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Elapsed: ${_formatElapsed(_elapsedSeconds)}',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 22),
+
+                        // Active Linear Progress Timeline Bar
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: _totalIntervalSeconds > 0
+                                ? 1.0 - (_intervalSecondsRemaining / _totalIntervalSeconds)
+                                : 0.0,
+                            backgroundColor: AppColors.isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              _isResting ? const Color(0xFFE65100) : AppColors.primaryTeal,
+                            ),
+                            minHeight: 6,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // 00:00  ACTIVE INTERVAL / REST INTERVAL  MM:SS
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
                             Text(
-                              _isResting
-                                  ? (_isTransitionToNextExercise ? 'TRANSITION REST' : 'REST INTERVAL')
-                                  : 'ACTIVE INTERVAL',
+                              '00:00',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
-                                letterSpacing: 0.8,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Container(
+                                  width: 7,
+                                  height: 7,
+                                  decoration: BoxDecoration(
+                                    color: _isResting ? const Color(0xFFE65100) : AppColors.primaryTeal,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  _isResting
+                                      ? (_isTransitionToNextExercise ? 'TRANSITION REST' : 'REST INTERVAL')
+                                      : 'ACTIVE INTERVAL',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    color: _isResting ? const Color(0xFFE65100) : AppColors.primaryTeal,
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              _formatElapsed(_totalIntervalSeconds),
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textMuted,
                               ),
                             ),
                           ],
-                        ),
-                        Text(
-                          _formatElapsed(_totalIntervalSeconds),
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textMuted,
-                          ),
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // ── PRIMARY ACTION BUTTON: [ NEXT EXERCISE -> ] > ───────────
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _isResting ? const Color(0xFFE65100) : const Color(0xFF005953),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    elevation: 3,
-                    shadowColor: (_isResting ? const Color(0xFFE65100) : const Color(0xFF005953))
-                        .withValues(alpha: 0.3),
                   ),
-                  onPressed: _isResting ? _skipRest : _nextExercise,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  const SizedBox(height: 20),
+
+                  // ── PRIMARY ACTION BUTTON: [ NEXT EXERCISE -> ] > ───────────
+                  SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _isResting ? const Color(0xFFE65100) : AppColors.primaryTeal,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 3,
+                        shadowColor: (_isResting ? const Color(0xFFE65100) : AppColors.primaryTeal)
+                            .withValues(alpha: 0.3),
+                      ),
+                      onPressed: _isResting ? _skipRest : _nextExercise,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _isResting
+                                ? (_isTransitionToNextExercise && nextExercise != null
+                                    ? '[ SKIP REST & START ${nextExercise.name.toUpperCase()} → ]'
+                                    : '[ SKIP REST & START SET ${_currentSet + 1} → ]')
+                                : '[ NEXT EXERCISE → ]',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          const Icon(Icons.chevron_right_rounded, color: Colors.white, size: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // ── ROW: [ || Pause ] and [ Start / Resume ] ────────────────
+                  Row(
                     children: [
-                      Text(
-                        _isResting
-                            ? (_isTransitionToNextExercise && nextExercise != null
-                                ? '[ SKIP REST & START ${nextExercise.name.toUpperCase()} → ]'
-                                : '[ SKIP REST & START SET ${_currentSet + 1} → ]')
-                            : '[ NEXT EXERCISE → ]',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          letterSpacing: 0.8,
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.surfaceMuted,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: AppColors.border),
+                              ),
+                            ),
+                            onPressed: _pauseTimer,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.pause_rounded, size: 18, color: AppColors.textPrimary),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '[ || Pause ]',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      const Icon(Icons.chevron_right_rounded, color: Colors.white, size: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: AppColors.cardBackground,
+                              side: BorderSide(color: AppColors.primaryTeal, width: 1.2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: _resumeTimer,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.play_arrow_rounded, size: 20, color: AppColors.primaryTeal),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '[ Start / Resume ]',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.primaryTeal,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                ),
-              ),
-              const SizedBox(height: 12),
+                  const SizedBox(height: 18),
 
-              // ── ROW: [ || Pause ] and [ Start / Resume ] ────────────────
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 48,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFF1F5F9),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(color: Color(0xFFE2E8F0)),
-                          ),
-                        ),
-                        onPressed: _pauseTimer,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.pause_rounded, size: 18, color: AppColors.textPrimary),
-                            const SizedBox(width: 6),
-                            Text(
-                              '[ || Pause ]',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
+                  // Footer Note
+                  Center(
+                    child: Text(
+                      'Target zone optimized for one-handed operation • Tap response < 50ms',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textMuted,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: SizedBox(
-                      height: 48,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          side: const BorderSide(color: Color(0xFF005953), width: 1.2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: _resumeTimer,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.play_arrow_rounded, size: 20, color: Color(0xFF005953)),
-                            const SizedBox(width: 4),
-                            Text(
-                              '[ Start / Resume ]',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF005953),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
-              const SizedBox(height: 18),
-
-              // Footer Note
-              Center(
-                child: Text(
-                  'Target zone optimized for one-handed operation • Tap response < 50ms',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textMuted,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 24),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -1298,7 +1313,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
         : 0;
 
     return Drawer(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.cardBackground,
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1306,10 +1321,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
             // Drawer Header
             Container(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-              decoration: const BoxDecoration(
-                color: Color(0xFFF8FAFC),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceMuted,
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                  bottom: BorderSide(color: AppColors.border, width: 1),
                 ),
               ),
               child: Column(
@@ -1369,7 +1384,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: exercises.isNotEmpty ? (_currentExerciseIndex + 1) / exercises.length : 0.0,
-                      backgroundColor: const Color(0xFFE2E8F0),
+                      backgroundColor: AppColors.isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                       valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryTeal),
                       minHeight: 6,
                     ),
@@ -1403,8 +1418,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
             // Controls Row (Pause / Resume)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: AppColors.border)),
               ),
               child: Row(
                 children: [
@@ -1413,10 +1428,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         side: BorderSide(
-                          color: _isRunning ? const Color(0xFFCBD5E1) : AppColors.primaryTeal,
+                          color: _isRunning ? AppColors.border : AppColors.primaryTeal,
                         ),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        backgroundColor: _isRunning ? Colors.white : AppColors.featureTealBg,
+                        backgroundColor: _isRunning ? AppColors.cardBackground : AppColors.featureTealBg,
                       ),
                       icon: Icon(
                         _isRunning ? Icons.pause_rounded : Icons.play_arrow_rounded,
@@ -1481,17 +1496,17 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       decoration: BoxDecoration(
                         color: isCurrent
-                            ? const Color(0xFFF0FDF4)
+                            ? (AppColors.isDark ? const Color(0xFF0F3934) : const Color(0xFFF0FDF4))
                             : isDone
-                                ? const Color(0xFFF8FAFC)
-                                : Colors.white,
+                                ? AppColors.surfaceMuted
+                                : AppColors.cardBackground,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isCurrent
-                              ? const Color(0xFF86EFAC)
+                              ? (AppColors.isDark ? const Color(0xFF059669) : const Color(0xFF86EFAC))
                               : isDone
-                                  ? const Color(0xFFE2E8F0)
-                                  : const Color(0xFFF1F5F9),
+                                  ? AppColors.border
+                                  : AppColors.cardBorder,
                           width: isCurrent ? 1.5 : 1.0,
                         ),
                       ),
@@ -1506,7 +1521,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                   ? AppColors.primaryTeal
                                   : isDone
                                       ? const Color(0xFF10B981)
-                                      : const Color(0xFFE2E8F0),
+                                      : (AppColors.isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                               shape: BoxShape.circle,
                             ),
                             child: Center(
@@ -1559,7 +1574,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFDCFCE7),
+                                color: AppColors.isDark ? const Color(0xFF064E3B) : const Color(0xFFDCFCE7),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -1567,7 +1582,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 9,
                                   fontWeight: FontWeight.w800,
-                                  color: const Color(0xFF16A34A),
+                                  color: AppColors.isDark ? const Color(0xFF34D399) : const Color(0xFF16A34A),
                                 ),
                               ),
                             )
@@ -1591,20 +1606,22 @@ class _ActivityScreenState extends State<ActivityScreen> {
             // Bottom Quit / End Session Button
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: Color(0xFFF1F5F9))),
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: AppColors.border)),
               ),
               child: SizedBox(
                 width: double.infinity,
                 child: TextButton.icon(
                   style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFFDC2626),
+                    foregroundColor: const Color(0xFFEF4444),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
-                      side: const BorderSide(color: Color(0xFFFEE2E2)),
+                      side: BorderSide(
+                        color: AppColors.isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFEE2E2),
+                      ),
                     ),
-                    backgroundColor: const Color(0xFFFEF2F2),
+                    backgroundColor: AppColors.isDark ? const Color(0xFF450A0A) : const Color(0xFFFEF2F2),
                   ),
                   icon: const Icon(Icons.exit_to_app_rounded, size: 18),
                   label: Text(
@@ -1627,3 +1644,4 @@ class _ActivityScreenState extends State<ActivityScreen> {
     );
   }
 }
+

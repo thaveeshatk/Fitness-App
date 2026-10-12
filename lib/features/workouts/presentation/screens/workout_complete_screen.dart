@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/asset_paths.dart';
+import '../../../../core/theme/theme_controller.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../../profile/presentation/screens/main_navigation_screen.dart';
 import '../../../progress/data/models/progress_data.dart';
@@ -30,76 +32,79 @@ class WorkoutCompleteScreen extends StatelessWidget {
     this.coachAvatar = 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
   });
 
-  static const primaryGreen = Color(0xFF0D7A6B); // Teal green from Figma
-  static const softGreenBg = Color(0xFFE6F4F1);
-  static const cardBorderColor = Color(0xFFF1F5F9);
+  static Color get primaryGreen => AppColors.primaryTeal;
+  static Color get softGreenBg => AppColors.featureTealBg;
+  static Color get cardBorderColor => AppColors.cardBorder;
 
   @override
   Widget build(BuildContext context) {
     // Progress data fallback/integration
     final progressData = ProgressService.getProgressData(ProgressTimeframe.thisWeek);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF8FAFC),
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        titleSpacing: 20,
-        title: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: const BoxDecoration(
-                color: softGreenBg,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                icon: const Icon(
-                  Icons.arrow_back_rounded,
-                  color: primaryGreen,
-                  size: 18,
-                ),
-                onPressed: () {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (_) => const MainNavigationScreen(initialIndex: 2),
+    return AnimatedBuilder(
+      animation: ThemeController.instance,
+      builder: (context, _) {
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppBar(
+            backgroundColor: AppColors.background,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            titleSpacing: 20,
+            title: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.featureTealBg,
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    icon: Icon(
+                      Icons.arrow_back_rounded,
+                      color: AppColors.primaryTeal,
+                      size: 18,
                     ),
-                    (route) => false,
-                  );
-                },
-              ),
+                    onPressed: () {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (_) => const MainNavigationScreen(initialIndex: 2),
+                        ),
+                        (route) => false,
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Workout Summary',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Text(
-              'Workout Summary',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF0F172A),
+            actions: const [
+              NotificationBell(
+                size: 38,
+                iconSize: 22,
               ),
-            ),
-          ],
-        ),
-        actions: const [
-          NotificationBell(
-            size: 38,
-            iconSize: 22,
+              Padding(
+                padding: EdgeInsets.only(right: 20, left: 4),
+                child: UserAvatar(radius: 16),
+              ),
+            ],
           ),
-          Padding(
-            padding: EdgeInsets.only(right: 20, left: 4),
-            child: UserAvatar(radius: 16),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          child: Column(
-            children: [
+          body: SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Column(
+                children: [
                   // 1. Hero Celebration Header
                   const CelebrationHeroSection(
                     title: 'Workout Complete!',
@@ -122,32 +127,32 @@ class WorkoutCompleteScreen extends StatelessWidget {
                         value: '$durationMinutes min',
                         subtitle: 'Total recorded',
                         icon: Icons.access_time_rounded,
-                        iconBgColor: const Color(0xFFE0F2FE),
-                        iconColor: const Color(0xFF0284C7),
+                        iconBgColor: AppColors.isDark ? const Color(0xFF0C4A6E) : const Color(0xFFE0F2FE),
+                        iconColor: AppColors.isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
                       ),
                       _buildStatCard(
                         title: 'ACTIVE TIME',
                         value: '$activeMinutes active min',
                         subtitle: 'In target zones',
                         icon: Icons.bolt_rounded,
-                        iconBgColor: const Color(0xFFDCFCE7),
-                        iconColor: const Color(0xFF16A34A),
+                        iconBgColor: AppColors.isDark ? const Color(0xFF064E3B) : const Color(0xFFDCFCE7),
+                        iconColor: AppColors.isDark ? const Color(0xFF34D399) : const Color(0xFF16A34A),
                       ),
                       _buildStatCard(
                         title: 'ENERGY',
                         value: '$caloriesBurned kcal',
                         subtitle: 'Burn estimated',
                         icon: Icons.local_fire_department_rounded,
-                        iconBgColor: const Color(0xFFFFEDD5),
-                        iconColor: const Color(0xFFEA580C),
+                        iconBgColor: AppColors.isDark ? const Color(0xFF7C2D12) : const Color(0xFFFFEDD5),
+                        iconColor: AppColors.isDark ? const Color(0xFFFB923C) : const Color(0xFFEA580C),
                       ),
                       _buildStatCard(
                         title: 'HEART RATE',
                         value: '$averageHeartRate bpm',
                         subtitle: 'Moderate intensity',
                         icon: Icons.favorite_border_rounded,
-                        iconBgColor: const Color(0xFFFFE4E6),
-                        iconColor: const Color(0xFFE11D48),
+                        iconBgColor: AppColors.isDark ? const Color(0xFF881337) : const Color(0xFFFFE4E6),
+                        iconColor: AppColors.isDark ? const Color(0xFFFB7185) : const Color(0xFFE11D48),
                       ),
                     ],
                   ),
@@ -166,8 +171,10 @@ class WorkoutCompleteScreen extends StatelessWidget {
                 ],
               ),
             ),
-      ),
-      bottomNavigationBar: _buildBottomBar(context),
+          ),
+          bottomNavigationBar: _buildBottomBar(context),
+        );
+      },
     );
   }
 
@@ -183,12 +190,12 @@ class WorkoutCompleteScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+        border: Border.all(color: AppColors.cardBorder, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: AppColors.shadowColor,
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -207,7 +214,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF64748B),
+                  color: AppColors.textMuted,
                   letterSpacing: 0.6,
                 ),
               ),
@@ -234,7 +241,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF0F172A),
+                  color: AppColors.textPrimary,
                   letterSpacing: -0.3,
                 ),
               ),
@@ -244,7 +251,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF94A3B8),
+                  color: AppColors.textMuted,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -278,14 +285,14 @@ class WorkoutCompleteScreen extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cardBorderColor),
-        boxShadow: const [
+        border: Border.all(color: AppColors.cardBorder),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x04000000),
+            color: AppColors.shadowColor,
             blurRadius: 8,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -303,7 +310,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF0F172A),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -312,7 +319,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF64748B),
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -320,7 +327,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: softGreenBg,
+                  color: AppColors.featureTealBg,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -328,7 +335,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: primaryGreen,
+                    color: AppColors.primaryTeal,
                   ),
                 ),
               ),
@@ -340,7 +347,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11.5,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF64748B),
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 16),
@@ -363,7 +370,9 @@ class WorkoutCompleteScreen extends StatelessWidget {
                         width: double.infinity,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: isCompleted ? primaryGreen : const Color(0xFFE2E8F0),
+                          color: isCompleted
+                              ? AppColors.primaryTeal
+                              : (AppColors.isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -375,8 +384,8 @@ class WorkoutCompleteScreen extends StatelessWidget {
                           fontSize: 10.5,
                           fontWeight: isToday ? FontWeight.w800 : FontWeight.w600,
                           color: isToday
-                              ? primaryGreen
-                              : (isCompleted ? const Color(0xFF334155) : const Color(0xFF94A3B8)),
+                              ? AppColors.primaryTeal
+                              : (isCompleted ? AppColors.textPrimary : AppColors.textMuted),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -388,8 +397,8 @@ class WorkoutCompleteScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: isToday
-                              ? primaryGreen
-                              : (isCompleted ? const Color(0xFFE6F4F1) : Colors.transparent),
+                              ? AppColors.primaryTeal
+                              : (isCompleted ? AppColors.featureTealBg : Colors.transparent),
                         ),
                         child: Text(
                           '${date.day}',
@@ -398,7 +407,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                             fontWeight: isToday ? FontWeight.w800 : FontWeight.w600,
                             color: isToday
                                 ? Colors.white
-                                : (isCompleted ? primaryGreen : const Color(0xFF94A3B8)),
+                                : (isCompleted ? AppColors.primaryTeal : AppColors.textMuted),
                           ),
                         ),
                       ),
@@ -419,14 +428,14 @@ class WorkoutCompleteScreen extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cardBorderColor),
-        boxShadow: const [
+        border: Border.all(color: AppColors.cardBorder),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x04000000),
+            color: AppColors.shadowColor,
             blurRadius: 8,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -437,9 +446,9 @@ class WorkoutCompleteScreen extends StatelessWidget {
           Container(
             width: 42,
             height: 42,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Color(0xFF0F172A),
+              color: AppColors.surfaceMuted,
             ),
             child: ClipOval(
               child: Image.network(
@@ -473,7 +482,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        color: primaryGreen,
+                        color: AppColors.primaryTeal,
                         letterSpacing: 0.8,
                       ),
                     ),
@@ -491,7 +500,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF475569),
+                    color: AppColors.textSecondary,
                     height: 1.35,
                   ),
                 ),
@@ -513,7 +522,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
           height: 50,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: primaryGreen,
+              backgroundColor: AppColors.primaryTeal,
               foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -555,24 +564,24 @@ class WorkoutCompleteScreen extends StatelessWidget {
                 height: 42,
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF1F5F9),
+                    backgroundColor: AppColors.surfaceMuted,
                     side: BorderSide.none,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   onPressed: () => _showSessionDetailsSheet(context),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.insert_chart_outlined_rounded,
                     size: 16,
-                    color: Color(0xFF334155),
+                    color: AppColors.textPrimary,
                   ),
                   label: Text(
                     'View Details',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF334155),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -584,7 +593,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                 height: 42,
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF1F5F9),
+                    backgroundColor: AppColors.surfaceMuted,
                     side: BorderSide.none,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -599,7 +608,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                     Clipboard.setData(ClipboardData(text: summaryText));
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        backgroundColor: primaryGreen,
+                        backgroundColor: AppColors.primaryTeal,
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         content: Text(
@@ -610,17 +619,17 @@ class WorkoutCompleteScreen extends StatelessWidget {
                       ),
                     );
                   },
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.share_outlined,
                     size: 16,
-                    color: Color(0xFF334155),
+                    color: AppColors.textPrimary,
                   ),
                   label: Text(
                     'Share Workout',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF334155),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -648,9 +657,9 @@ class WorkoutCompleteScreen extends StatelessWidget {
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.85,
           ),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -660,7 +669,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE2E8F0),
+                  color: AppColors.border,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -702,7 +711,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w600,
-                                        color: const Color(0xFF16A34A),
+                                        color: AppColors.isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
                                       ),
                                     ),
                                   ],
@@ -713,14 +722,14 @@ class WorkoutCompleteScreen extends StatelessWidget {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w800,
-                                    color: const Color(0xFF0F172A),
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
                               ],
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
+                            icon: Icon(Icons.close_rounded, color: AppColors.textSecondary),
                             onPressed: () => Navigator.of(ctx).pop(),
                           ),
                         ],
@@ -730,9 +739,9 @@ class WorkoutCompleteScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
+                          color: AppColors.surfaceMuted,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          border: Border.all(color: AppColors.border),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -749,7 +758,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w700,
-                                        color: const Color(0xFF0F172A),
+                                        color: AppColors.textPrimary,
                                       ),
                                     ),
                                   ],
@@ -803,9 +812,9 @@ class WorkoutCompleteScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
+                          color: AppColors.surfaceMuted,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          border: Border.all(color: AppColors.border),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -815,7 +824,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,
-                                color: const Color(0xFF64748B),
+                                color: AppColors.textSecondary,
                                 letterSpacing: 0.8,
                               ),
                             ),
@@ -838,13 +847,13 @@ class WorkoutCompleteScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF0FDF4),
+                          color: AppColors.isDark ? const Color(0xFF0F3934) : const Color(0xFFF0FDF4),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFBBF7D0)),
+                          border: Border.all(color: AppColors.isDark ? const Color(0xFF165B52) : const Color(0xFFBBF7D0)),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.stars_rounded, color: primaryGreen, size: 24),
+                            Icon(Icons.stars_rounded, color: primaryGreen, size: 24),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
@@ -863,7 +872,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                                     'Pacing stayed within target cadence. Recovery intervals were executed seamlessly.',
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 11,
-                                      color: const Color(0xFF475569),
+                                      color: AppColors.isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
                                     ),
                                   ),
                                 ],
@@ -941,7 +950,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF334155),
+              color: AppColors.textPrimary,
             ),
           ),
         ),
@@ -949,7 +958,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
           range,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 11,
-            color: const Color(0xFF64748B),
+            color: AppColors.textMuted,
           ),
         ),
         const SizedBox(width: 8),
@@ -982,9 +991,9 @@ class WorkoutCompleteScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AppColors.surfaceMuted,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -997,7 +1006,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 9.5,
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF64748B),
+                  color: AppColors.textMuted,
                   letterSpacing: 0.6,
                 ),
               ),
@@ -1010,7 +1019,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 15,
               fontWeight: FontWeight.w800,
-              color: const Color(0xFF0F172A),
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 2),
@@ -1018,7 +1027,7 @@ class WorkoutCompleteScreen extends StatelessWidget {
             subtitle,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 10.5,
-              color: const Color(0xFF94A3B8),
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -1030,21 +1039,21 @@ class WorkoutCompleteScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.check_circle_rounded, color: primaryGreen, size: 13),
+          Icon(Icons.check_circle_rounded, color: primaryGreen, size: 13),
           const SizedBox(width: 5),
           Text(
             label,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF334155),
+              color: AppColors.textPrimary,
             ),
           ),
         ],
@@ -1055,10 +1064,10 @@ class WorkoutCompleteScreen extends StatelessWidget {
   /// Persistent bottom navigation bar matching Figma layout
   Widget _buildBottomBar(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
         border: Border(
-          top: BorderSide(color: Color(0xFFEDF2F7), width: 1),
+          top: BorderSide(color: AppColors.border, width: 1),
         ),
       ),
       child: SafeArea(
@@ -1082,8 +1091,8 @@ class WorkoutCompleteScreen extends StatelessWidget {
   }
 
   Widget _buildNavItem(BuildContext context, int index, String label, IconData icon, {bool isActive = false}) {
-    const activeColor = primaryGreen;
-    const inactiveColor = Color(0xFF94A3B8);
+    final activeColor = primaryGreen;
+    final inactiveColor = AppColors.textMuted;
 
     return Expanded(
       child: InkWell(

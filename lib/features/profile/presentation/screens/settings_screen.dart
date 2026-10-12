@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/theme_controller.dart';
 import 'edit_profile_screen.dart';
+import 'privacy_policy_screen.dart';
 import 'package:fitness_app/features/notifications/presentation/screens/notification_settings_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -47,15 +48,7 @@ class SettingsScreen extends StatelessWidget {
                     iconWidget: Text(isDark ? '🌙' : '☀️', style: const TextStyle(fontSize: 22)),
                     title: 'Appearance',
                     subtitle: isDark ? 'Theme · Dark' : 'Theme · Light',
-                    isSelected: true,
                     onTap: () => _showThemeSelectionModal(context),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildSettingsCard(
-                    iconWidget: const Text('🏋️', style: TextStyle(fontSize: 22)),
-                    title: 'My Equipment',
-                    subtitle: '3 items',
-                    onTap: () {},
                   ),
                   const SizedBox(height: 12),
                   _buildSettingsCard(
@@ -71,20 +64,21 @@ class SettingsScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  const SizedBox(height: 12),
-                  _buildSettingsCard(
-                    iconWidget: const Text('📏', style: TextStyle(fontSize: 22)),
-                    title: 'Units',
-                    subtitle: 'kg / km',
-                    onTap: () {},
-                  ),
                   const SizedBox(height: 24),
                   _buildSectionHeader('SUPPORT'),
                   const SizedBox(height: 12),
                   _buildSettingsCard(
-                    iconWidget: const Text('🔒', style: TextStyle(fontSize: 22)),
-                    title: 'Privacy & Security',
-                    onTap: () {},
+                    iconWidget: const Text('🛡️', style: TextStyle(fontSize: 22)),
+                    title: 'Privacy Policy',
+                    subtitle: 'Data collection & your rights',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PrivacyPolicyScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 32),
                 ],

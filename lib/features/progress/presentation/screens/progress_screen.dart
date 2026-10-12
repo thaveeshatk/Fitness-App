@@ -943,7 +943,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           const SizedBox(height: 22),
           // 7-day bar chart
           SizedBox(
-            height: 130,
+            height: 136,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -1017,6 +1017,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
       children: [
         // Tag badge (Today or Plan)
         if (day.isToday)
@@ -1031,6 +1032,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               'Today',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 8.5,
+                height: 1.1,
                 fontWeight: FontWeight.w800,
                 color: Colors.white,
               ),
@@ -1048,6 +1050,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               'Plan',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 8.5,
+                height: 1.1,
                 fontWeight: FontWeight.w800,
                 color: _darkTeal,
               ),
@@ -1061,6 +1064,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           day.isRest ? 'Rest' : '${day.minutes}m',
           style: GoogleFonts.plusJakartaSans(
             fontSize: 10,
+            height: 1.1,
             fontWeight: day.isToday ? FontWeight.w800 : FontWeight.w600,
             color: day.isRest
                 ? AppColors.textMuted
@@ -1108,6 +1112,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           day.dayName,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 10.5,
+            height: 1.1,
             fontWeight: day.isToday ? FontWeight.w800 : FontWeight.w600,
             color: day.isToday ? _primaryTeal : AppColors.textSecondary,
           ),

@@ -392,13 +392,13 @@ class NotificationService {
   }) async {
     final daysStr = days.join(', ');
     final amPm = isAm ? 'AM' : 'PM';
-    final dateStr = DateTime.now().toIso8601String().substring(0, 10);
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
 
     await createNotification(
       title: 'Schedule Updated 📅',
       message: 'Your workouts are scheduled for $daysStr at $time $amPm.',
       type: NotificationType.schedule,
-      eventKey: 'schedule_updated_$dateStr',
+      eventKey: 'schedule_updated_$timestamp',
       actionRoute: '/my-plan',
       metadata: {
         'days': days.toList(),

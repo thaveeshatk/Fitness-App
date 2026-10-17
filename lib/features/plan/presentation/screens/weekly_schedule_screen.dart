@@ -5,6 +5,8 @@ import 'package:fitness_app/core/theme/theme_controller.dart';
 import 'package:fitness_app/features/plan/data/services/plan_service.dart';
 import 'package:fitness_app/features/plan/presentation/screens/adaptive_dashboard_screen.dart';
 import 'package:fitness_app/features/notifications/presentation/widgets/notification_bell.dart';
+import 'package:fitness_app/features/notifications/presentation/screens/notification_center_screen.dart';
+import 'package:fitness_app/features/workouts/data/services/workout_audio_service.dart';
 
 class WeeklyScheduleScreen extends StatefulWidget {
   const WeeklyScheduleScreen({super.key});
@@ -743,14 +745,128 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                       try {
                         await PlanService.saveSchedule(_selectedDays, _time, _isAm);
                         
+                        // Play notification chime sound
+                        WorkoutAudioService.playFinishChime();
+
                         if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Schedule Saved Successfully!')),
-                        );
-                        
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (_) => const AdaptiveDashboardScreen(),
+
+                        // Show interactive in-app notification dialog
+                        await showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (dialogCtx) => Dialog(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                            backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 26.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 64,
+                                    height: 64,
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? const Color(0xFF0F766E).withValues(alpha: 0.25)
+                                          : const Color(0xFFE6F4F1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.notifications_active_rounded,
+                                      color: tealColor,
+                                      size: 32,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: isDark ? const Color(0xFF064E3B) : const Color(0xFFDCFCE7),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.check_circle_rounded, color: Color(0xFF16A34A), size: 14),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          'Notification Sent',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 11.5,
+                                            fontWeight: FontWeight.w700,
+                                            color: const Color(0xFF16A34A),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 14),
+                                  Text(
+                                    'Schedule Saved & Notification Sent! 🔔',
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 17.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Your workouts are scheduled for ${_selectedDays.join(", ")} at $_time ${_isAm ? "AM" : "PM"}.\n\nA new reminder has been dispatched to your Notification Center.',
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 13,
+                                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 22),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 48,
+                                    child: ElevatedButton.icon(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: tealColor,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                        elevation: 0,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.of(dialogCtx).pop();
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(builder: (_) => const NotificationCenterScreen()),
+                                        );
+                                      },
+                                      icon: const Icon(Icons.notifications_rounded, color: Colors.white, size: 18),
+                                      label: Text(
+                                        'View in Notification Center 🔔',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 13.5,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(dialogCtx).pop();
+                                      Navigator.of(context).pushReplacement(
+                                        MaterialPageRoute(builder: (_) => const AdaptiveDashboardScreen()),
+                                      );
+                                    },
+                                    child: Text(
+                                      'Back to Dashboard',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
+                                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         );
                       } finally {

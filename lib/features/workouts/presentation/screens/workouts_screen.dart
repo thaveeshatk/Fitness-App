@@ -1662,6 +1662,7 @@ class _WorkoutFormSheet extends StatefulWidget {
 
 class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
   late TextEditingController _titleController;
+  String? _titleError;
   String? _category;
   String? _difficulty;
   late int _duration;
@@ -1670,6 +1671,17 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
   late List<ExerciseItem> _selectedExercises;
   late List<ExerciseItem> _availableExercises;
   bool _isSaving = false;
+
+  String? _validateTitle(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) {
+      return 'Please enter a routine title.';
+    }
+    if (trimmed.length < 5) {
+      return 'Routine title must be at least 5 characters long (${trimmed.length}/5).';
+    }
+    return null;
+  }
 
   final List<String> _categories = const ['Cardio', 'Strength', 'HIIT', 'Yoga', 'Mobility'];
   final List<String> _difficulties = const ['Beginner', 'Intermediate', 'Advanced'];
@@ -1718,11 +1730,13 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
 
   Future<void> _saveWorkout() async {
     final title = _titleController.text.trim();
-    if (title.isEmpty) {
+    final validationError = _validateTitle(title);
+    if (validationError != null) {
+      setState(() => _titleError = validationError);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a routine title.'),
-          backgroundColor: Color(0xFFDC2626),
+        SnackBar(
+          content: Text(validationError),
+          backgroundColor: const Color(0xFFDC2626),
         ),
       );
       return;
@@ -1924,32 +1938,56 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 1. Routine Title
-                    Text(
-                      '1. ROUTINE TITLE',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                        letterSpacing: 0.5,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '1. ROUTINE TITLE (MIN. 5 CHARACTERS)',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        if (_titleController.text.trim().isNotEmpty)
+                          Text(
+                            '${_titleController.text.trim().length} chars',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
+                              color: _titleController.text.trim().length < 5
+                                  ? const Color(0xFFDC2626)
+                                  : const Color(0xFF10B981),
+                            ),
+                          ),
+                      ],
                     ),
                     const SizedBox(height: 8),
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceMuted,
+                        color: _titleError != null ? const Color(0xFFFEF2F2) : AppColors.surfaceMuted,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.border),
+                        border: Border.all(
+                          color: _titleError != null ? const Color(0xFFDC2626) : AppColors.border,
+                          width: _titleError != null ? 1.5 : 1.0,
+                        ),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       child: TextField(
                         controller: _titleController,
+                        onChanged: (val) {
+                          setState(() {
+                            _titleError = _validateTitle(val);
+                          });
+                        },
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
                           color: AppColors.textPrimary,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'e.g. Morning High-Burn Circuit',
+                          hintText: 'e.g. Morning High-Burn Circuit (min. 5 chars)',
                           hintStyle: GoogleFonts.plusJakartaSans(
                             color: AppColors.textMuted,
                             fontSize: 13,
@@ -1958,6 +1996,25 @@ class _WorkoutFormSheetState extends State<_WorkoutFormSheet> {
                         ),
                       ),
                     ),
+                    if (_titleError != null) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(Icons.error_outline_rounded, size: 14, color: Color(0xFFDC2626)),
+                          const SizedBox(width: 5),
+                          Expanded(
+                            child: Text(
+                              _titleError!,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFFDC2626),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 18),
 
                     // 2. Category
